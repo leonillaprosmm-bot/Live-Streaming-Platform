@@ -22,18 +22,22 @@
 
         .main-video-box { position: relative; background: #000; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; width: 100%; transition: aspect-ratio 0.3s; }
         .main-video-box.vertical { aspect-ratio: 9/16; max-width: 400px; margin: 0 auto; }
-        .main-video-box video { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        .main-video-box video, .main-video-box canvas, .main-video-box img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
 
         .guest-tile { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
-        .guest-tile:hover { border-color: #00f2fe; transform: scale(1.02); }
+        .guest-tile:hover { border-color: #00f2fe; }
         .guest-tile.on-stage { border-color: #ff0050; box-shadow: 0 0 20px rgba(255,0,80,0.5); }
-        .guest-tile video { width: 100%; height: 100%; object-fit: cover; }
+        .guest-tile video, .guest-tile canvas { width: 100%; height: 100%; object-fit: cover; }
 
         .request-card { animation: slideInRight 0.4s ease-out; }
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
+        .tile-menu { display: none; position: absolute; top: 4px; right: 4px; z-index: 10; }
         .guest-tile:hover .tile-menu { display: block; }
-        .tile-menu { display: none; position: absolute; top: 2px; right: 2px; z-index: 10; }
+
+        .bg-thumb { width: 100%; aspect-ratio: 16/9; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; object-fit: cover; }
+        .bg-thumb:hover { border-color: #00f2fe; transform: scale(1.03); }
+        .bg-thumb.active { border-color: #ff0050; }
     </style>
 </head>
 <body class="bg-studio-900 text-gray-100 min-h-screen antialiased">
@@ -46,7 +50,7 @@
                     <i class="fa-solid fa-video text-2xl text-white"></i>
                 </div>
                 <h1 class="text-3xl font-bold text-white mb-2">ProStream Studio</h1>
-                <p class="text-gray-400 text-sm">Прямой эфир</p>
+                <p class="text-gray-400 text-sm">Прямой эфир с эффектами</p>
             </div>
 
             <div class="bg-studio-800 rounded-2xl border border-studio-700 p-6 shadow-2xl space-y-4">
@@ -107,17 +111,13 @@
             </div>
         </header>
 
-        <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-3 p-3 overflow-hidden">
+        <main class="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-3 p-3 overflow-hidden">
             <div class="lg:col-span-3 flex flex-col gap-3 overflow-hidden">
 
                 <!-- ГЛАВНОЕ ОКНО -->
                 <div class="relative flex-shrink-0 flex justify-center">
                     <div id="mainVideoBox" class="main-video-box">
-                        <!-- Слайд-шоу заглушка -->
-                        <div id="stageSlideshow" class="absolute inset-0 z-[1]">
-                            <img id="stageSlide" src="https://placehold.co/1280x720/0b0f19/00f2fe?text=ProStream+Studio&font=montserrat" class="w-full h-full object-cover">
-                        </div>
-                        <!-- Сюда LiveKit подкладывает видео поверх -->
+                        <img id="stageBgImage" src="https://placehold.co/1280x720/0b0f19/00f2fe?text=ProStream+Studio&font=montserrat" class="w-full h-full object-cover">
                     </div>
 
                     <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10 z-10">
@@ -139,9 +139,9 @@
                         </h3>
                         <span id="guestsCount" class="text-xs text-gray-500">0</span>
                     </div>
-                    <div id="guestGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 max-h-[240px] overflow-y-auto">
+                    <div id="guestGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[240px] overflow-y-auto">
                         <div id="noGuestsHint" class="col-span-full text-center py-4 text-xs text-gray-500">
-                            <i class="fa-solid fa-user-plus mr-1"></i> Пока никого. Скиньте ссылку, чтобы подключились.
+                            <i class="fa-solid fa-user-plus mr-1"></i> Пока никого.
                         </div>
                     </div>
                 </div>
@@ -149,29 +149,101 @@
                 <!-- УПРАВЛЕНИЕ -->
                 <div class="bg-studio-800 border border-studio-700 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <button id="roomCamBtn" onclick="toggleRoomCam()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
-                            <i id="roomCamIcon" class="fa-solid fa-video-slash text-red-400"></i> <span id="roomCamLabel">Камера</span>
+                        <button id="roomCamBtn" onclick="toggleRoomCam()" class="bg-studio-700 hover:bg-studio-600 text-white px-3 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
+                            <i id="roomCamIcon" class="fa-solid fa-video-slash text-red-400"></i> Камера
                         </button>
-                        <button id="roomMicBtn" onclick="toggleRoomMic()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
-                            <i id="roomMicIcon" class="fa-solid fa-microphone-slash text-red-400"></i> <span id="roomMicLabel">Микрофон</span>
+                        <button id="roomMicBtn" onclick="toggleRoomMic()" class="bg-studio-700 hover:bg-studio-600 text-white px-3 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
+                            <i id="roomMicIcon" class="fa-solid fa-microphone-slash text-red-400"></i> Микрофон
                         </button>
-                        <!-- Screen Share — скрыт на мобильных -->
-                        <button id="shareScreenBtn" onclick="toggleScreenShare()" class="hidden md:flex bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition items-center gap-2 border border-studio-600">
-                            <i class="fa-solid fa-desktop text-purple-400"></i> <span id="shareScreenLabel">Экран</span>
-                        </button>
-                        <button id="requestStageBtn" onclick="requestStage()" class="hidden bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                        <button id="requestStageBtn" onclick="requestStage()" class="hidden bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
                             <i class="fa-solid fa-hand"></i> <span id="requestStageLabel">Хочу в эфир</span>
                         </button>
                     </div>
 
-                    <button onclick="sendLikeBurst()" class="bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg">
+                    <button onclick="sendLikeBurst()" class="bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg">
                         <i class="fa-solid fa-heart"></i> Лайк
                     </button>
                 </div>
             </div>
 
+            <!-- СТУДИЯ (панель справа) -->
+            <div id="studioPanel" class="lg:col-span-1 bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-[600px] shadow-2xl overflow-hidden hidden">
+                <div class="p-3 border-b border-studio-700 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-studio-accent"></i>
+                        <h2 class="font-bold text-sm text-white">Студия</h2>
+                    </div>
+                    <button onclick="toggleStudio()" class="text-gray-400 hover:text-white">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-3 space-y-4 text-xs">
+
+                    <!-- ФОН -->
+                    <div>
+                        <h3 class="font-bold text-white mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-image text-studio-cyan"></i> Фон
+                        </h3>
+                        <div class="grid grid-cols-3 gap-1.5 mb-2">
+                            <button onclick="studioSetBg('none')" class="bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Ориг</button>
+                            <button onclick="studioSetBg('blur')" class="bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Блюр</button>
+                            <button onclick="studioSetBg('green')" class="bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Зелёный</button>
+                        </div>
+                        <p class="text-[9px] text-gray-500 mb-1">Или выбери картинку:</p>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                            <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                            <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                            <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                            <img src="https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                        </div>
+                    </div>
+
+                    <!-- ЭФФЕКТЫ -->
+                    <div>
+                        <h3 class="font-bold text-white mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sparkles text-purple-400"></i> Эффект
+                        </h3>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <button onclick="studioSetEffect('original', this)" class="effect-btn bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Ориг</button>
+                            <button onclick="studioSetEffect('glitch', this)" class="effect-btn bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Глитч</button>
+                            <button onclick="studioSetEffect('pixel', this)" class="effect-btn bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Пиксель</button>
+                            <button onclick="studioSetEffect('vhs', this)" class="effect-btn bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">VHS</button>
+                            <button onclick="studioSetEffect('invert', this)" class="effect-btn bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Инверт</button>
+                            <button onclick="studioSetEffect('sepia', this)" class="effect-btn bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Сепия</button>
+                            <button onclick="studioSetEffect('thermal', this)" class="effect-btn bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Тепло</button>
+                            <button onclick="studioSetEffect('noise', this)" class="effect-btn bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[10px] border border-studio-600">Шум</button>
+                        </div>
+                    </div>
+
+                    <!-- ТЕКСТ -->
+                    <div>
+                        <h3 class="font-bold text-white mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-font text-amber-400"></i> Текст
+                        </h3>
+                        <input type="text" id="studioText" placeholder="Текст на экране..." maxlength="40"
+                            oninput="studioSetText()"
+                            class="w-full bg-studio-900 border border-studio-700 rounded px-2 py-1.5 text-xs text-white mb-2 focus:outline-none focus:border-studio-accent">
+                        <div class="flex gap-2 items-center">
+                            <input type="color" id="studioTextColor" value="#ff3366" onchange="studioSetText()" class="w-8 h-7 rounded cursor-pointer bg-transparent border border-studio-700">
+                            <input type="range" id="studioTextSize" min="20" max="120" value="60" oninput="studioSetText()" class="flex-1">
+                        </div>
+                    </div>
+
+                    <!-- ИНТЕНСИВНОСТЬ -->
+                    <div>
+                        <h3 class="font-bold text-white mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-sliders text-emerald-400"></i> Интенсивность
+                        </h3>
+                        <input type="range" id="studioIntensity" min="0" max="200" value="100" oninput="studioSetIntensity()" class="w-full">
+                    </div>
+                </div>
+            </div>
+
             <!-- ЧАТ -->
-            <div class="lg:col-span-1 bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-[500px] lg:h-auto shadow-2xl overflow-hidden">
+            <div id="chatPanel" class="lg:col-span-1 bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-[600px] shadow-2xl overflow-hidden">
                 <div class="p-3.5 border-b border-studio-700 flex items-center justify-between">
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-comments text-studio-accent"></i>
@@ -195,6 +267,11 @@
             </div>
         </main>
 
+        <!-- Кнопка "Студия" для ведущего (когда панель скрыта) -->
+        <button id="openStudioBtn" onclick="toggleStudio()" class="hidden fixed bottom-24 right-6 z-30 bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-4 py-3 rounded-full shadow-2xl transition flex items-center gap-2 font-bold text-sm">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Студия
+        </button>
+
         <div id="requestsContainer" class="fixed top-20 right-4 w-80 z-40 space-y-2"></div>
         <div id="floatingReactionsContainer" class="fixed bottom-24 right-8 w-48 h-64 pointer-events-none overflow-hidden z-20"></div>
     </div>
@@ -212,9 +289,10 @@
         </div>
     </div>
 
-    <!-- ============ LIVEKIT SDK ============ -->
+    <!-- ============ LIVEKIT + STUDIO ============ -->
     <script type="module">
-        import { Room, RoomEvent, Track } from 'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.esm.mjs';
+        import { Room, RoomEvent, Track, LocalVideoTrack, createLocalVideoTrack } from 'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.esm.mjs';
+        import { Studio } from './studio.js';
 
         const TOKEN_SERVER_URL = "https://prostream-signaling.onrender.com";
         const FIXED_ROOM = "main-studio";
@@ -224,17 +302,38 @@
             name: '',
             isHost: false,
             room: null,
+            studio: null,
             isRoomCamOn: false,
             isRoomMicOn: false,
-            isScreenSharing: false,
             stageIdentity: null,
-            isOnStage: false,
             orientation: 'horizontal'
         };
+
+        // Создаём Studio Canvas (скрытый, для рендера)
+        window.studioCanvas = document.createElement('canvas');
+        window.studioCanvas.width = 1280;
+        window.studioCanvas.height = 720;
+        window.studioCanvas.style.display = 'none';
+        document.body.appendChild(window.studioCanvas);
 
         window.showScreen = function(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+        };
+
+        window.toggleStudio = function() {
+            const panel = document.getElementById('studioPanel');
+            const chatPanel = document.getElementById('chatPanel');
+            const btn = document.getElementById('openStudioBtn');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                chatPanel.classList.add('hidden');
+                btn.classList.add('hidden');
+            } else {
+                panel.classList.add('hidden');
+                chatPanel.classList.remove('hidden');
+                btn.classList.remove('hidden');
+            }
         };
 
         // ============ ВХОД ============
@@ -251,8 +350,11 @@
             document.getElementById('roomSubtitle').innerText =
                 (isHost ? '👑 Ведущий: ' : '👤 Гость: ') + name;
 
-            // Кнопка "Хочу в эфир" — только у гостей
-            if (!isHost) document.getElementById('requestStageBtn').classList.remove('hidden');
+            if (!isHost) {
+                document.getElementById('requestStageBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('openStudioBtn').classList.remove('hidden');
+            }
 
             await connectToLiveKit(isHost);
         };
@@ -277,16 +379,10 @@
 
                 room
                     .on(RoomEvent.ParticipantConnected, (p) => {
-                        console.log('👤 Подключился:', p.identity);
                         updateParticipantCount();
                         renderGuestTile(p.identity, false);
-                        // Если он уже на сцене (был поднят) — поднять снова
-                        if (window.appState.stageIdentity === p.identity) {
-                            setTimeout(() => putOnStage(p.identity), 500);
-                        }
                     })
                     .on(RoomEvent.ParticipantDisconnected, (p) => {
-                        console.log('👤 Отключился:', p.identity);
                         updateParticipantCount();
                         removeGuestTile(p.identity);
                         if (window.appState.stageIdentity === p.identity) clearStage();
@@ -318,10 +414,10 @@
                 console.log('✅ Подключен как', isHost ? 'ВЕДУЩИЙ' : 'ГОСТЬ');
 
                 if (isHost) {
-                    await room.localParticipant.enableCameraAndMicrophone();
-                    window.appState.isRoomCamOn = true;
-                    window.appState.isRoomMicOn = true;
+                    // Ведущий: запускаем Studio (canvas → LiveKit)
+                    await startHostStudio();
                 } else {
+                    // Гость: обычная камера, выключена
                     await room.localParticipant.setMicrophoneEnabled(false);
                     await room.localParticipant.setCameraEnabled(false);
                 }
@@ -338,31 +434,99 @@
                 });
 
                 updateParticipantCount();
+
             } catch (err) {
                 console.error('❌ Ошибка LiveKit:', err);
                 alert('Ошибка подключения: ' + err.message);
             }
         }
 
+        // ============ ЗАПУСК СТУДИИ У ВЕДУЩЕГО ============
+        async function startHostStudio() {
+            const room = window.appState.room;
+
+            // Создаём студию
+            const studio = new Studio(window.studioCanvas);
+            window.appState.studio = studio;
+
+            // Запускаем камеру → canvas
+            const outputStream = await studio.start();
+
+            // Берём видео-трек из canvas-потока
+            const videoTrack = outputStream.getVideoTracks()[0];
+            const audioTrack = outputStream.getAudioTracks()[0];
+
+            // Публикуем видео из canvas в LiveKit
+            await room.localParticipant.publishTrack(videoTrack, { name: 'studio-video' });
+
+            // Публикуем аудио из камеры
+            if (audioTrack) {
+                await room.localParticipant.publishTrack(audioTrack, { name: 'studio-audio' });
+            }
+
+            window.appState.isRoomCamOn = true;
+            window.appState.isRoomMicOn = true;
+            updateRoomIcons();
+
+            // Показываем preview студии локально в тайле
+            renderGuestTile(window.appState.name, true);
+            const c = document.getElementById('guest-video-' + window.appState.name);
+            c.innerHTML = '';
+            const preview = document.createElement('canvas');
+            preview.width = 320;
+            preview.height = 180;
+            preview.className = 'w-full h-full object-cover';
+            c.appendChild(preview);
+            const pctx = preview.getContext('2d');
+            setInterval(() => {
+                pctx.drawImage(window.studioCanvas, 0, 0, 320, 180);
+            }, 100);
+        }
+
+        // ============ СТУДИЯ: УПРАВЛЕНИЕ ============
+        window.studioSetBg = function(type, imageUrl, el) {
+            if (!window.appState.studio) return;
+            window.appState.studio.setBackground(type, imageUrl);
+            document.querySelectorAll('.bg-thumb').forEach(t => t.classList.remove('active'));
+            if (el) el.classList.add('active');
+        };
+        window.studioSetEffect = function(effect, el) {
+            if (!window.appState.studio) return;
+            window.appState.studio.setVideoEffect(effect);
+            document.querySelectorAll('.effect-btn').forEach(b => {
+                b.classList.remove('bg-studio-accent');
+                b.classList.add('bg-studio-700');
+            });
+            if (el) {
+                el.classList.remove('bg-studio-700');
+                el.classList.add('bg-studio-accent');
+            }
+        };
+        window.studioSetText = function() {
+            if (!window.appState.studio) return;
+            const text = document.getElementById('studioText').value;
+            const color = document.getElementById('studioTextColor').value;
+            const size = parseInt(document.getElementById('studioTextSize').value);
+            window.appState.studio.setText(text, color);
+            window.appState.studio.setTextSize(size);
+        };
+        window.studioSetIntensity = function() {
+            if (!window.appState.studio) return;
+            const val = parseInt(document.getElementById('studioIntensity').value) / 100;
+            window.appState.studio.setIntensity(val);
+        };
+
         // ============ DATA-СООБЩЕНИЯ ============
         function handleDataMessage(data, participant) {
             if (data.type === 'stage-request') {
-                // Только ведущий видит запросы
                 if (window.appState.isHost) showRequestCard(data.name, participant.identity);
             } else if (data.type === 'stage-approved') {
-                // Гость: ведущий одобрил — включаем камеру автоматически
-                if (!window.appState.isHost) {
-                    enableCamThenGoOnStage();
-                }
+                if (!window.appState.isHost) enableCamThenGoOnStage();
             } else if (data.type === 'stage-denied' || data.type === 'stage-removed') {
-                // Гость: ведущий отклонил/убрал — сбрасываем кнопку
-                if (!window.appState.isHost) {
-                    resetRequestButton();
-                }
+                if (!window.appState.isHost) resetRequestButton();
             }
         }
 
-        // Гость: включаем камеру и залезаем на сцену
         async function enableCamThenGoOnStage() {
             const room = window.appState.room;
             if (!room) return;
@@ -370,17 +534,14 @@
                 if (!window.appState.isRoomCamOn) {
                     await room.localParticipant.setCameraEnabled(true);
                     window.appState.isRoomCamOn = true;
-                    updateRoomIcons();
                 }
                 if (!window.appState.isRoomMicOn) {
                     await room.localParticipant.setMicrophoneEnabled(true);
                     window.appState.isRoomMicOn = true;
-                    updateRoomIcons();
                 }
+                updateRoomIcons();
                 showToast('🎉 Вы на сцене!');
-            } catch (err) {
-                console.error('Не удалось включить камеру:', err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function resetRequestButton() {
@@ -438,13 +599,15 @@
 
         // ============ ТРЕКИ ============
         function attachLocalTrack(track) {
+            // Локальные треки ведущего уже рендерятся из студии
+            // Локальные треки гостей — покажем
+            if (window.appState.isHost) return;
             if (track.kind === Track.Kind.Video) {
-                const containerId = track.source === Track.Source.ScreenShare ? 'screen-' + window.appState.name : window.appState.name;
-                renderGuestTile(containerId, true);
-                const c = document.getElementById('guest-video-' + containerId);
+                renderGuestTile(window.appState.name, true);
+                const c = document.getElementById('guest-video-' + window.appState.name);
                 c.innerHTML = '';
                 const v = track.attach();
-                v.className = 'w-full h-full object-cover' + (track.source === Track.Source.ScreenShare ? '' : ' transform -scale-x-100');
+                v.className = 'w-full h-full object-cover transform -scale-x-100';
                 c.appendChild(v);
             }
         }
@@ -460,10 +623,7 @@
                 const v = track.attach();
                 v.className = 'w-full h-full object-cover';
                 c.appendChild(v);
-                // Если это screen share — сразу на сцену
-                if (isScreen) {
-                    setTimeout(() => putOnStage(containerId), 300);
-                }
+                if (isScreen) setTimeout(() => putOnStage(containerId), 300);
             } else if (track.kind === Track.Kind.Audio) {
                 const a = track.attach();
                 a.autoplay = true;
@@ -471,37 +631,59 @@
             }
         }
 
-        // ============ СЦЕНА ============
+        // ============ СЦЕНА (ИСПРАВЛЕНО) ============
         window.putOnStage = function(identity) {
             const box = document.getElementById('mainVideoBox');
-            // Убираем все видео кроме заглушки
-            box.querySelectorAll('video').forEach(v => v.remove());
+            box.querySelectorAll('video, canvas:not(#stageBgImage)').forEach(el => {
+                if (el.id !== 'stageBgImage') el.remove();
+            });
 
             const c = document.getElementById('guest-video-' + identity);
             if (!c) return;
 
+            // Ищем видео ИЛИ canvas внутри контейнера
             const v = c.querySelector('video');
-            if (!v) {
-                // Нет видео — показываем уведомление
-                document.getElementById('stageSlideshow').style.display = 'none';
+            const cv = c.querySelector('canvas');
+
+            if (!v && !cv) {
+                document.getElementById('stageBgImage').style.display = 'none';
                 document.getElementById('mainNameLabel').innerText = 'Ожидание видео...';
                 setTimeout(() => {
                     const c2 = document.getElementById('guest-video-' + identity);
-                    const v2 = c2 ? c2.querySelector('video') : null;
+                    const v2 = c2 ? (c2.querySelector('video') || c2.querySelector('canvas')) : null;
                     if (v2) putOnStage(identity);
                 }, 1500);
                 return;
             }
 
-            // Скрываем слайд-шоу
-            document.getElementById('stageSlideshow').style.display = 'none';
+            document.getElementById('stageBgImage').style.display = 'none';
 
-            const clone = v.cloneNode(true);
-            clone.className = 'w-full h-full object-cover';
-            if (identity === window.appState.name && !identity.startsWith('screen-')) {
-                clone.style.transform = 'scaleX(-1)';
+            if (v) {
+                const clone = v.cloneNode(true);
+                clone.className = 'w-full h-full object-cover';
+                clone.autoplay = true;
+                clone.playsInline = true;
+                clone.muted = false;
+                if (identity === window.appState.name && !identity.startsWith('screen-')) clone.style.transform = 'scaleX(-1)';
+                box.appendChild(clone);
+                // Продолжаем обновлять, если это стрим
+                const srcStream = v.srcObject;
+                if (srcStream) clone.srcObject = srcStream;
+            } else if (cv) {
+                // Canvas — копируем содержимое через requestAnimationFrame
+                const cloneCanvas = document.createElement('canvas');
+                cloneCanvas.width = cv.width;
+                cloneCanvas.height = cv.height;
+                cloneCanvas.className = 'w-full h-full object-cover';
+                box.appendChild(cloneCanvas);
+                const cctx = cloneCanvas.getContext('2d');
+                const renderLoop = () => {
+                    if (!document.body.contains(cloneCanvas)) return;
+                    try { cctx.drawImage(cv, 0, 0, cloneCanvas.width, cloneCanvas.height); } catch (e) {}
+                    requestAnimationFrame(renderLoop);
+                };
+                renderLoop();
             }
-            box.appendChild(clone);
 
             window.appState.stageIdentity = identity;
             document.getElementById('mainNameLabel').innerText = identity === window.appState.name ? identity + ' (Вы)' : identity;
@@ -515,19 +697,17 @@
         window.clearStage = function() {
             const prevIdentity = window.appState.stageIdentity;
             const box = document.getElementById('mainVideoBox');
-            box.querySelectorAll('video').forEach(v => v.remove());
-            document.getElementById('stageSlideshow').style.display = 'block';
+            box.querySelectorAll('video, canvas').forEach(v => v.remove());
+            document.getElementById('stageBgImage').style.display = 'block';
             document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
             document.getElementById('mainHostBadge').classList.add('hidden');
             document.getElementById('clearStageBtn').classList.add('hidden');
             window.appState.stageIdentity = null;
             document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
 
-            // Сбрасываем кнопку у гостя, которого убрали
             if (prevIdentity && window.appState.room && window.appState.isHost) {
-                const room = window.appState.room;
                 const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-removed' }));
-                room.localParticipant.publishData(payload, { reliable: true });
+                window.appState.room.localParticipant.publishData(payload, { reliable: true });
             }
         };
 
@@ -539,12 +719,11 @@
                 name: window.appState.name
             }));
             window.appState.room.localParticipant.publishData(payload, { reliable: true });
-            showToast('📨 Запрос отправлен ведущему!');
+            showToast('📨 Запрос отправлен!');
             document.getElementById('requestStageLabel').innerText = 'Запрос отправлен';
             document.getElementById('requestStageBtn').classList.add('opacity-50', 'pointer-events-none');
         };
 
-        // ============ ВЕДУЩИЙ: КАРТОЧКИ ЗАПРОСОВ ============
         function showRequestCard(name, identity) {
             const container = document.getElementById('requestsContainer');
             const safeId = escapeHtml(identity).replace(/'/g, '&#39;');
@@ -573,37 +752,27 @@
             setTimeout(() => { if (card.parentNode) card.remove(); }, 45000);
         }
 
-        window.approveRequest = async function(identity, btn) {
-            // 1) Сообщаем гостю — включай камеру и готовься
+        window.approveRequest = function(identity, btn) {
             const room = window.appState.room;
             const payload = new TextEncoder().encode(JSON.stringify({
                 type: 'stage-approved',
                 identity: identity
             }));
             room.localParticipant.publishData(payload, { reliable: true });
-
-            // 2) Ждём 1.5 сек чтобы гость успел включить камеру, потом поднимаем
-            setTimeout(() => {
-                putOnStage(identity);
-            }, 1500);
-
+            setTimeout(() => putOnStage(identity), 1500);
             btn.closest('.request-card').remove();
-            showToast('✅ ' + identity + ' выходит на сцену');
+            showToast('✅ ' + identity + ' на сцене');
         };
 
         window.denyRequest = function(identity, btn) {
             const room = window.appState.room;
-            const payload = new TextEncoder().encode(JSON.stringify({
-                type: 'stage-denied'
-            }));
+            const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-denied' }));
             room.localParticipant.publishData(payload, { reliable: true });
             btn.closest('.request-card').remove();
         };
 
-        // Ведущий вручную поднимает на сцену из тайла
-        window.hostActionPutOnStage = async function(identity) {
+        window.hostActionPutOnStage = function(identity) {
             if (!window.appState.isHost) return;
-            // Отправляем гостю команду включить камеру
             const room = window.appState.room;
             const payload = new TextEncoder().encode(JSON.stringify({
                 type: 'stage-approved',
@@ -629,7 +798,6 @@
             }
         };
 
-        // ============ ССЫЛКА ============
         window.copyInviteLink = function() {
             const link = window.location.origin + window.location.pathname;
             navigator.clipboard.writeText(link).then(() => showToast('✅ Ссылка скопирована!')).catch(() => prompt('Скопируйте:', link));
@@ -648,7 +816,12 @@
             if (!window.appState.room) return;
             try {
                 const s = !window.appState.isRoomCamOn;
-                await window.appState.room.localParticipant.setCameraEnabled(s);
+                if (window.appState.isHost && window.appState.studio) {
+                    // Ведущий: включаем/выключаем видео-трек из canvas
+                    await window.appState.room.localParticipant.setCameraEnabled(s);
+                } else {
+                    await window.appState.room.localParticipant.setCameraEnabled(s);
+                }
                 window.appState.isRoomCamOn = s;
                 updateRoomIcons();
             } catch (err) { console.error(err); }
@@ -664,19 +837,6 @@
             } catch (err) { console.error(err); }
         };
 
-        window.toggleScreenShare = async function() {
-            if (!window.appState.room) return;
-            try {
-                const s = !window.appState.isScreenSharing;
-                await window.appState.room.localParticipant.setScreenShareEnabled(s);
-                window.appState.isScreenSharing = s;
-                document.getElementById('shareScreenLabel').innerText = s ? 'Стоп' : 'Экран';
-            } catch (err) {
-                console.error(err);
-                alert('Screen share не поддерживается на этом устройстве. Попробуй с компьютера (Chrome/Edge).');
-            }
-        };
-
         function updateRoomIcons() {
             document.getElementById('roomCamIcon').className = window.appState.isRoomCamOn ? 'fa-solid fa-video text-studio-cyan' : 'fa-solid fa-video-slash text-red-400';
             document.getElementById('roomMicIcon').className = window.appState.isRoomMicOn ? 'fa-solid fa-microphone text-emerald-400' : 'fa-solid fa-microphone-slash text-red-400';
@@ -689,8 +849,8 @@
             document.getElementById('participantCountHeader').innerText = `${count} ${word}`;
         }
 
-        // ============ ВЫХОД ============
         window.leaveRoom = function() {
+            if (window.appState.studio) window.appState.studio.stop();
             if (window.appState.room) {
                 window.appState.room.disconnect();
                 window.appState.room = null;
@@ -709,18 +869,9 @@
         window.escapeHtml = function(str) {
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
         };
-
-        // Скрыть кнопку "Экран" на тач-устройствах
-        window.addEventListener('DOMContentLoaded', () => {
-            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-            if (isMobile) {
-                const btn = document.getElementById('shareScreenBtn');
-                if (btn) btn.style.display = 'none';
-            }
-        });
     </script>
 
-    <!-- ============ FIREBASE: чат + лайки + модерация ============ -->
+    <!-- ============ FIREBASE: чат ============ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -791,7 +942,7 @@
                     </div>
                     <p class="text-gray-200 mt-0.5 break-words">${escapeHtml(msg.text)}</p>
                 </div>
-                ${canModerate ? `<button onclick="deleteMessage('${id}')" class="opacity-0 group-hover:opacity-100 transition text-red-400 hover:text-red-300 p-1" title="Удалить"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}
+                ${canModerate ? `<button onclick="deleteMessage('${id}')" class="opacity-0 group-hover:opacity-100 transition text-red-400 hover:text-red-300 p-1"><i class="fa-solid fa-trash text-xs"></i></button>` : ''}
             `;
             chatMessages.appendChild(div);
         }
