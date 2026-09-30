@@ -17,15 +17,23 @@
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
         @keyframes floatUp { 0% { transform: translateY(0px) scale(0.6); opacity: 1; } 50% { transform: translateY(-180px) scale(1.2); opacity: 0.8; } 100% { transform: translateY(-350px) scale(1.6); opacity: 0; } }
         .floating-heart { position: absolute; animation: floatUp 3s ease-in-out forwards; pointer-events: none; }
-        .video-tile { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; }
-        .video-tile video { width: 100%; height: 100%; object-fit: cover; }
         .screen { display: none; }
         .screen.active { display: flex; }
+
+        /* Главное видео (ведущий) */
+        .main-video-box { position: relative; background: #000; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; width: 100%; }
+        .main-video-box video { width: 100%; height: 100%; object-fit: cover; }
+
+        /* Маленькие окна гостей */
+        .guest-tile { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; cursor: pointer; border: 2px solid transparent; transition: border 0.2s; }
+        .guest-tile:hover { border-color: #00f2fe; }
+        .guest-tile.active { border-color: #ff0050; }
+        .guest-tile video { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body class="bg-studio-900 text-gray-100 min-h-screen antialiased">
 
-    <!-- ЭКРАН 1: ВХОД -->
+    <!-- ============ ЭКРАН 1: ВХОД ============ -->
     <div id="screen-welcome" class="screen active min-h-screen flex-col items-center justify-center p-4">
         <div class="max-w-md w-full">
             <div class="text-center mb-8">
@@ -44,10 +52,10 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs text-gray-400 mb-2 font-medium">Пароль ведущего (только для вас)</label>
+                    <label class="block text-xs text-gray-400 mb-2 font-medium">Пароль ведущего</label>
                     <input type="password" id="inputHostKey" placeholder="Оставь пустым, если ты гость"
                         class="w-full bg-studio-900 border border-studio-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-studio-accent transition">
-                    <p class="text-[10px] text-gray-500 mt-1">Гости — оставьте пустым. Вы (ведущий) — введите свой пароль.</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Гости — пусто. Ведущий — свой пароль (по умолчанию <code class="text-studio-cyan">admin123</code>)</p>
                 </div>
 
                 <button onclick="enterStream()" class="w-full bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white py-3 rounded-xl text-sm font-bold transition shadow-lg flex items-center justify-center gap-2">
@@ -57,8 +65,9 @@
         </div>
     </div>
 
-    <!-- ЭКРАН 2: ЭФИР -->
+    <!-- ============ ЭКРАН 2: ЭФИР ============ -->
     <div id="screen-room" class="screen min-h-screen flex-col">
+        <!-- Шапка -->
         <header class="bg-studio-800 border-b border-studio-700 px-4 py-3 flex items-center justify-between z-30 flex-wrap gap-2">
             <div class="flex items-center space-x-3">
                 <div class="bg-gradient-to-r from-studio-accent to-studio-cyan p-2 rounded-xl text-white shadow-lg">
@@ -66,7 +75,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-sm text-white flex items-center gap-2">
-                        <span id="roomTitle">Эфир</span>
+                        Прямой эфир
                         <span class="bg-red-600 text-[10px] px-2 py-0.5 rounded-full font-semibold">● LIVE</span>
                     </h1>
                     <p id="roomSubtitle" class="text-[10px] text-gray-400">—</p>
@@ -74,7 +83,7 @@
             </div>
 
             <div class="flex items-center gap-2 flex-wrap">
-                <div class="hidden md:flex items-center bg-studio-700/60 px-3 py-1.5 rounded-lg border border-studio-600 text-xs text-gray-300">
+                <div class="flex items-center bg-studio-700/60 px-3 py-1.5 rounded-lg border border-studio-600 text-xs text-gray-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
                     <span id="participantCountHeader">1 участник</span>
                 </div>
@@ -89,21 +98,51 @@
             </div>
         </header>
 
+        <!-- Основное поле -->
         <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-3 p-3 overflow-hidden">
-            <div class="lg:col-span-3 flex flex-col relative">
-                <div id="videoGrid" class="flex-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-2 bg-studio-800/50 rounded-2xl border border-studio-700 overflow-y-auto auto-rows-fr">
-                    <!-- LiveKit сам добавит видео -->
+
+            <!-- Левая часть: видео -->
+            <div class="lg:col-span-3 flex flex-col gap-3 overflow-hidden">
+
+                <!-- ГЛАВНОЕ ОКНО (ведущий / активный спикер) -->
+                <div class="relative flex-shrink-0">
+                    <div id="mainVideoBox" class="main-video-box">
+                        <div id="mainPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-studio-800 text-gray-500">
+                            <i class="fa-solid fa-user text-6xl mb-3"></i>
+                            <p class="text-sm">Ожидание ведущего...</p>
+                        </div>
+                    </div>
+                    <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10 z-10">
+                        <i id="mainMicIcon" class="fa-solid fa-microphone text-emerald-400"></i>
+                        <span id="mainNameLabel">—</span>
+                        <span id="mainHostBadge" class="hidden bg-amber-500 text-black text-[9px] px-1.5 py-0.5 rounded font-bold ml-1">👑 ВЕДУЩИЙ</span>
+                    </div>
                 </div>
 
-                <div id="floatingReactionsContainer" class="absolute bottom-24 right-8 w-48 h-64 pointer-events-none overflow-hidden z-20"></div>
+                <!-- СЕТКА ГОСТЕЙ -->
+                <div class="flex-shrink-0">
+                    <div class="flex items-center justify-between mb-2 px-1">
+                        <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            <i class="fa-solid fa-users mr-1"></i> Участники
+                        </h3>
+                        <span id="guestsCount" class="text-xs text-gray-500">0</span>
+                    </div>
+                    <div id="guestGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 max-h-[220px] overflow-y-auto">
+                        <!-- Сюда автоматически добавляются окна гостей -->
+                        <div id="noGuestsHint" class="col-span-full text-center py-4 text-xs text-gray-500">
+                            <i class="fa-solid fa-user-plus mr-1"></i> Пока никого. Скиньте ссылку, чтобы подключились.
+                        </div>
+                    </div>
+                </div>
 
-                <div class="bg-studio-800 border border-studio-700 rounded-2xl px-4 py-3 mt-3 flex flex-wrap items-center justify-between gap-3">
+                <!-- Управление -->
+                <div class="bg-studio-800 border border-studio-700 rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
                     <div class="flex items-center gap-2">
                         <button id="roomCamBtn" onclick="toggleRoomCam()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
-                            <i id="roomCamIcon" class="fa-solid fa-video-slash text-red-400"></i> <span id="roomCamLabel">Включить камеру</span>
+                            <i id="roomCamIcon" class="fa-solid fa-video-slash text-red-400"></i> <span id="roomCamLabel">Камера</span>
                         </button>
                         <button id="roomMicBtn" onclick="toggleRoomMic()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
-                            <i id="roomMicIcon" class="fa-solid fa-microphone-slash text-red-400"></i> <span id="roomMicLabel">Включить микрофон</span>
+                            <i id="roomMicIcon" class="fa-solid fa-microphone-slash text-red-400"></i> <span id="roomMicLabel">Микрофон</span>
                         </button>
                     </div>
 
@@ -113,6 +152,7 @@
                 </div>
             </div>
 
+            <!-- Правая часть: чат -->
             <div class="lg:col-span-1 bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-[500px] lg:h-auto shadow-2xl overflow-hidden">
                 <div class="p-3.5 border-b border-studio-700 flex items-center justify-between">
                     <div class="flex items-center space-x-2">
@@ -136,9 +176,11 @@
                 </div>
             </div>
         </main>
+
+        <div id="floatingReactionsContainer" class="fixed bottom-24 right-8 w-48 h-64 pointer-events-none overflow-hidden z-20"></div>
     </div>
 
-    <!-- ЭКРАН 3: ПОСЛЕ ВЫХОДА -->
+    <!-- ============ ЭКРАН 3: ВЫХОД ============ -->
     <div id="screen-left" class="screen min-h-screen flex-col items-center justify-center p-4">
         <div class="text-center max-w-md">
             <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-studio-700 mb-6">
@@ -151,20 +193,21 @@
         </div>
     </div>
 
-    <!-- LIVEKIT SDK + ЛОГИКА -->
+    <!-- ============ LIVEKIT SDK ============ -->
     <script type="module">
         import { Room, RoomEvent, Track } from 'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.esm.mjs';
 
         const TOKEN_SERVER_URL = "https://prostream-signaling.onrender.com";
         const FIXED_ROOM = "main-studio";
-        const HOST_PASSWORD = "admin123"; // ⚠️ ПАРОЛЬ ВЕДУЩЕГО — можешь поменять на свой
+        const HOST_PASSWORD = "admin123";
 
         window.appState = {
             name: '',
             isHost: false,
             room: null,
             isRoomCamOn: false,
-            isRoomMicOn: false
+            isRoomMicOn: false,
+            mainVideoIdentity: null // кто сейчас в большом окне
         };
 
         window.showScreen = function(id) {
@@ -176,7 +219,6 @@
         window.enterStream = async function() {
             const name = document.getElementById('inputName').value.trim();
             const hostKey = document.getElementById('inputHostKey').value;
-
             if (!name) { alert('Введите ваше имя'); return; }
 
             const isHost = (hostKey === HOST_PASSWORD);
@@ -205,15 +247,11 @@
                 if (!res.ok) throw new Error('Не удалось получить токен');
                 const { token, url } = await res.json();
 
-                // ⚠️ ГЛАВНОЕ ИСПРАВЛЕНИЕ: forceTURN через iceTransportPolicy: 'relay'
+                // ВАЖНО: без iceTransportPolicy — иначе на некоторых сетях не работает
                 const room = new Room({
                     adaptiveStream: true,
                     dynacast: true,
-                    videoCaptureDefaults: { resolution: { width: 1280, height: 720 } },
-                    // 🎯 ЭТО ЗАСТАВЛЯЕТ ИСПОЛЬЗОВАТЬ TURN (порт 443, как обычный сайт)
-                    rtcConfig: {
-                        iceTransportPolicy: 'relay'
-                    }
+                    videoCaptureDefaults: { resolution: { width: 1280, height: 720 } }
                 });
                 window.appState.room = room;
 
@@ -225,16 +263,23 @@
                     .on(RoomEvent.ParticipantDisconnected, (p) => {
                         console.log('👤 Отключился:', p.identity);
                         updateParticipantCount();
-                        const tile = document.getElementById('tile-' + p.identity);
-                        if (tile) tile.remove();
+                        removeGuestTile(p.identity);
+                        // Если он был в главном окне — вернуть ведущего
+                        if (window.appState.mainVideoIdentity === p.identity) {
+                            showHostInMain();
+                        }
                     })
                     .on(RoomEvent.TrackSubscribed, (track, pub, participant) => {
-                        console.log('📺 Трек получен от:', participant.identity);
+                        console.log('📺 Трек от:', participant.identity, track.kind);
                         attachRemoteTrack(track, participant);
                     })
                     .on(RoomEvent.TrackUnsubscribed, (track, pub, participant) => {
-                        const container = document.getElementById('video-' + participant.identity);
-                        if (container && track.kind === Track.Kind.Video) container.innerHTML = '';
+                        if (track.kind === Track.Kind.Video) {
+                            const guestContainer = document.getElementById('guest-video-' + participant.identity);
+                            if (guestContainer) guestContainer.innerHTML = '';
+                            const mainContainer = document.getElementById('main-video-' + participant.identity);
+                            if (mainContainer) mainContainer.innerHTML = '';
+                        }
                     })
                     .on(RoomEvent.LocalTrackPublished, (publication) => {
                         if (publication.track) attachLocalTrack(publication.track);
@@ -242,21 +287,28 @@
                     .on(RoomEvent.Disconnected, () => console.log('❌ Отключен'));
 
                 await room.connect(url, token);
-                console.log('✅ Подключен к LiveKit как', isHost ? 'ВЕДУЩИЙ' : 'ГОСТЬ');
+                console.log('✅ Подключен как', isHost ? 'ВЕДУЩИЙ' : 'ГОСТЬ');
 
                 if (isHost) {
-                    // ВЕДУЩИЙ: камера+микрофон
                     await room.localParticipant.enableCameraAndMicrophone();
                     window.appState.isRoomCamOn = true;
                     window.appState.isRoomMicOn = true;
                 } else {
-                    // ГОСТЬ: без камеры и микрофона (может включить вручную)
                     await room.localParticipant.setMicrophoneEnabled(false);
                     await room.localParticipant.setCameraEnabled(false);
                     window.appState.isRoomCamOn = false;
                     window.appState.isRoomMicOn = false;
                 }
                 updateRoomIcons();
+
+                // Сразу рисуем уже подключённых
+                room.remoteParticipants.forEach((p) => {
+                    p.trackPublications.forEach((pub) => {
+                        if (pub.track && pub.isSubscribed) {
+                            attachRemoteTrack(pub.track, p);
+                        }
+                    });
+                });
 
                 room.localParticipant.trackPublications.forEach((pub) => {
                     if (pub.track) attachLocalTrack(pub.track);
@@ -270,49 +322,149 @@
             }
         }
 
-        // ============ ОТОБРАЖЕНИЕ ============
-        function createVideoTile(identity, isLocal = false) {
-            let tile = document.getElementById('tile-' + identity);
+        // ============ ГЛАВНОЕ ОКНО ============
+        function setMainVideo(identity, name, isHost) {
+            window.appState.mainVideoIdentity = identity;
+
+            document.getElementById('mainPlaceholder').style.display = 'none';
+            document.getElementById('mainNameLabel').innerText = name;
+            document.getElementById('mainHostBadge').style.display = isHost ? 'inline-block' : 'none';
+
+            // Если в главном окне новое видео — очищаем старое
+            const mainBox = document.getElementById('mainVideoBox');
+            mainBox.querySelectorAll('video').forEach(v => v.remove());
+
+            // Переносим видео из гостевого тайла (или локальное)
+            const sourceContainer = identity === window.appState.name
+                ? document.getElementById('guest-video-' + identity)
+                : document.getElementById('guest-video-' + identity);
+
+            if (sourceContainer) {
+                const videoEl = sourceContainer.querySelector('video');
+                if (videoEl) {
+                    const clone = videoEl.cloneNode(true);
+                    clone.className = 'w-full h-full object-cover';
+                    if (identity === window.appState.name) clone.style.transform = 'scaleX(-1)';
+                    mainBox.appendChild(clone);
+                }
+            }
+        }
+
+        function showHostInMain() {
+            // Ищем ведущего среди участников
+            const room = window.appState.room;
+            if (!room) return;
+
+            // Если мы сами ведущий
+            if (window.appState.isHost) {
+                const localVideo = document.querySelector('#guest-video-' + window.appState.name + ' video');
+                if (localVideo) {
+                    setMainVideo(window.appState.name, window.appState.name + ' (Вы)', true);
+                } else {
+                    // Ещё не опубликовали трек — покажем заглушку
+                    document.getElementById('mainPlaceholder').style.display = 'flex';
+                }
+                return;
+            }
+
+            // Если мы гость — ищем ведущего среди удалённых
+            let hostFound = false;
+            room.remoteParticipants.forEach((p) => {
+                if (!hostFound) {
+                    setMainVideo(p.identity, p.identity, true);
+                    hostFound = true;
+                }
+            });
+
+            if (!hostFound) {
+                document.getElementById('mainPlaceholder').style.display = 'flex';
+                document.getElementById('mainNameLabel').innerText = 'Ожидание ведущего...';
+                document.getElementById('mainHostBadge').style.display = 'none';
+            }
+        }
+
+        // ============ ГОСТЕВЫЕ ТАЙЛЫ ============
+        function createGuestTile(identity, isLocal) {
+            let tile = document.getElementById('guest-tile-' + identity);
             if (tile) return tile;
 
+            // Скрываем подсказку "пока никого"
+            const hint = document.getElementById('noGuestsHint');
+            if (hint) hint.style.display = 'none';
+
             tile = document.createElement('div');
-            tile.id = 'tile-' + identity;
-            tile.className = 'video-tile relative';
+            tile.id = 'guest-tile-' + identity;
+            tile.className = 'guest-tile relative';
+            tile.onclick = () => {
+                // Клик по тайлу — показать его в главном окне
+                setMainVideo(identity, identity + (isLocal ? ' (Вы)' : ''), false);
+                document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('active'));
+                tile.classList.add('active');
+            };
             tile.innerHTML = `
-                <div id="video-${identity}" class="w-full h-full bg-studio-900 flex items-center justify-center">
+                <div id="guest-video-${identity}" class="w-full h-full bg-studio-900 flex items-center justify-center">
                     <div class="text-center text-gray-500">
-                        <i class="fa-solid fa-user text-3xl mb-2"></i>
-                        <p class="text-[10px]">Камера выключена</p>
+                        <i class="fa-solid fa-user text-2xl mb-1"></i>
+                        <p class="text-[9px]">камера off</p>
                     </div>
                 </div>
-                <div class="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg text-[10px] font-medium text-white border border-white/10">
-                    <i class="fa-solid fa-user mr-1 ${isLocal ? 'text-studio-cyan' : 'text-gray-300'}"></i>
-                    ${isLocal ? window.appState.name + ' (Вы)' : identity}
+                <div class="absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-medium text-white">
+                    ${isLocal ? 'Вы' : identity}
                 </div>
             `;
-            document.getElementById('videoGrid').appendChild(tile);
+            document.getElementById('guestGrid').appendChild(tile);
+            updateGuestsCount();
             return tile;
         }
 
+        function removeGuestTile(identity) {
+            const tile = document.getElementById('guest-tile-' + identity);
+            if (tile) tile.remove();
+            updateGuestsCount();
+
+            // Если никого не осталось — показать подсказку
+            const remaining = document.querySelectorAll('.guest-tile').length;
+            if (remaining === 0) {
+                const hint = document.getElementById('noGuestsHint');
+                if (hint) hint.style.display = 'block';
+            }
+        }
+
+        function updateGuestsCount() {
+            const count = document.querySelectorAll('.guest-tile').length;
+            document.getElementById('guestsCount').innerText = count;
+        }
+
+        // ============ ОТОБРАЖЕНИЕ ТРЕКОВ ============
         function attachLocalTrack(track) {
             if (track.kind === Track.Kind.Video) {
-                createVideoTile(window.appState.name, true);
-                const container = document.getElementById('video-' + window.appState.name);
+                createGuestTile(window.appState.name, true);
+                const container = document.getElementById('guest-video-' + window.appState.name);
                 container.innerHTML = '';
                 const videoEl = track.attach();
                 videoEl.className = 'w-full h-full object-cover transform -scale-x-100';
                 container.appendChild(videoEl);
+
+                // Если я ведущий — сразу ставлю себя в главное окно
+                if (window.appState.isHost) {
+                    setMainVideo(window.appState.name, window.appState.name + ' (Вы)', true);
+                }
             }
         }
 
         function attachRemoteTrack(track, participant) {
             if (track.kind === Track.Kind.Video) {
-                createVideoTile(participant.identity, false);
-                const container = document.getElementById('video-' + participant.identity);
+                createGuestTile(participant.identity, false);
+                const container = document.getElementById('guest-video-' + participant.identity);
                 container.innerHTML = '';
                 const videoEl = track.attach();
                 videoEl.className = 'w-full h-full object-cover';
                 container.appendChild(videoEl);
+
+                // Если я гость и это первый удалённый — показать в главном окне
+                if (!window.appState.isHost && !window.appState.mainVideoIdentity) {
+                    setMainVideo(participant.identity, participant.identity, true);
+                }
             } else if (track.kind === Track.Kind.Audio) {
                 const audioEl = track.attach();
                 audioEl.autoplay = true;
@@ -325,9 +477,7 @@
             const link = window.location.origin + window.location.pathname;
             navigator.clipboard.writeText(link).then(() => {
                 showToast('✅ Ссылка скопирована!');
-            }).catch(() => {
-                prompt('Скопируйте ссылку:', link);
-            });
+            }).catch(() => prompt('Скопируйте ссылку:', link));
         };
 
         function showToast(msg) {
@@ -348,7 +498,6 @@
                 updateRoomIcons();
             } catch (err) {
                 console.error('Ошибка камеры:', err);
-                alert('Не удалось включить камеру: ' + err.message);
             }
         };
 
@@ -367,16 +516,8 @@
         function updateRoomIcons() {
             const camOn = window.appState.isRoomCamOn;
             const micOn = window.appState.isRoomMicOn;
-
-            document.getElementById('roomCamIcon').className = camOn
-                ? 'fa-solid fa-video text-studio-cyan'
-                : 'fa-solid fa-video-slash text-red-400';
-            document.getElementById('roomCamLabel').innerText = camOn ? 'Выключить камеру' : 'Включить камеру';
-
-            document.getElementById('roomMicIcon').className = micOn
-                ? 'fa-solid fa-microphone text-emerald-400'
-                : 'fa-solid fa-microphone-slash text-red-400';
-            document.getElementById('roomMicLabel').innerText = micOn ? 'Выключить микрофон' : 'Включить микрофон';
+            document.getElementById('roomCamIcon').className = camOn ? 'fa-solid fa-video text-studio-cyan' : 'fa-solid fa-video-slash text-red-400';
+            document.getElementById('roomMicIcon').className = micOn ? 'fa-solid fa-microphone text-emerald-400' : 'fa-solid fa-microphone-slash text-red-400';
         }
 
         function updateParticipantCount() {
@@ -392,7 +533,9 @@
                 window.appState.room.disconnect();
                 window.appState.room = null;
             }
-            document.getElementById('videoGrid').innerHTML = '';
+            document.getElementById('guestGrid').innerHTML = '<div id="noGuestsHint" class="col-span-full text-center py-4 text-xs text-gray-500"><i class="fa-solid fa-user-plus mr-1"></i> Пока никого.</div>';
+            document.getElementById('mainVideoBox').innerHTML = '<div id="mainPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-studio-800 text-gray-500"><i class="fa-solid fa-user text-6xl mb-3"></i><p class="text-sm">Ожидание ведущего...</p></div>';
+            window.appState.mainVideoIdentity = null;
             showScreen('screen-left');
         };
 
@@ -403,7 +546,7 @@
         };
     </script>
 
-    <!-- FIREBASE: чат + лайки -->
+    <!-- ============ FIREBASE: чат + лайки ============ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
