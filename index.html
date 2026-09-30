@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProStream Studio - TikTok Live</title>
+    <title>ProStream Studio — Видеовстречи</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { studio: { 900: '#0b0f19', 800: '#111827', 700: '#1f2937', 600: '#374151', accent: '#ff0050', accentHover: '#e00045', cyan: '#00f2fe' } } } } }
@@ -18,10 +18,13 @@
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
         @keyframes floatUp { 0% { transform: translateY(0px) scale(0.6); opacity: 1; } 50% { transform: translateY(-180px) scale(1.2); opacity: 0.8; } 100% { transform: translateY(-350px) scale(1.6); opacity: 0; } }
         .floating-heart { position: absolute; animation: floatUp 3s ease-in-out forwards; pointer-events: none; }
+        .video-tile { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; }
+        .video-tile video { width: 100%; height: 100%; object-fit: cover; }
     </style>
 </head>
 <body class="bg-studio-900 text-gray-100 min-h-screen flex flex-col antialiased">
 
+    <!-- Верхняя шапка -->
     <header class="bg-studio-800 border-b border-studio-700 px-4 py-3 flex items-center justify-between z-30">
         <div class="flex items-center space-x-3">
             <div class="bg-gradient-to-r from-studio-accent to-studio-cyan p-2 rounded-xl text-white font-bold flex items-center justify-center shadow-lg">
@@ -29,132 +32,291 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg text-white flex items-center gap-2">ProStream Studio <span class="bg-studio-accent text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">LIVE</span></h1>
-                <p class="text-xs text-gray-400">Multi-Cam Studio & TikTok Live</p>
+                <p class="text-xs text-gray-400">Видеовстречи в реальном времени</p>
             </div>
         </div>
         <div class="flex items-center space-x-4">
             <div class="hidden md:flex items-center bg-studio-700/60 px-3 py-1.5 rounded-lg border border-studio-600 text-xs text-gray-300">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2 animate-ping"></span>
-                <span>Room: <strong class="text-white">#PRO-LIVE-88</strong></span>
+                <span>Комната: <strong class="text-white">PRO-LIVE-88</strong></span>
             </div>
             <div class="flex items-center gap-2 bg-studio-700 px-3 py-1.5 rounded-lg">
                 <img id="userAvatar" src="https://placehold.co/32x32/111827/ffffff?text=U" class="w-6 h-6 rounded-full border border-studio-cyan" alt="User">
-                <span id="userNameDisplay" class="text-xs font-semibold">Connecting...</span>
+                <span id="userNameDisplay" class="text-xs font-semibold">Подключение...</span>
             </div>
         </div>
     </header>
 
+    <!-- Основное поле -->
     <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4 overflow-hidden">
 
+        <!-- Левая часть — видео-сетка -->
         <div class="lg:col-span-3 flex flex-col gap-4">
             <div class="relative flex-1 bg-studio-800 rounded-2xl border border-studio-700 overflow-hidden flex flex-col min-h-[480px] shadow-2xl">
 
                 <div class="absolute top-4 left-4 z-20 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-xs">
-                    <span class="bg-red-600 w-2.5 h-2.5 rounded-full"></span>
-                    <span class="font-bold text-white">MAIN BROADCAST</span>
+                    <span class="bg-red-600 w-2.5 h-2.5 rounded-full animate-pulse"></span>
+                    <span class="font-bold text-white">В ЭФИРЕ</span>
                     <span class="text-gray-400">|</span>
-                    <span id="viewerCount" class="text-studio-cyan font-semibold"><i class="fa-solid fa-users mr-1"></i> 0 Watching</span>
+                    <span id="participantCount" class="text-studio-cyan font-semibold"><i class="fa-solid fa-users mr-1"></i> 1 участник</span>
                 </div>
 
-                <div id="videoGrid" class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-gradient-to-br from-studio-900 to-studio-800 items-center justify-center relative overflow-hidden">
+                <div class="absolute top-4 right-4 z-20 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-xs">
+                    <span id="connectionStatus" class="text-gray-200"><i class="fa-solid fa-circle-notch fa-spin text-studio-cyan mr-1"></i> Подключение...</span>
+                </div>
 
-                    <div class="relative bg-black rounded-xl overflow-hidden border border-studio-700 shadow-lg group aspect-video flex items-center justify-center">
-                        <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
-                        <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10">
-                            <i class="fa-solid fa-microphone text-emerald-400" id="micStatusIcon"></i>
-                            <span id="localStreamLabel">Model / Main Host (You)</span>
-                        </div>
-                        <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition bg-black/60 p-1.5 rounded-lg flex gap-1">
-                            <button onclick="toggleVideo()" class="p-1.5 bg-studio-700 hover:bg-studio-600 rounded text-xs"><i class="fa-solid fa-video text-white"></i></button>
-                            <button onclick="toggleAudio()" class="p-1.5 bg-studio-700 hover:bg-studio-600 rounded text-xs"><i class="fa-solid fa-microphone text-white"></i></button>
-                        </div>
-                    </div>
-
-                    <div class="relative bg-studio-900 rounded-xl overflow-hidden border border-studio-700 shadow-lg group aspect-video flex items-center justify-center">
-                        <div id="remotePlaceholder1" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-studio-800/80">
-                            <i class="fa-solid fa-user-gear text-4xl mb-2 text-studio-cyan animate-pulse"></i>
-                            <p class="text-xs font-medium text-gray-400">Remote Peer (WebRTC)</p>
-                            <p id="remoteStatus1" class="text-[10px] text-gray-500 mt-1">Ожидание подключения...</p>
-                        </div>
-                        <video id="remoteVideo1" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                        <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10">
-                            <i class="fa-solid fa-microphone text-emerald-400"></i>
-                            <span>Remote Peer</span>
-                        </div>
-                    </div>
-
-                    <div class="relative bg-studio-900 rounded-xl overflow-hidden border border-studio-700 shadow-lg group aspect-video flex items-center justify-center">
-                        <div id="remotePlaceholder2" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-studio-800/80">
-                            <i class="fa-solid fa-user-plus text-4xl mb-2 text-studio-accent animate-pulse"></i>
-                            <p class="text-xs font-medium text-gray-400">Guest Slot #2</p>
-                            <p class="text-[10px] text-gray-500 mt-1">Занято</p>
-                        </div>
-                        <video id="remoteVideo2" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                    </div>
-
-                    <div class="relative bg-studio-800/90 rounded-xl p-4 border border-studio-700 flex flex-col justify-between aspect-video shadow-lg">
-                        <div>
-                            <h3 class="font-bold text-sm text-white mb-1 flex items-center gap-2"><i class="fa-solid fa-sliders text-studio-cyan"></i> Control Panel</h3>
-                            <p class="text-xs text-gray-400">Presets & lighting</p>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 my-2">
-                            <button onclick="triggerPreset('Full Shot')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between"><span>Full Body</span> <i class="fa-solid fa-camera text-studio-cyan"></i></button>
-                            <button onclick="triggerPreset('Close Up')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between"><span>Portrait</span> <i class="fa-solid fa-camera text-studio-accent"></i></button>
-                            <button onclick="triggerPreset('Warm Light')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between"><span>Warm</span> <i class="fa-solid fa-sun text-amber-400"></i></button>
-                            <button onclick="triggerPreset('Cool Neon')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between"><span>Neon</span> <i class="fa-solid fa-moon text-indigo-400"></i></button>
-                        </div>
-                        <div class="text-[11px] bg-studio-900/80 p-2 rounded text-emerald-400 flex items-center gap-2 border border-emerald-900">
-                            <i class="fa-solid fa-circle-check"></i>
-                            <span id="presetStatusText">Assistant synced</span>
-                        </div>
-                    </div>
+                <!-- Видео-сетка -->
+                <div id="videoGrid" class="flex-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-4 bg-gradient-to-br from-studio-900 to-studio-800 overflow-y-auto auto-rows-fr">
+                    <!-- Сюда LiveKit автоматически добавляет видео участников -->
                 </div>
 
                 <div id="floatingReactionsContainer" class="absolute bottom-16 right-8 w-48 h-64 pointer-events-none overflow-hidden z-20"></div>
 
+                <!-- Нижняя панель управления -->
                 <div class="bg-studio-800 border-t border-studio-700 px-6 py-3 flex flex-wrap items-center justify-between gap-3 z-20">
                     <div class="flex items-center space-x-2">
-                        <button onclick="toggleVideo()" id="camBtn" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow"><i class="fa-solid fa-video text-studio-cyan"></i> Cam</button>
-                        <button onclick="toggleAudio()" id="micBtn" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow"><i class="fa-solid fa-microphone text-emerald-400"></i> Mic</button>
-                        <button onclick="toggleScreenShare()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow"><i class="fa-solid fa-desktop text-purple-400"></i> Screen</button>
+                        <button id="camBtn" onclick="toggleCam()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow">
+                            <i id="camIcon" class="fa-solid fa-video text-studio-cyan"></i> Камера
+                        </button>
+                        <button id="micBtn" onclick="toggleMic()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow">
+                            <i id="micIcon" class="fa-solid fa-microphone text-emerald-400"></i> Микрофон
+                        </button>
+                        <button onclick="toggleScreenShare()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow">
+                            <i class="fa-solid fa-desktop text-purple-400"></i> Экран
+                        </button>
                     </div>
+
                     <div class="flex items-center gap-2">
-                        <button onclick="sendLikeBurst()" class="bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg"><i class="fa-solid fa-heart animate-bounce"></i> Send Like</button>
+                        <button onclick="sendLikeBurst()" class="bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg">
+                            <i class="fa-solid fa-heart animate-bounce"></i> Лайк
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- Правая часть — чат -->
         <div class="lg:col-span-1 bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-[650px] shadow-2xl overflow-hidden">
             <div class="p-3.5 bg-studio-800 border-b border-studio-700 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-comments text-studio-accent"></i>
-                    <h2 class="font-bold text-sm text-white">Live Chat</h2>
+                    <h2 class="font-bold text-sm text-white">Чат</h2>
                 </div>
                 <span class="bg-studio-700 text-studio-cyan text-[10px] px-2 py-0.5 rounded-full font-semibold border border-studio-600">Firebase</span>
             </div>
 
-            <div class="bg-gradient-to-r from-purple-900/60 to-studio-700/60 p-2.5 border-b border-studio-700 flex items-center justify-between text-xs">
-                <div class="flex items-center gap-2">
-                    <span class="text-amber-400 text-base animate-bounce">🎁</span>
-                    <div><p class="font-semibold text-white">Top Gift: <span class="text-amber-300">Galaxy</span></p></div>
-                </div>
-                <button onclick="sendGiftModal()" class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold px-2.5 py-1 rounded text-[11px] transition shadow">Gift</button>
-            </div>
-
             <div id="chatMessages" class="flex-1 p-3 overflow-y-auto space-y-3 flex flex-col text-xs">
-                <div class="text-center my-2"><span class="bg-studio-700/80 text-gray-400 text-[10px] px-3 py-1 rounded-full border border-studio-600">Welcome!</span></div>
+                <div class="text-center my-2"><span class="bg-studio-700/80 text-gray-400 text-[10px] px-3 py-1 rounded-full border border-studio-600">Добро пожаловать!</span></div>
             </div>
 
             <div class="p-3 bg-studio-800 border-t border-studio-700">
                 <form id="chatForm" onsubmit="handleSendMessage(event)" class="flex items-center gap-2">
-                    <input type="text" id="chatInput" placeholder="Send comment..." maxlength="300" class="flex-1 bg-studio-900 border border-studio-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-studio-accent transition">
-                    <button type="submit" class="bg-studio-accent hover:bg-studio-accentHover text-white px-3 py-2 rounded-xl text-xs font-bold transition shadow"><i class="fa-solid fa-paper-plane"></i></button>
+                    <input type="text" id="chatInput" placeholder="Написать сообщение..." maxlength="300" class="flex-1 bg-studio-900 border border-studio-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-studio-accent transition">
+                    <button type="submit" class="bg-studio-accent hover:bg-studio-accentHover text-white px-3 py-2 rounded-xl text-xs font-bold transition shadow">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
                 </form>
             </div>
         </div>
     </main>
 
+    <!-- ============================================================= -->
+    <!-- LIVEKIT SDK                                                    -->
+    <!-- ============================================================= -->
+    <script type="module">
+        import {
+            Room,
+            RoomEvent,
+            Track,
+            createLocalTracks
+        } from 'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.esm.mjs';
+
+        // ============ НАСТРОЙКИ ============
+        const TOKEN_SERVER_URL = "https://prostream-signaling.onrender.com"; // URL твоего Render
+        const ROOM_NAME = "PRO-LIVE-88";
+        const PARTICIPANT_NAME = "@user_" + Math.random().toString(36).substr(2, 5);
+
+        let room = null;
+        let localVideoTrack = null;
+        let localAudioTrack = null;
+        let isCamEnabled = true;
+        let isMicEnabled = true;
+
+        // ============ ПОДКЛЮЧЕНИЕ К LIVEKIT ============
+        async function connectToRoom() {
+            try {
+                // 1. Получаем токен с Render
+                const res = await fetch(`${TOKEN_SERVER_URL}/token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        roomName: ROOM_NAME,
+                        participantName: PARTICIPANT_NAME
+                    })
+                });
+
+                if (!res.ok) throw new Error('Не удалось получить токен');
+                const { token, url } = await res.json();
+
+                // 2. Создаём комнату LiveKit
+                room = new Room({
+                    adaptiveStream: true,
+                    dynacast: true,
+                    videoCaptureDefaults: {
+                        resolution: { width: 1280, height: 720 }
+                    }
+                });
+
+                // 3. Обработчики событий
+                room
+                    .on(RoomEvent.ParticipantConnected, (participant) => {
+                        console.log('👤 Участник подключился:', participant.identity);
+                        updateParticipantCount();
+                    })
+                    .on(RoomEvent.ParticipantDisconnected, (participant) => {
+                        console.log('👤 Участник отключился:', participant.identity);
+                        updateParticipantCount();
+                    })
+                    .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+                        console.log('📺 Получен трек от', participant.identity);
+                        attachTrack(track, participant);
+                    })
+                    .on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
+                        const el = document.getElementById('video-' + participant.identity);
+                        if (el && track.kind === Track.Kind.Video) {
+                            const videoEl = el.querySelector('video');
+                            if (videoEl) videoEl.remove();
+                        }
+                    })
+                    .on(RoomEvent.LocalTrackPublished, (publication) => {
+                        console.log('📤 Локальный трек опубликован');
+                        attachLocalTrack(publication.track);
+                    })
+                    .on(RoomEvent.Disconnected, () => {
+                        console.log('❌ Отключен от комнаты');
+                        updateStatus('Отключен', 'red');
+                    });
+
+                // 4. Подключаемся
+                await room.connect(url, token);
+                console.log('✅ Подключен к LiveKit');
+
+                // 5. Публикуем свою камеру и микрофон
+                await room.localParticipant.enableCameraAndMicrophone();
+                console.log('📤 Локальные треки опубликованы');
+
+                // 6. Прикрепляем локальные треки к сетке
+                room.localParticipant.trackPublications.forEach((pub) => {
+                    if (pub.track) attachLocalTrack(pub.track);
+                });
+
+                updateStatus('Подключен', 'green');
+                updateParticipantCount();
+                document.getElementById('userNameDisplay').innerText = PARTICIPANT_NAME;
+
+            } catch (err) {
+                console.error('❌ Ошибка подключения к LiveKit:', err);
+                updateStatus('Ошибка: ' + err.message, 'red');
+            }
+        }
+
+        // ============ ОТОБРАЖЕНИЕ ВИДЕО ============
+        function createVideoTile(identity, isLocal = false) {
+            let tile = document.getElementById('tile-' + identity);
+            if (tile) return tile;
+
+            tile = document.createElement('div');
+            tile.id = 'tile-' + identity;
+            tile.className = 'video-tile relative';
+            tile.innerHTML = `
+                <div id="video-${identity}" class="w-full h-full"></div>
+                <div class="absolute bottom-2 left-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg text-[11px] font-medium text-white border border-white/10">
+                    <i class="fa-solid fa-user mr-1 ${isLocal ? 'text-studio-cyan' : 'text-gray-300'}"></i>
+                    ${isLocal ? 'Вы' : identity}
+                </div>
+            `;
+            document.getElementById('videoGrid').appendChild(tile);
+            return tile;
+        }
+
+        function attachLocalTrack(track) {
+            if (track.kind === Track.Kind.Video) {
+                const tile = createVideoTile(PARTICIPANT_NAME, true);
+                const videoEl = track.attach();
+                videoEl.className = 'w-full h-full object-cover transform -scale-x-100';
+                document.getElementById('video-' + PARTICIPANT_NAME).appendChild(videoEl);
+            }
+        }
+
+        function attachTrack(track, participant) {
+            if (track.kind === Track.Kind.Video) {
+                createVideoTile(participant.identity, false);
+                const videoEl = track.attach();
+                videoEl.className = 'w-full h-full object-cover';
+                document.getElementById('video-' + participant.identity).appendChild(videoEl);
+            } else if (track.kind === Track.Kind.Audio) {
+                const audioEl = track.attach();
+                audioEl.autoplay = true;
+                document.body.appendChild(audioEl);
+            }
+        }
+
+        // ============ УПРАВЛЕНИЕ ============
+        window.toggleCam = async function() {
+            if (!room) return;
+            isCamEnabled = !isCamEnabled;
+            await room.localParticipant.setCameraEnabled(isCamEnabled);
+            document.getElementById('camIcon').className = isCamEnabled
+                ? 'fa-solid fa-video text-studio-cyan'
+                : 'fa-solid fa-video-slash text-red-400';
+        };
+
+        window.toggleMic = async function() {
+            if (!room) return;
+            isMicEnabled = !isMicEnabled;
+            await room.localParticipant.setMicrophoneEnabled(isMicEnabled);
+            document.getElementById('micIcon').className = isMicEnabled
+                ? 'fa-solid fa-microphone text-emerald-400'
+                : 'fa-solid fa-microphone-slash text-red-400';
+        };
+
+        window.toggleScreenShare = async function() {
+            if (!room) return;
+            try {
+                await room.localParticipant.setScreenShareEnabled(true);
+                console.log('🖥 Демонстрация экрана включена');
+            } catch (err) {
+                console.error('Ошибка screen share:', err);
+            }
+        };
+
+        function updateStatus(text, color) {
+            const colorMap = { green: 'text-emerald-400', red: 'text-red-400', gray: 'text-gray-300' };
+            document.getElementById('connectionStatus').innerHTML =
+                `<i class="fa-solid fa-circle text-[8px] mr-1 ${colorMap[color] || 'text-gray-300'}"></i> ${text}`;
+        }
+
+        function updateParticipantCount() {
+            if (!room) return;
+            const count = room.remoteParticipants.size + 1;
+            document.getElementById('participantCount').innerHTML =
+                `<i class="fa-solid fa-users mr-1"></i> ${count} участник${count === 1 ? '' : count < 5 ? 'а' : 'ов'}`;
+        }
+
+        // ============ ЗАПУСК ============
+        window.addEventListener('DOMContentLoaded', () => {
+            updateStatus('Подключение...', 'gray');
+            connectToRoom();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (room) room.disconnect();
+        });
+    </script>
+
+    <!-- ============================================================= -->
+    <!-- FIREBASE: чат + лайки                                           -->
+    <!-- ============================================================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -176,52 +338,6 @@
         const ROOM_ID = "PRO-LIVE-88";
         let currentUser = null;
 
-        let localStream = null;
-        let isVideoActive = true;
-        let isAudioActive = true;
-
-        const localVideo = document.getElementById('localVideo');
-        const micStatusIcon = document.getElementById('micStatusIcon');
-        const camBtn = document.getElementById('camBtn');
-        const micBtn = document.getElementById('micBtn');
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                localVideo.srcObject = localStream;
-            } catch (err) { console.warn("Webcam unavailable:", err); }
-        });
-
-        window.toggleVideo = function() {
-            if (!localStream) return;
-            isVideoActive = !isVideoActive;
-            localStream.getVideoTracks().forEach(t => t.enabled = isVideoActive);
-            localVideo.style.display = isVideoActive ? 'block' : 'none';
-        };
-
-        window.toggleAudio = function() {
-            if (!localStream) return;
-            isAudioActive = !isAudioActive;
-            localStream.getAudioTracks().forEach(t => t.enabled = isAudioActive);
-            micStatusIcon.className = isAudioActive ? "fa-solid fa-microphone text-emerald-400" : "fa-solid fa-microphone-slash text-red-400";
-        };
-
-        window.toggleScreenShare = async function() {
-            try {
-                const s = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                localVideo.srcObject = s;
-                document.getElementById('localStreamLabel').innerText = "Screen Share";
-            } catch (e) { console.error(e); }
-        };
-
-        window.triggerPreset = function(name) {
-            const s = document.getElementById('presetStatusText');
-            s.innerText = `Preset: "${name}"`;
-            setTimeout(() => s.innerText = "Assistant synced", 3000);
-        };
-
-        window.sendGiftModal = () => { alert("Gift sent! 🎁"); window.sendLikeBurst(); };
-
         signInAnonymously(auth).catch(err => console.error("Auth error:", err));
 
         onAuthStateChanged(auth, (user) => {
@@ -231,24 +347,12 @@
                     name: "@user_" + user.uid.slice(0, 5),
                     avatar: "https://placehold.co/24x24/111827/ffffff?text=" + user.uid.charAt(0).toUpperCase()
                 };
-                document.getElementById('userNameDisplay').innerText = currentUser.name;
                 document.getElementById('userAvatar').src = currentUser.avatar.replace('24x24', '32x32');
-                initPresence();
                 loadMessages();
                 loadLikes();
                 console.log("🔥 Firebase OK. Room:", ROOM_ID);
             }
         });
-
-        function initPresence() {
-            const myRef = ref(db, `rooms/${ROOM_ID}/viewers/${currentUser.uid}`);
-            set(myRef, { online: true, ts: serverTimestamp() });
-            onDisconnect(myRef).remove();
-            onValue(ref(db, `rooms/${ROOM_ID}/viewers`), (snap) => {
-                const count = snap.exists() ? Object.keys(snap.val()).length : 0;
-                document.getElementById('viewerCount').innerHTML = `<i class="fa-solid fa-users mr-1"></i> ${count} Watching`;
-            });
-        }
 
         const chatMessages = document.getElementById('chatMessages');
 
@@ -328,85 +432,6 @@
         function escapeHtml(str) {
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
-    </script>
-
-    <script>
-        const SIGNALING_URL = "https://prostream-signaling.onrender.com";
-        let peerConnection = null;
-        let socket = null;
-        let localStreamForCall = null;
-        const ROOM_ID_WEBRTC = "PRO-LIVE-88";
-
-        function initWebRTC() {
-            socket = io(SIGNALING_URL, { transports: ['websocket', 'polling'] });
-
-            socket.on('connect', () => {
-                console.log('✅ Signaling connected');
-                socket.emit('join-room', ROOM_ID_WEBRTC);
-            });
-
-            socket.on('ready', async () => {
-                console.log('🎯 Peer found!');
-                await startWebRTCCall();
-            });
-
-            socket.on('waiting', () => {
-                document.getElementById('remoteStatus1').innerText = 'Ожидание второго участника...';
-            });
-
-            socket.on('signal', async (data) => {
-                if (!peerConnection) return;
-                try {
-                    if (data.description) {
-                        await peerConnection.setRemoteDescription(data.description);
-                        if (data.description.type === 'offer') {
-                            const answer = await peerConnection.createAnswer();
-                            await peerConnection.setLocalDescription(answer);
-                            socket.emit('signal', { roomId: ROOM_ID_WEBRTC, data: { description: peerConnection.localDescription } });
-                        }
-                    } else if (data.candidate) {
-                        await peerConnection.addIceCandidate(data.candidate);
-                    }
-                } catch (err) { console.error('Signal error:', err); }
-            });
-
-            socket.on('peer-disconnected', () => {
-                console.log('❌ Peer disconnected');
-                if (peerConnection) { peerConnection.close(); peerConnection = null; }
-                document.getElementById('remotePlaceholder1').style.display = 'flex';
-                document.getElementById('remoteVideo1').classList.add('hidden');
-            });
-        }
-
-        async function startWebRTCCall() {
-            try {
-                if (!localStreamForCall) {
-                    localStreamForCall = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                }
-                const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-                peerConnection = new RTCPeerConnection(config);
-
-                localStreamForCall.getTracks().forEach(track => peerConnection.addTrack(track, localStreamForCall));
-
-                peerConnection.ontrack = (event) => {
-                    const remoteVideo = document.getElementById('remoteVideo1');
-                    remoteVideo.srcObject = event.streams[0];
-                    remoteVideo.classList.remove('hidden');
-                    document.getElementById('remotePlaceholder1').style.display = 'none';
-                };
-
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) socket.emit('signal', { roomId: ROOM_ID_WEBRTC, data: { candidate: event.candidate } });
-                };
-
-                const offer = await peerConnection.createOffer();
-                await peerConnection.setLocalDescription(offer);
-                socket.emit('signal', { roomId: ROOM_ID_WEBRTC, data: { description: peerConnection.localDescription } });
-                console.log('📤 Offer sent');
-            } catch (err) { console.error('WebRTC error:', err); }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => setTimeout(initWebRTC, 1000));
     </script>
 </body>
 </html>
