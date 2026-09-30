@@ -1,5 +1,5 @@
 // ============================================================
-// STUDIO.JS — Эффекты, фон, текст, виртуальная камера
+// STUDIO.JS — Обработчик одного видео (своего / гостя / screen)
 // ============================================================
 
 export class Studio {
@@ -9,34 +9,35 @@ export class Studio {
         this.canvas.width = 1280;
         this.canvas.height = 720;
 
+        // Скрытое видео (источник для canvas)
         this.videoEl = document.createElement('video');
         this.videoEl.autoplay = true;
         this.videoEl.playsInline = true;
         this.videoEl.muted = true;
 
-        this.stream = null;
+        this.ownStream = null;      // наша камера
+        this.currentSourceStream = null; // что сейчас обрабатываем
         this.outputStream = null;
         this.running = false;
         this.rafId = null;
 
-        // Состояние эффектов
         this.state = {
-            background: 'none',      // none | blur | green | image
-            backgroundImage: null,   // HTMLImageElement
-            videoEffect: 'original', // original | glitch | pixel | blur | vhs | invert | sepia | thermal | noise
+            background: 'none',
+            backgroundImage: null,
+            videoEffect: 'original',
             intensity: 1.0,
+            opacity: 1.0,
+            videoScale: 1.0,
+            videoY: 0,
             textFront: '',
             textFrontColor: '#ff3366',
-            textBack: '',
-            textBackColor: '#00ff88',
             textSize: 60,
             showText: false,
-            segmenter: null,
-            segmentationMask: null,
+            sourceLabel: 'Своя камера',
+            selfieSegmentation: null,
             lastResults: null
         };
 
-        // MediaPipe Selfie Segmentation для фона
         this.selfieSegmentation = null;
         this._initMediaPipe();
     }
@@ -59,20 +60,23 @@ export class Studio {
         }
     }
 
-    // Запуск: получаем камеру, стартуем цикл
+    // Запуск: получаем свою камеру + стартуем цикл
     async start() {
-        this.stream = await navigator.mediaDevices.getUserMedia({
+        this.ownStream = await navigator.mediaDevices.getUserMedia({
             video: { width: 1280, height: 720 },
             audio: true
         });
-        this.videoEl.srcObject = this.stream;
+
+        // По умолчанию источник — своя камера
+        this.currentSourceStream = this.ownStream;
+        this.videoEl.srcObject = this.ownStream;
         await this.videoEl.play();
 
-        // Создаём выходной поток из canvas
+        // Выходной поток из canvas
         this.outputStream = this.canvas.captureStream(30);
 
-        // Подмешиваем аудио из камеры
-        const audioTrack = this.stream.getAudioTracks()[0];
+        // Подмешиваем аудио (из нашей камеры — всегда)
+        const audioTrack = this.ownStream.getAudioTracks()[0];
         if (audioTrack) this.outputStream.addTrack(audioTrack);
 
         this.running = true;
@@ -83,23 +87,32 @@ export class Studio {
     stop() {
         this.running = false;
         if (this.rafId) cancelAnimationFrame(this.rafId);
-        if (this.stream) this.stream.getTracks().forEach(t => t.stop());
+        if (this.ownStream) this.ownStream.getTracks().forEach(t => t.stop());
         if (this.outputStream) this.outputStream.getTracks().forEach(t => t.stop());
-        this.stream = null;
+        this.ownStream = null;
         this.outputStream = null;
+        this.currentSourceStream = null;
+    }
+
+    // ============ ГЛАВНОЕ: смена источника ============
+    async setSource(stream, label) {
+        if (!stream) return;
+        this.currentSourceStream = stream;
+        this.videoEl.srcObject = stream;
+        try { await this.videoEl.play(); } catch (e) {}
+        this.state.sourceLabel = label || 'Источник';
+        console.log('🎬 Студия переключена на:', this.state.sourceLabel);
     }
 
     async _loop() {
         if (!this.running) return;
-
         if (this.videoEl.readyState >= 2) {
-            // Отправляем кадр в MediaPipe (если фон включён)
-            if (this.selfieSegmentation && (this.state.background === 'blur' || this.state.background === 'green' || this.state.background === 'image')) {
+            const useMask = this.state.background === 'blur' || this.state.background === 'green' || this.state.background === 'image';
+            if (this.selfieSegmentation && useMask) {
                 try { await this.selfieSegmentation.send({ image: this.videoEl }); } catch (e) {}
             }
             this._draw();
         }
-
         this.rafId = requestAnimationFrame(() => this._loop());
     }
 
@@ -109,10 +122,15 @@ export class Studio {
         const h = this.canvas.height;
         const video = this.videoEl;
 
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.filter = 'none';
+
         ctx.save();
         ctx.clearRect(0, 0, w, h);
 
-        // === 1. ФОН ===
+        // 1. ФОН
         if (this.state.background === 'image' && this.state.backgroundImage) {
             ctx.drawImage(this.state.backgroundImage, 0, 0, w, h);
         } else if (this.state.background === 'green') {
@@ -123,35 +141,37 @@ export class Studio {
             ctx.fillRect(0, 0, w, h);
         }
 
-        // === 2. ВИДЕО (с маской или без) ===
+        // 2. ВИДЕО
         const results = this.state.lastResults;
         const useMask = (this.state.background === 'blur' || this.state.background === 'green' || this.state.background === 'image') && results;
+        const scale = this.state.videoScale;
+        const offsetY = this.state.videoY;
 
         if (useMask) {
-            // Рисуем по маске
             ctx.save();
             ctx.filter = 'blur(3px)';
-            ctx.drawImage(results.segmentationMask, 0, 0, w, h);
+            ctx.drawImage(results.segmentationMask, 0, offsetY, w * scale, h * scale);
             ctx.filter = 'none';
             ctx.globalCompositeOperation = 'source-in';
-            ctx.drawImage(results.image, 0, 0, w, h);
+            ctx.drawImage(results.image, 0, offsetY, w * scale, h * scale);
             ctx.restore();
         } else {
-            // Просто видео на весь кадр (object-fit: cover)
-            const vr = video.videoWidth / video.videoHeight;
+            const vr = video.videoWidth / video.videoHeight || 16/9;
             const cr = w / h;
             let dw, dh, dx, dy;
-            if (vr > cr) { dh = h; dw = h * vr; dx = (w - dw) / 2; dy = 0; }
-            else { dw = w; dh = w / vr; dx = 0; dy = (h - dh) / 2; }
+            if (vr > cr) { dh = h * scale; dw = dh * vr; dx = (w - dw) / 2; dy = offsetY; }
+            else { dw = w * scale; dh = dw / vr; dx = (w - dw) / 2; dy = (h - dh) / 2 + offsetY; }
+            ctx.globalAlpha = this.state.opacity;
             ctx.drawImage(video, dx, dy, dw, dh);
+            ctx.globalAlpha = 1;
         }
 
-        // === 3. ВИДЕО-ЭФФЕКТЫ ===
+        // 3. ЭФФЕКТЫ
         if (this.state.videoEffect !== 'original') {
             this._applyVideoEffect();
         }
 
-        // === 4. ТЕКСТ ===
+        // 4. ТЕКСТ
         if (this.state.showText && this.state.textFront) {
             this._drawText();
         }
@@ -163,69 +183,75 @@ export class Studio {
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
+        const intensity = this.state.intensity;
 
         switch (this.state.videoEffect) {
             case 'glitch': {
-                const shift = 5 + Math.random() * 15 * this.state.intensity;
-                const frame = ctx.getImageData(0, 0, w, h);
-                ctx.putImageData(frame, shift, 0);
+                const shift = Math.floor(5 + Math.random() * 15 * intensity);
+                try {
+                    const imageData = ctx.getImageData(0, 0, w, h);
+                    ctx.putImageData(imageData, shift, 0);
+                } catch (e) {}
                 break;
             }
             case 'pixel': {
-                const size = Math.max(4, Math.floor(15 / this.state.intensity));
-                const imageData = ctx.getImageData(0, 0, w, h);
-                const data = imageData.data;
-                for (let y = 0; y < h; y += size) {
-                    for (let x = 0; x < w; x += size) {
-                        const i = (y * w + x) * 4;
-                        const r = data[i], g = data[i+1], b = data[i+2];
-                        ctx.fillStyle = `rgb(${r},${g},${b})`;
-                        ctx.fillRect(x, y, size, size);
+                const size = Math.max(4, Math.floor(20 / intensity));
+                try {
+                    const imageData = ctx.getImageData(0, 0, w, h);
+                    const data = imageData.data;
+                    for (let y = 0; y < h; y += size) {
+                        for (let x = 0; x < w; x += size) {
+                            const i = (y * w + x) * 4;
+                            ctx.fillStyle = `rgb(${data[i]},${data[i+1]},${data[i+2]})`;
+                            ctx.fillRect(x, y, size, size);
+                        }
                     }
-                }
+                } catch (e) {}
                 break;
             }
-            case 'blur':
-                ctx.filter = `blur(${Math.max(1, 5 * this.state.intensity)}px)`;
-                ctx.drawImage(this.canvas, 0, 0);
-                ctx.filter = 'none';
-                break;
             case 'vhs': {
-                for (let i = 0; i < 30 * this.state.intensity; i++) {
+                for (let i = 0; i < 30 * intensity; i++) {
                     const y = Math.random() * h;
-                    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.1})`;
-                    ctx.fillRect(0, y, w, 1);
+                    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.15})`;
+                    ctx.fillRect(0, y, w, 2);
                 }
                 break;
             }
-            case 'invert':
+            case 'invert': {
                 ctx.globalCompositeOperation = 'difference';
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, w, h);
                 ctx.globalCompositeOperation = 'source-over';
                 break;
-            case 'sepia':
+            }
+            case 'sepia': {
                 ctx.globalCompositeOperation = 'multiply';
-                ctx.fillStyle = 'rgba(255, 240, 200, ' + (0.3 * this.state.intensity) + ')';
+                ctx.fillStyle = `rgba(255, 240, 200, ${0.4 * intensity})`;
                 ctx.fillRect(0, 0, w, h);
                 ctx.globalCompositeOperation = 'source-over';
                 break;
-            case 'thermal':
-                ctx.globalCompositeOperation = 'hue-rotate';
-                ctx.filter = `hue-rotate(180deg) saturate(3)`;
-                ctx.drawImage(this.canvas, 0, 0);
-                ctx.filter = 'none';
-                break;
+            }
             case 'noise': {
-                const imageData = ctx.getImageData(0, 0, w, h);
-                const data = imageData.data;
-                for (let i = 0; i < data.length; i += 4) {
-                    const noise = (Math.random() - 0.5) * 100 * this.state.intensity;
-                    data[i] = Math.min(255, Math.max(0, data[i] + noise));
-                    data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
-                    data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
-                }
-                ctx.putImageData(imageData, 0, 0);
+                try {
+                    const imageData = ctx.getImageData(0, 0, w, h);
+                    const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        const noise = (Math.random() - 0.5) * 100 * intensity;
+                        data[i] = Math.min(255, Math.max(0, data[i] + noise));
+                        data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
+                        data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                } catch (e) {}
+                break;
+            }
+            case 'blur': {
+                const tmp = document.createElement('canvas');
+                tmp.width = w; tmp.height = h;
+                tmp.getContext('2d').drawImage(this.canvas, 0, 0);
+                ctx.filter = `blur(${Math.max(1, 6 * intensity)}px)`;
+                ctx.drawImage(tmp, 0, 0);
+                ctx.filter = 'none';
                 break;
             }
         }
@@ -249,7 +275,7 @@ export class Studio {
         ctx.restore();
     }
 
-    // Публичные методы для управления
+    // ============ ПУБЛИЧНЫЕ МЕТОДЫ ============
     setBackground(type, imageUrl) {
         this.state.background = type;
         if (type === 'image' && imageUrl) {
@@ -260,24 +286,33 @@ export class Studio {
         }
     }
 
-    setVideoEffect(effect) {
-        this.state.videoEffect = effect;
-    }
-
-    setIntensity(val) {
-        this.state.intensity = val;
-    }
+    setVideoEffect(effect) { this.state.videoEffect = effect; }
+    setIntensity(val) { this.state.intensity = val; }
+    setOpacity(val) { this.state.opacity = val; }
+    setVideoScale(val) { this.state.videoScale = val; }
+    setVideoY(val) { this.state.videoY = val; }
 
     setText(text, color) {
         this.state.textFront = text;
         this.state.textFrontColor = color || '#ff3366';
         this.state.showText = !!text;
     }
+    setTextSize(size) { this.state.textSize = size; }
 
-    setTextSize(size) {
-        this.state.textSize = size;
+    setMicEnabled(enabled) {
+        if (this.ownStream) {
+            const audioTrack = this.ownStream.getAudioTracks()[0];
+            if (audioTrack) audioTrack.enabled = enabled;
+        }
     }
 
-    getInputStream() { return this.stream; }
+    getInputStream() { return this.ownStream; }
     getOutputStream() { return this.outputStream; }
+    getAudioTrack() {
+        return this.outputStream ? this.outputStream.getAudioTracks()[0] : null;
+    }
+    getVideoTrack() {
+        return this.outputStream ? this.outputStream.getVideoTracks()[0] : null;
+    }
+    getSourceLabel() { return this.state.sourceLabel; }
 }
