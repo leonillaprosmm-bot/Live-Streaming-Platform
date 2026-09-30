@@ -22,15 +22,18 @@
 
         .main-video-box { position: relative; background: #000; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; width: 100%; transition: aspect-ratio 0.3s; }
         .main-video-box.vertical { aspect-ratio: 9/16; max-width: 400px; margin: 0 auto; }
-        .main-video-box video { width: 100%; height: 100%; object-fit: cover; }
+        .main-video-box video { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
 
         .guest-tile { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
         .guest-tile:hover { border-color: #00f2fe; transform: scale(1.02); }
-        .guest-tile.on-stage { border-color: #ff0050; }
+        .guest-tile.on-stage { border-color: #ff0050; box-shadow: 0 0 20px rgba(255,0,80,0.5); }
         .guest-tile video { width: 100%; height: 100%; object-fit: cover; }
 
         .request-card { animation: slideInRight 0.4s ease-out; }
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        .guest-tile:hover .tile-menu { display: block; }
+        .tile-menu { display: none; position: absolute; top: 2px; right: 2px; z-index: 10; }
     </style>
 </head>
 <body class="bg-studio-900 text-gray-100 min-h-screen antialiased">
@@ -107,23 +110,28 @@
         <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-3 p-3 overflow-hidden">
             <div class="lg:col-span-3 flex flex-col gap-3 overflow-hidden">
 
-                <!-- ГЛАВНОЕ ОКНО (сцена / заглушка) -->
+                <!-- ГЛАВНОЕ ОКНО -->
                 <div class="relative flex-shrink-0 flex justify-center">
                     <div id="mainVideoBox" class="main-video-box">
-                        <img id="stageBgImage" src="https://placehold.co/1280x720/0b0f19/00f2fe?text=ProStream+Studio%0A%C2%AB%D0%AD%D1%84%D0%B8%D1%80+%D1%81%D0%BA%D0%BE%D1%80%D0%BE+%D0%BD%D0%B0%D1%87%D0%BD%D1%91%D1%82%D1%81%D1%8F%C2%BB&font=montserrat" class="w-full h-full object-cover">
+                        <!-- Слайд-шоу заглушка -->
+                        <div id="stageSlideshow" class="absolute inset-0 z-[1]">
+                            <img id="stageSlide" src="https://placehold.co/1280x720/0b0f19/00f2fe?text=ProStream+Studio&font=montserrat" class="w-full h-full object-cover">
+                        </div>
+                        <!-- Сюда LiveKit подкладывает видео поверх -->
                     </div>
+
                     <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10 z-10">
                         <i id="mainMicIcon" class="fa-solid fa-microphone text-emerald-400"></i>
                         <span id="mainNameLabel">Сцена свободна</span>
                         <span id="mainHostBadge" class="hidden bg-amber-500 text-black text-[9px] px-1.5 py-0.5 rounded font-bold ml-1">👑 ВЕДУЩИЙ</span>
                     </div>
-                    <!-- Кнопка "Убрать со сцены" (только у ведущего) -->
-                    <button id="clearStageBtn" onclick="clearStage()" class="hidden absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-lg z-10">
+
+                    <button id="clearStageBtn" onclick="clearStage()" class="hidden absolute top-3 right-3 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-lg z-20">
                         <i class="fa-solid fa-xmark"></i> Убрать со сцены
                     </button>
                 </div>
 
-                <!-- СЕТКА УЧАСТНИКОВ -->
+                <!-- УЧАСТНИКИ -->
                 <div class="flex-shrink-0">
                     <div class="flex items-center justify-between mb-2 px-1">
                         <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -147,7 +155,8 @@
                         <button id="roomMicBtn" onclick="toggleRoomMic()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
                             <i id="roomMicIcon" class="fa-solid fa-microphone-slash text-red-400"></i> <span id="roomMicLabel">Микрофон</span>
                         </button>
-                        <button id="shareScreenBtn" onclick="toggleScreenShare()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
+                        <!-- Screen Share — скрыт на мобильных -->
+                        <button id="shareScreenBtn" onclick="toggleScreenShare()" class="hidden md:flex bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition items-center gap-2 border border-studio-600">
                             <i class="fa-solid fa-desktop text-purple-400"></i> <span id="shareScreenLabel">Экран</span>
                         </button>
                         <button id="requestStageBtn" onclick="requestStage()" class="hidden bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
@@ -186,9 +195,7 @@
             </div>
         </main>
 
-        <!-- ЗАПРОСЫ НА ЭФИР (у ведущего) -->
         <div id="requestsContainer" class="fixed top-20 right-4 w-80 z-40 space-y-2"></div>
-
         <div id="floatingReactionsContainer" class="fixed bottom-24 right-8 w-48 h-64 pointer-events-none overflow-hidden z-20"></div>
     </div>
 
@@ -221,7 +228,8 @@
             isRoomMicOn: false,
             isScreenSharing: false,
             stageIdentity: null,
-            orientation: 'horizontal' // horizontal | vertical
+            isOnStage: false,
+            orientation: 'horizontal'
         };
 
         window.showScreen = function(id) {
@@ -244,9 +252,7 @@
                 (isHost ? '👑 Ведущий: ' : '👤 Гость: ') + name;
 
             // Кнопка "Хочу в эфир" — только у гостей
-            if (!isHost) {
-                document.getElementById('requestStageBtn').classList.remove('hidden');
-            }
+            if (!isHost) document.getElementById('requestStageBtn').classList.remove('hidden');
 
             await connectToLiveKit(isHost);
         };
@@ -259,7 +265,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ roomName: FIXED_ROOM, participantName: window.appState.name })
                 });
-
                 if (!res.ok) throw new Error('Не удалось получить токен');
                 const { token, url } = await res.json();
 
@@ -275,6 +280,10 @@
                         console.log('👤 Подключился:', p.identity);
                         updateParticipantCount();
                         renderGuestTile(p.identity, false);
+                        // Если он уже на сцене (был поднят) — поднять снова
+                        if (window.appState.stageIdentity === p.identity) {
+                            setTimeout(() => putOnStage(p.identity), 500);
+                        }
                     })
                     .on(RoomEvent.ParticipantDisconnected, (p) => {
                         console.log('👤 Отключился:', p.identity);
@@ -288,11 +297,20 @@
                     .on(RoomEvent.TrackUnsubscribed, (track, pub, participant) => {
                         if (track.kind === Track.Kind.Video) {
                             const c = document.getElementById('guest-video-' + participant.identity);
-                            if (c) c.innerHTML = '';
+                            if (c) c.innerHTML = '<div class="text-center text-gray-500"><i class="fa-solid fa-user text-2xl mb-1"></i><p class="text-[9px]">камера off</p></div>';
+                            if (window.appState.stageIdentity === participant.identity) {
+                                setTimeout(() => putOnStage(participant.identity), 300);
+                            }
                         }
                     })
                     .on(RoomEvent.LocalTrackPublished, (publication) => {
                         if (publication.track) attachLocalTrack(publication.track);
+                    })
+                    .on(RoomEvent.DataReceived, (payload, participant) => {
+                        try {
+                            const data = JSON.parse(new TextDecoder().decode(payload));
+                            handleDataMessage(data, participant);
+                        } catch (e) {}
                     })
                     .on(RoomEvent.Disconnected, () => console.log('❌ Отключен'));
 
@@ -309,33 +327,74 @@
                 }
                 updateRoomIcons();
 
-                // Рисуем уже подключённых
                 room.remoteParticipants.forEach((p) => {
                     renderGuestTile(p.identity, false);
                     p.trackPublications.forEach((pub) => {
                         if (pub.track && pub.isSubscribed) attachRemoteTrack(pub.track, p);
                     });
                 });
-
                 room.localParticipant.trackPublications.forEach((pub) => {
                     if (pub.track) attachLocalTrack(pub.track);
                 });
 
                 updateParticipantCount();
-
-                // Запуск слушателя запросов на эфир (только ведущий)
-                if (isHost) startRequestListener();
-
             } catch (err) {
                 console.error('❌ Ошибка LiveKit:', err);
                 alert('Ошибка подключения: ' + err.message);
             }
         }
 
+        // ============ DATA-СООБЩЕНИЯ ============
+        function handleDataMessage(data, participant) {
+            if (data.type === 'stage-request') {
+                // Только ведущий видит запросы
+                if (window.appState.isHost) showRequestCard(data.name, participant.identity);
+            } else if (data.type === 'stage-approved') {
+                // Гость: ведущий одобрил — включаем камеру автоматически
+                if (!window.appState.isHost) {
+                    enableCamThenGoOnStage();
+                }
+            } else if (data.type === 'stage-denied' || data.type === 'stage-removed') {
+                // Гость: ведущий отклонил/убрал — сбрасываем кнопку
+                if (!window.appState.isHost) {
+                    resetRequestButton();
+                }
+            }
+        }
+
+        // Гость: включаем камеру и залезаем на сцену
+        async function enableCamThenGoOnStage() {
+            const room = window.appState.room;
+            if (!room) return;
+            try {
+                if (!window.appState.isRoomCamOn) {
+                    await room.localParticipant.setCameraEnabled(true);
+                    window.appState.isRoomCamOn = true;
+                    updateRoomIcons();
+                }
+                if (!window.appState.isRoomMicOn) {
+                    await room.localParticipant.setMicrophoneEnabled(true);
+                    window.appState.isRoomMicOn = true;
+                    updateRoomIcons();
+                }
+                showToast('🎉 Вы на сцене!');
+            } catch (err) {
+                console.error('Не удалось включить камеру:', err);
+            }
+        }
+
+        function resetRequestButton() {
+            const btn = document.getElementById('requestStageBtn');
+            const label = document.getElementById('requestStageLabel');
+            if (btn && label) {
+                btn.classList.remove('opacity-50', 'pointer-events-none');
+                label.innerText = 'Хочу в эфир';
+            }
+        }
+
         // ============ УЧАСТНИКИ ============
         function renderGuestTile(identity, isLocal) {
             if (document.getElementById('guest-tile-' + identity)) return;
-
             const hint = document.getElementById('noGuestsHint');
             if (hint) hint.style.display = 'none';
 
@@ -349,12 +408,15 @@
                         <p class="text-[9px]">камера off</p>
                     </div>
                 </div>
-                <div class="absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-medium text-white">
-                    ${isLocal ? 'Вы' : identity}
+                <div class="absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-medium text-white z-[2]">
+                    ${isLocal ? 'Вы' : escapeHtml(identity)}
                 </div>
-                <div class="absolute top-1 right-1 bg-black/70 px-1 py-0.5 rounded text-[8px] text-gray-300">
-                    <i class="fa-solid fa-hand"></i>
-                </div>
+                ${window.appState.isHost ? `
+                <div class="tile-menu">
+                    <button onclick="event.stopPropagation(); hostActionPutOnStage('${escapeHtml(identity).replace(/'/g, '&#39;')}')" class="bg-amber-500 hover:bg-amber-600 text-black text-[10px] px-2 py-1 rounded font-bold shadow-lg">
+                        <i class="fa-solid fa-arrow-up"></i> На сцену
+                    </button>
+                </div>` : ''}
             `;
             document.getElementById('guestGrid').appendChild(tile);
             updateGuestsCount();
@@ -364,7 +426,6 @@
             const tile = document.getElementById('guest-tile-' + identity);
             if (tile) tile.remove();
             updateGuestsCount();
-
             if (document.querySelectorAll('.guest-tile').length === 0) {
                 const hint = document.getElementById('noGuestsHint');
                 if (hint) hint.style.display = 'block';
@@ -378,23 +439,31 @@
         // ============ ТРЕКИ ============
         function attachLocalTrack(track) {
             if (track.kind === Track.Kind.Video) {
-                renderGuestTile(window.appState.name, true);
-                const c = document.getElementById('guest-video-' + window.appState.name);
+                const containerId = track.source === Track.Source.ScreenShare ? 'screen-' + window.appState.name : window.appState.name;
+                renderGuestTile(containerId, true);
+                const c = document.getElementById('guest-video-' + containerId);
                 c.innerHTML = '';
                 const v = track.attach();
-                v.className = 'w-full h-full object-cover transform -scale-x-100';
+                v.className = 'w-full h-full object-cover' + (track.source === Track.Source.ScreenShare ? '' : ' transform -scale-x-100');
                 c.appendChild(v);
             }
         }
 
         function attachRemoteTrack(track, participant) {
+            const isScreen = track.source === Track.Source.ScreenShare;
+            const containerId = isScreen ? 'screen-' + participant.identity : participant.identity;
+
             if (track.kind === Track.Kind.Video) {
-                renderGuestTile(participant.identity, false);
-                const c = document.getElementById('guest-video-' + participant.identity);
+                renderGuestTile(containerId, false);
+                const c = document.getElementById('guest-video-' + containerId);
                 c.innerHTML = '';
                 const v = track.attach();
                 v.className = 'w-full h-full object-cover';
                 c.appendChild(v);
+                // Если это screen share — сразу на сцену
+                if (isScreen) {
+                    setTimeout(() => putOnStage(containerId), 300);
+                }
             } else if (track.kind === Track.Kind.Audio) {
                 const a = track.attach();
                 a.autoplay = true;
@@ -402,24 +471,36 @@
             }
         }
 
-        // ============ СЦЕНА (ГЛАВНОЕ ОКНО) ============
+        // ============ СЦЕНА ============
         window.putOnStage = function(identity) {
             const box = document.getElementById('mainVideoBox');
-            box.querySelectorAll('video, img').forEach(el => el.style.display = 'none');
+            // Убираем все видео кроме заглушки
+            box.querySelectorAll('video').forEach(v => v.remove());
 
             const c = document.getElementById('guest-video-' + identity);
             if (!c) return;
 
             const v = c.querySelector('video');
             if (!v) {
-                // Нет видео — показываем заглушку
+                // Нет видео — показываем уведомление
+                document.getElementById('stageSlideshow').style.display = 'none';
+                document.getElementById('mainNameLabel').innerText = 'Ожидание видео...';
+                setTimeout(() => {
+                    const c2 = document.getElementById('guest-video-' + identity);
+                    const v2 = c2 ? c2.querySelector('video') : null;
+                    if (v2) putOnStage(identity);
+                }, 1500);
                 return;
             }
 
+            // Скрываем слайд-шоу
+            document.getElementById('stageSlideshow').style.display = 'none';
+
             const clone = v.cloneNode(true);
             clone.className = 'w-full h-full object-cover';
-            clone.style.display = 'block';
-            if (identity === window.appState.name) clone.style.transform = 'scaleX(-1)';
+            if (identity === window.appState.name && !identity.startsWith('screen-')) {
+                clone.style.transform = 'scaleX(-1)';
+            }
             box.appendChild(clone);
 
             window.appState.stageIdentity = identity;
@@ -432,51 +513,47 @@
         };
 
         window.clearStage = function() {
+            const prevIdentity = window.appState.stageIdentity;
             const box = document.getElementById('mainVideoBox');
             box.querySelectorAll('video').forEach(v => v.remove());
-            document.getElementById('stageBgImage').style.display = 'block';
+            document.getElementById('stageSlideshow').style.display = 'block';
             document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
             document.getElementById('mainHostBadge').classList.add('hidden');
             document.getElementById('clearStageBtn').classList.add('hidden');
             window.appState.stageIdentity = null;
             document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
+
+            // Сбрасываем кнопку у гостя, которого убрали
+            if (prevIdentity && window.appState.room && window.appState.isHost) {
+                const room = window.appState.room;
+                const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-removed' }));
+                room.localParticipant.publishData(payload, { reliable: true });
+            }
         };
 
-        // ============ ЗАПРОС НА ЭФИР ============
+        // ============ ЗАПРОС ОТ ГОСТЯ ============
         window.requestStage = function() {
-            if (!window.appState.room) return;
-            const room = window.appState.room;
-            // Отправляем через LiveKit Data Channel
+            if (!window.appState.room || window.appState.isHost) return;
             const payload = new TextEncoder().encode(JSON.stringify({
                 type: 'stage-request',
                 name: window.appState.name
             }));
-            room.localParticipant.publishData(payload, { reliable: true });
+            window.appState.room.localParticipant.publishData(payload, { reliable: true });
             showToast('📨 Запрос отправлен ведущему!');
             document.getElementById('requestStageLabel').innerText = 'Запрос отправлен';
-            document.getElementById('requestStageBtn').classList.add('opacity-50');
+            document.getElementById('requestStageBtn').classList.add('opacity-50', 'pointer-events-none');
         };
 
-        function startRequestListener() {
-            const room = window.appState.room;
-            room.on(RoomEvent.DataReceived, (payload, participant) => {
-                try {
-                    const data = JSON.parse(new TextDecoder().decode(payload));
-                    if (data.type === 'stage-request') {
-                        showRequestCard(data.name, participant.identity);
-                    }
-                } catch (e) {}
-            });
-        }
-
+        // ============ ВЕДУЩИЙ: КАРТОЧКИ ЗАПРОСОВ ============
         function showRequestCard(name, identity) {
             const container = document.getElementById('requestsContainer');
+            const safeId = escapeHtml(identity).replace(/'/g, '&#39;');
             const card = document.createElement('div');
             card.className = 'request-card bg-studio-800 border-2 border-amber-500 rounded-xl p-4 shadow-2xl';
             card.innerHTML = `
                 <div class="flex items-center gap-3 mb-3">
                     <div class="w-10 h-10 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold">
-                        ${name.charAt(0).toUpperCase()}
+                        ${escapeHtml(name).charAt(0).toUpperCase()}
                     </div>
                     <div class="flex-1">
                         <p class="text-white font-bold text-sm">${escapeHtml(name)}</p>
@@ -484,36 +561,56 @@
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="approveRequest('${escapeHtml(identity)}', this)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg text-xs font-bold transition">
+                    <button data-id="${safeId}" onclick="approveRequest(this.dataset.id, this)" class="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white py-2 rounded-lg text-xs font-bold transition">
                         <i class="fa-solid fa-check"></i> Одобрить
                     </button>
-                    <button onclick="denyRequest(this)" class="flex-1 bg-studio-700 hover:bg-studio-600 text-gray-300 py-2 rounded-lg text-xs font-bold transition">
+                    <button data-id="${safeId}" onclick="denyRequest(this.dataset.id, this)" class="flex-1 bg-studio-700 hover:bg-studio-600 text-gray-300 py-2 rounded-lg text-xs font-bold transition">
                         <i class="fa-solid fa-xmark"></i> Отклонить
                     </button>
                 </div>
             `;
             container.appendChild(card);
-            setTimeout(() => { if (card.parentNode) card.remove(); }, 30000);
+            setTimeout(() => { if (card.parentNode) card.remove(); }, 45000);
         }
 
-        window.approveRequest = function(identity, btn) {
-            // Поднимаем на сцену
-            putOnStage(identity);
-            // Уведомляем гостя
+        window.approveRequest = async function(identity, btn) {
+            // 1) Сообщаем гостю — включай камеру и готовься
             const room = window.appState.room;
-            if (room) {
-                const payload = new TextEncoder().encode(JSON.stringify({
-                    type: 'stage-approved',
-                    identity: identity
-                }));
-                room.localParticipant.publishData(payload, { reliable: true });
-            }
+            const payload = new TextEncoder().encode(JSON.stringify({
+                type: 'stage-approved',
+                identity: identity
+            }));
+            room.localParticipant.publishData(payload, { reliable: true });
+
+            // 2) Ждём 1.5 сек чтобы гость успел включить камеру, потом поднимаем
+            setTimeout(() => {
+                putOnStage(identity);
+            }, 1500);
+
             btn.closest('.request-card').remove();
-            showToast('✅ ' + identity + ' на сцене');
+            showToast('✅ ' + identity + ' выходит на сцену');
         };
 
-        window.denyRequest = function(btn) {
+        window.denyRequest = function(identity, btn) {
+            const room = window.appState.room;
+            const payload = new TextEncoder().encode(JSON.stringify({
+                type: 'stage-denied'
+            }));
+            room.localParticipant.publishData(payload, { reliable: true });
             btn.closest('.request-card').remove();
+        };
+
+        // Ведущий вручную поднимает на сцену из тайла
+        window.hostActionPutOnStage = async function(identity) {
+            if (!window.appState.isHost) return;
+            // Отправляем гостю команду включить камеру
+            const room = window.appState.room;
+            const payload = new TextEncoder().encode(JSON.stringify({
+                type: 'stage-approved',
+                identity: identity
+            }));
+            room.localParticipant.publishData(payload, { reliable: true });
+            setTimeout(() => putOnStage(identity), 1200);
         };
 
         // ============ ОРИЕНТАЦИЯ ============
@@ -574,7 +671,10 @@
                 await window.appState.room.localParticipant.setScreenShareEnabled(s);
                 window.appState.isScreenSharing = s;
                 document.getElementById('shareScreenLabel').innerText = s ? 'Стоп' : 'Экран';
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error(err);
+                alert('Screen share не поддерживается на этом устройстве. Попробуй с компьютера (Chrome/Edge).');
+            }
         };
 
         function updateRoomIcons() {
@@ -610,8 +710,14 @@
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
         };
 
-        // ============ FIRESTORE: запросы на эфир (дублируем через Firebase для надёжности) ============
-        // Основной канал — LiveKit Data Channel. Firebase не обязателен здесь.
+        // Скрыть кнопку "Экран" на тач-устройствах
+        window.addEventListener('DOMContentLoaded', () => {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            if (isMobile) {
+                const btn = document.getElementById('shareScreenBtn');
+                if (btn) btn.style.display = 'none';
+            }
+        });
     </script>
 
     <!-- ============ FIREBASE: чат + лайки + модерация ============ -->
