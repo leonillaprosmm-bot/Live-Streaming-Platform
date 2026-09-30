@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProStream Studio — Видеовстречи</title>
+    <title>ProStream Studio — Прямой эфир</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = { darkMode: 'class', theme: { extend: { colors: { studio: { 900: '#0b0f19', 800: '#111827', 700: '#1f2937', 600: '#374151', accent: '#ff0050', accentHover: '#e00045', cyan: '#00f2fe' } } } } }
@@ -21,14 +21,12 @@
         .video-tile video { width: 100%; height: 100%; object-fit: cover; }
         .screen { display: none; }
         .screen.active { display: flex; }
-        .pulse-red { animation: pulseRed 1.5s infinite; }
-        @keyframes pulseRed { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body class="bg-studio-900 text-gray-100 min-h-screen antialiased">
 
     <!-- ============================================================= -->
-    <!-- ЭКРАН 1: ПРИВЕТСТВИЕ                                           -->
+    <!-- ЭКРАН 1: ВХОД (только имя)                                     -->
     <!-- ============================================================= -->
     <div id="screen-welcome" class="screen active min-h-screen flex-col items-center justify-center p-4">
         <div class="max-w-md w-full">
@@ -37,7 +35,7 @@
                     <i class="fa-solid fa-video text-2xl text-white"></i>
                 </div>
                 <h1 class="text-3xl font-bold text-white mb-2">ProStream Studio</h1>
-                <p class="text-gray-400 text-sm">Видеовстречи в реальном времени</p>
+                <p class="text-gray-400 text-sm">Прямой эфир в реальном времени</p>
             </div>
 
             <div class="bg-studio-800 rounded-2xl border border-studio-700 p-6 shadow-2xl space-y-4">
@@ -47,90 +45,18 @@
                         class="w-full bg-studio-900 border border-studio-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-studio-accent transition">
                 </div>
 
-                <div>
-                    <label class="block text-xs text-gray-400 mb-2 font-medium">Название комнаты</label>
-                    <input type="text" id="inputRoom" placeholder="team-meeting"
-                        class="w-full bg-studio-900 border border-studio-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-studio-accent transition">
-                    <p class="text-[10px] text-gray-500 mt-1">Только латиница, цифры и дефис. Например: <code class="text-studio-cyan">my-team-2025</code></p>
-                </div>
-
-                <button onclick="goToPreview()" class="w-full bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white py-3 rounded-xl text-sm font-bold transition shadow-lg flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-arrow-right"></i> Продолжить
+                <button onclick="enterStream()" class="w-full bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white py-3 rounded-xl text-sm font-bold transition shadow-lg flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrow-right"></i> Войти в эфир
                 </button>
             </div>
-
-            <p class="text-center text-xs text-gray-500 mt-6">
-                Если у вас есть ссылка на комнату — откройте её, и вы присоединитесь к эфиру.
-            </p>
         </div>
     </div>
 
     <!-- ============================================================= -->
-    <!-- ЭКРАН 2: ПРЕДПРОСМОТР                                           -->
-    <!-- ============================================================= -->
-    <div id="screen-preview" class="screen min-h-screen flex-col items-center justify-center p-4">
-        <div class="max-w-4xl w-full">
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-white mb-1">Подготовка к эфиру</h2>
-                <p class="text-gray-400 text-sm">Проверьте камеру и микрофон</p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="lg:col-span-2">
-                    <div class="relative bg-black rounded-2xl overflow-hidden border border-studio-700 shadow-2xl aspect-video">
-                        <video id="previewVideo" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
-                        <div id="previewPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-studio-800 text-gray-500">
-                            <i class="fa-solid fa-video-slash text-4xl mb-2"></i>
-                            <p class="text-xs">Камера выключена</p>
-                        </div>
-                        <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10">
-                            <i id="previewMicIcon" class="fa-solid fa-microphone text-emerald-400"></i>
-                            <span id="previewNameLabel">Вы</span>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-center gap-3 mt-4">
-                        <button id="previewCamBtn" onclick="togglePreviewCam()" class="bg-studio-700 hover:bg-studio-600 text-white px-5 py-2.5 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
-                            <i id="previewCamIcon" class="fa-solid fa-video text-studio-cyan"></i> Камера
-                        </button>
-                        <button id="previewMicBtn" onclick="togglePreviewMic()" class="bg-studio-700 hover:bg-studio-600 text-white px-5 py-2.5 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600">
-                            <i id="previewMicBtnIcon" class="fa-solid fa-microphone text-emerald-400"></i> Микрофон
-                        </button>
-                    </div>
-                </div>
-
-                <div class="space-y-3">
-                    <div class="bg-studio-800 rounded-2xl border border-studio-700 p-5">
-                        <h3 class="text-sm font-bold text-white mb-3">Информация</h3>
-                        <div class="space-y-2 text-xs">
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Имя:</span>
-                                <span id="infoName" class="text-white font-medium">—</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Комната:</span>
-                                <span id="infoRoom" class="text-studio-cyan font-medium">—</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button onclick="startStream()" class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3.5 rounded-xl text-sm font-bold transition shadow-lg flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-tower-broadcast"></i> <span id="startBtnLabel">Начать эфир</span>
-                    </button>
-
-                    <button onclick="goBackToWelcome()" class="w-full bg-studio-700 hover:bg-studio-600 text-gray-300 py-2.5 rounded-xl text-xs font-medium transition">
-                        ← Назад
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================================= -->
-    <!-- ЭКРАН 3: ЭФИР (комната)                                        -->
+    <!-- ЭКРАН 2: ЭФИР                                                   -->
     <!-- ============================================================= -->
     <div id="screen-room" class="screen min-h-screen flex-col">
-        <!-- Верхняя шапка -->
+        <!-- Шапка -->
         <header class="bg-studio-800 border-b border-studio-700 px-4 py-3 flex items-center justify-between z-30 flex-wrap gap-2">
             <div class="flex items-center space-x-3">
                 <div class="bg-gradient-to-r from-studio-accent to-studio-cyan p-2 rounded-xl text-white shadow-lg">
@@ -138,47 +64,34 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-sm text-white flex items-center gap-2">
-                        <span id="roomTitle">Комната</span>
-                        <span class="bg-red-600 text-[10px] px-2 py-0.5 rounded-full font-semibold pulse-red">● LIVE</span>
+                        Прямой эфир
+                        <span class="bg-red-600 text-[10px] px-2 py-0.5 rounded-full font-semibold">● LIVE</span>
                     </h1>
                     <p id="roomSubtitle" class="text-[10px] text-gray-400">—</p>
                 </div>
             </div>
 
-            <!-- Кнопки в шапке -->
             <div class="flex items-center gap-2 flex-wrap">
                 <div class="hidden md:flex items-center bg-studio-700/60 px-3 py-1.5 rounded-lg border border-studio-600 text-xs text-gray-300">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
                     <span id="participantCountHeader">1 участник</span>
                 </div>
 
-                <!-- ГЛАВНАЯ КНОПКА: СКОПИРОВАТЬ ССЫЛКУ -->
-                <button onclick="copyInviteLinkInRoom()" class="bg-gradient-to-r from-studio-cyan to-blue-500 hover:from-blue-500 hover:to-studio-cyan text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
+                <button onclick="copyInviteLink()" class="bg-gradient-to-r from-studio-cyan to-blue-500 hover:from-blue-500 hover:to-studio-cyan text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
                     <i class="fa-solid fa-link"></i> Скопировать ссылку
                 </button>
 
                 <button onclick="leaveRoom()" class="bg-red-600/20 hover:bg-red-600/40 border border-red-500/40 text-red-300 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-right-from-bracket"></i> Покинуть
+                    <i class="fa-solid fa-right-from-bracket"></i> Выйти
                 </button>
             </div>
         </header>
 
-        <!-- Инфо-полоска со ссылкой -->
-        <div class="bg-studio-800/60 border-b border-studio-700 px-4 py-2 flex items-center gap-2 text-xs text-gray-300 flex-wrap">
-            <i class="fa-solid fa-share-nodes text-studio-cyan"></i>
-            <span class="text-gray-400">Ссылка на эфир:</span>
-            <code id="liveLinkDisplay" class="text-studio-cyan font-mono bg-studio-900 px-2 py-1 rounded border border-studio-700 text-[11px] truncate max-w-md">—</code>
-            <button onclick="copyInviteLinkInRoom()" class="ml-auto text-studio-cyan hover:text-white text-[11px] underline">
-                <i class="fa-solid fa-copy mr-1"></i>Копировать
-            </button>
-        </div>
-
-        <!-- Основное поле -->
+        <!-- Основное -->
         <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-3 p-3 overflow-hidden">
-
             <div class="lg:col-span-3 flex flex-col relative">
                 <div id="videoGrid" class="flex-1 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 p-2 bg-studio-800/50 rounded-2xl border border-studio-700 overflow-y-auto auto-rows-fr">
-                    <!-- LiveKit сам сюда добавит видео -->
+                    <!-- LiveKit сам добавит видео -->
                 </div>
 
                 <div id="floatingReactionsContainer" class="absolute bottom-24 right-8 w-48 h-64 pointer-events-none overflow-hidden z-20"></div>
@@ -202,6 +115,7 @@
                 </div>
             </div>
 
+            <!-- Чат -->
             <div class="lg:col-span-1 bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-[600px] lg:h-auto shadow-2xl overflow-hidden">
                 <div class="p-3.5 border-b border-studio-700 flex items-center justify-between">
                     <div class="flex items-center space-x-2">
@@ -228,16 +142,15 @@
     </div>
 
     <!-- ============================================================= -->
-    <!-- ЭКРАН 4: ПОСЛЕ ВЫХОДА                                          -->
+    <!-- ЭКРАН 3: ПОСЛЕ ВЫХОДА                                          -->
     <!-- ============================================================= -->
     <div id="screen-left" class="screen min-h-screen flex-col items-center justify-center p-4">
         <div class="text-center max-w-md">
             <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-studio-700 mb-6">
                 <i class="fa-solid fa-check text-3xl text-emerald-400"></i>
             </div>
-            <h2 class="text-2xl font-bold text-white mb-2">Вы покинули эфир</h2>
-            <p class="text-gray-400 text-sm mb-8">Спасибо, что были с нами</p>
-            <button onclick="returnToWelcome()" class="bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-6 py-3 rounded-xl text-sm font-bold transition shadow-lg">
+            <h2 class="text-2xl font-bold text-white mb-2">Вы вышли из эфира</h2>
+            <button onclick="returnToWelcome()" class="bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-6 py-3 rounded-xl text-sm font-bold transition shadow-lg mt-4">
                 <i class="fa-solid fa-house mr-2"></i> На главную
             </button>
         </div>
@@ -250,14 +163,11 @@
         import { Room, RoomEvent, Track } from 'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.esm.mjs';
 
         const TOKEN_SERVER_URL = "https://prostream-signaling.onrender.com";
+        const FIXED_ROOM = "main-studio"; // ЕДИНСТВЕННАЯ комната — не показываем её юзеру
 
         window.appState = {
             name: '',
-            roomId: '',
             isHost: false,
-            isPreviewCamOn: false,
-            isPreviewMicOn: false,
-            previewStream: null,
             room: null,
             isRoomCamOn: false,
             isRoomMicOn: false
@@ -268,134 +178,27 @@
             document.getElementById(id).classList.add('active');
         };
 
-        // ============ ЭКРАН 1 ============
-        window.goToPreview = function() {
+        // ============ ВХОД ============
+        window.enterStream = async function() {
             const name = document.getElementById('inputName').value.trim();
-            const room = document.getElementById('inputRoom').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
-
             if (!name) { alert('Введите ваше имя'); return; }
-            if (!room) { alert('Введите название комнаты'); return; }
 
             window.appState.name = name;
-            window.appState.roomId = room;
-            window.appState.isHost = true; // если сами создали — мы ведущий
-
-            document.getElementById('infoName').innerText = name;
-            document.getElementById('infoRoom').innerText = room;
-            document.getElementById('previewNameLabel').innerText = name;
-            document.getElementById('startBtnLabel').innerText = 'Начать эфир';
-
-            showScreen('screen-preview');
-            startPreviewStream();
-        };
-
-        window.goBackToWelcome = function() {
-            stopPreviewStream();
-            showScreen('screen-welcome');
-        };
-
-        // ============ ЭКРАН 2: ПРЕДПРОСМОТР ============
-        async function startPreviewStream() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                window.appState.previewStream = stream;
-                document.getElementById('previewVideo').srcObject = stream;
-                document.getElementById('previewPlaceholder').style.display = 'none';
-                window.appState.isPreviewCamOn = true;
-                window.appState.isPreviewMicOn = true;
-                updatePreviewIcons();
-            } catch (err) {
-                console.warn('Камера недоступна:', err);
-                document.getElementById('previewPlaceholder').style.display = 'flex';
-                window.appState.isPreviewCamOn = false;
-                window.appState.isPreviewMicOn = false;
-                updatePreviewIcons();
-            }
-        }
-
-        function stopPreviewStream() {
-            if (window.appState.previewStream) {
-                window.appState.previewStream.getTracks().forEach(t => t.stop());
-                window.appState.previewStream = null;
-            }
-            document.getElementById('previewVideo').srcObject = null;
-        }
-
-        window.togglePreviewCam = function() {
-            if (!window.appState.previewStream) { startPreviewStream(); return; }
-            const videoTrack = window.appState.previewStream.getVideoTracks()[0];
-            if (videoTrack) {
-                videoTrack.enabled = !videoTrack.enabled;
-                window.appState.isPreviewCamOn = videoTrack.enabled;
-                document.getElementById('previewPlaceholder').style.display = videoTrack.enabled ? 'none' : 'flex';
-            }
-            updatePreviewIcons();
-        };
-
-        window.togglePreviewMic = function() {
-            if (!window.appState.previewStream) return;
-            const audioTrack = window.appState.previewStream.getAudioTracks()[0];
-            if (audioTrack) {
-                audioTrack.enabled = !audioTrack.enabled;
-                window.appState.isPreviewMicOn = audioTrack.enabled;
-            }
-            updatePreviewIcons();
-        };
-
-        function updatePreviewIcons() {
-            document.getElementById('previewCamIcon').className = window.appState.isPreviewCamOn
-                ? 'fa-solid fa-video text-studio-cyan'
-                : 'fa-solid fa-video-slash text-red-400';
-            document.getElementById('previewMicIcon').className = window.appState.isPreviewMicOn
-                ? 'fa-solid fa-microphone text-emerald-400'
-                : 'fa-solid fa-microphone-slash text-red-400';
-            document.getElementById('previewMicBtnIcon').className = window.appState.isPreviewMicOn
-                ? 'fa-solid fa-microphone text-emerald-400'
-                : 'fa-solid fa-microphone-slash text-red-400';
-        }
-
-        // ============ КОПИРОВАНИЕ ССЫЛКИ (работает в любой момент) ============
-        window.copyInviteLinkInRoom = function() {
-            const link = window.location.origin + window.location.pathname + '?room=' + window.appState.roomId;
-            navigator.clipboard.writeText(link).then(() => {
-                showToast('✅ Ссылка скопирована!');
-            }).catch(() => {
-                prompt('Скопируйте ссылку:', link);
-            });
-        };
-
-        function showToast(msg) {
-            const t = document.createElement('div');
-            t.className = 'fixed top-20 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-2xl z-[100] font-medium text-sm';
-            t.innerText = msg;
-            document.body.appendChild(t);
-            setTimeout(() => t.remove(), 2500);
-        }
-
-        // ============ СТАРТ ЭФИРА ============
-        window.startStream = async function() {
-            const wasHost = window.appState.isHost;
-            stopPreviewStream();
             showScreen('screen-room');
-            document.getElementById('roomTitle').innerText = window.appState.roomId;
-            document.getElementById('roomSubtitle').innerText = (wasHost ? 'Ведущий: ' : 'Гость: ') + window.appState.name;
+            document.getElementById('roomSubtitle').innerText = 'Вы вошли как: ' + name;
 
-            // Показываем ссылку прямо в эфире
-            const fullLink = window.location.origin + window.location.pathname + '?room=' + window.appState.roomId;
-            document.getElementById('liveLinkDisplay').innerText = fullLink;
-
-            // Ведущий — с камерой. Гость — без камеры.
-            await connectToLiveKit(wasHost);
+            await connectToLiveKit();
         };
 
         // ============ LIVEKIT ============
-        async function connectToLiveKit(startWithCam) {
+        async function connectToLiveKit() {
             try {
+                // 1. Получаем токен
                 const res = await fetch(`${TOKEN_SERVER_URL}/token`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        roomName: window.appState.roomId,
+                        roomName: FIXED_ROOM,
                         participantName: window.appState.name
                     })
                 });
@@ -403,6 +206,7 @@
                 if (!res.ok) throw new Error('Не удалось получить токен');
                 const { token, url } = await res.json();
 
+                // 2. Комната
                 const room = new Room({
                     adaptiveStream: true,
                     dynacast: true,
@@ -429,22 +233,33 @@
                     })
                     .on(RoomEvent.Disconnected, () => console.log('❌ Отключен'));
 
+                // 3. Подключаемся
                 await room.connect(url, token);
                 console.log('✅ Подключен к LiveKit');
 
-                if (startWithCam) {
+                // 4. КТО ПЕРВЫЙ ЗАШЁЛ — ТОТ ВЕДУЩИЙ
+                //    Если в комнате уже есть другие участники → мы гость.
+                //    Если мы первые → мы ведущий.
+                const isFirst = room.remoteParticipants.size === 0;
+                window.appState.isHost = isFirst;
+
+                if (isFirst) {
+                    // ВЕДУЩИЙ: камера+микрофон ВКЛ
                     await room.localParticipant.enableCameraAndMicrophone();
                     window.appState.isRoomCamOn = true;
                     window.appState.isRoomMicOn = true;
+                    console.log('👑 Вы ведущий эфира');
                 } else {
-                    // Гость: только слушает, камера выключена
+                    // ГОСТЬ: камера выключена, микрофон выключен
                     await room.localParticipant.setMicrophoneEnabled(false);
                     await room.localParticipant.setCameraEnabled(false);
                     window.appState.isRoomCamOn = false;
                     window.appState.isRoomMicOn = false;
+                    console.log('👤 Вы гость эфира');
                 }
                 updateRoomIcons();
 
+                // 5. Прикрепляем свои треки (если есть)
                 room.localParticipant.trackPublications.forEach((pub) => {
                     if (pub.track) attachLocalTrack(pub.track);
                 });
@@ -505,6 +320,24 @@
                 audioEl.autoplay = true;
                 document.body.appendChild(audioEl);
             }
+        }
+
+        // ============ КОПИРОВАНИЕ ССЫЛКИ ============
+        window.copyInviteLink = function() {
+            const link = window.location.origin + window.location.pathname;
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('✅ Ссылка скопирована! Отправь её друзьям.');
+            }).catch(() => {
+                prompt('Скопируйте ссылку:', link);
+            });
+        };
+
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'fixed top-20 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-2xl z-[100] font-medium text-sm';
+            t.innerText = msg;
+            document.body.appendChild(t);
+            setTimeout(() => t.remove(), 2500);
         }
 
         // ============ УПРАВЛЕНИЕ ============
@@ -577,40 +410,7 @@
         window.returnToWelcome = function() {
             showScreen('screen-welcome');
             document.getElementById('inputName').value = '';
-            document.getElementById('inputRoom').value = '';
-            window._chatLoaded = false;
         };
-
-        // ============ АВТО-ПОДКЛЮЧЕНИЕ ПО ССЫЛКЕ ============
-        window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const roomFromUrl = params.get('room');
-
-            if (roomFromUrl) {
-                // Пришли по ссылке — мы ГОСТЬ
-                setTimeout(() => {
-                    const name = prompt('Как вас зовут?', 'Гость');
-                    if (!name) {
-                        window.location.href = window.location.pathname;
-                        return;
-                    }
-
-                    window.appState.name = name;
-                    window.appState.roomId = roomFromUrl;
-                    window.appState.isHost = false; // ГОСТЬ
-
-                    document.getElementById('inputName').value = name;
-                    document.getElementById('inputRoom').value = roomFromUrl;
-                    document.getElementById('infoName').innerText = name;
-                    document.getElementById('infoRoom').innerText = roomFromUrl;
-                    document.getElementById('previewNameLabel').innerText = name;
-                    document.getElementById('startBtnLabel').innerText = 'Присоединиться';
-
-                    showScreen('screen-preview');
-                    startPreviewStream();
-                }, 100);
-            }
-        });
     </script>
 
     <!-- ============================================================= -->
@@ -634,6 +434,7 @@
         const fbApp = initializeApp(firebaseConfig);
         const auth = getAuth(fbApp);
         const db = getDatabase(fbApp);
+        const FIXED_ROOM = "main-studio";
         let currentUser = null;
 
         signInAnonymously(auth).catch(err => console.error("Auth error:", err));
@@ -651,12 +452,20 @@
 
         const chatMessages = document.getElementById('chatMessages');
 
-        function getRoomId() {
-            return window.appState.roomId || 'default';
-        }
+        // Загрузка сообщений (срабатывает когда экран эфира активен)
+        const observer = new MutationObserver(() => {
+            if (document.getElementById('screen-room').classList.contains('active')) {
+                if (!window._chatLoaded) {
+                    window._chatLoaded = true;
+                    loadMessages();
+                    loadLikes();
+                }
+            }
+        });
+        observer.observe(document.getElementById('screen-room'), { attributes: true });
 
-        window.loadMessages = function() {
-            const q = query(ref(db, `rooms/${getRoomId()}/messages`), limitToLast(100));
+        function loadMessages() {
+            const q = query(ref(db, `rooms/${FIXED_ROOM}/messages`), limitToLast(100));
             onValue(q, (snap) => {
                 chatMessages.querySelectorAll('[data-msg]').forEach(el => el.remove());
                 const data = snap.val();
@@ -664,7 +473,7 @@
                 Object.entries(data).sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0)).forEach(([id, msg]) => renderMessage(id, msg));
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             });
-        };
+        }
 
         function renderMessage(id, msg) {
             const isSelf = currentUser && msg.uid === currentUser.uid;
@@ -684,11 +493,11 @@
 
         window.handleSendMessage = function(event) {
             event.preventDefault();
-            if (!currentUser || !window.appState.roomId) return;
+            if (!currentUser) return;
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if (!text) return;
-            push(ref(db, `rooms/${getRoomId()}/messages`), {
+            push(ref(db, `rooms/${FIXED_ROOM}/messages`), {
                 uid: currentUser.uid,
                 name: window.appState.name || currentUser.name,
                 avatar: currentUser.avatar,
@@ -698,8 +507,8 @@
             input.value = '';
         };
 
-        window.loadLikes = function() {
-            const q = query(ref(db, `rooms/${getRoomId()}/likes`), limitToLast(1));
+        function loadLikes() {
+            const q = query(ref(db, `rooms/${FIXED_ROOM}/likes`), limitToLast(1));
             onValue(q, (snap) => {
                 const data = snap.val();
                 if (!data) return;
@@ -707,14 +516,14 @@
                 if (currentUser && like.uid !== currentUser.uid) {
                     if (Date.now() - (like.ts || 0) < 3000) animateLikeBurst();
                 }
-                setTimeout(() => remove(ref(db, `rooms/${getRoomId()}/likes/${id}`)).catch(() => {}), 6000);
+                setTimeout(() => remove(ref(db, `rooms/${FIXED_ROOM}/likes/${id}`)).catch(() => {}), 6000);
             });
-        };
+        }
 
         window.sendLikeBurst = function() {
-            if (!currentUser || !window.appState.roomId) return;
+            if (!currentUser) return;
             animateLikeBurst();
-            push(ref(db, `rooms/${getRoomId()}/likes`), { uid: currentUser.uid, ts: Date.now() }).catch(err => console.error("Like error:", err));
+            push(ref(db, `rooms/${FIXED_ROOM}/likes`), { uid: currentUser.uid, ts: Date.now() }).catch(err => console.error("Like error:", err));
         };
 
         function animateLikeBurst() {
@@ -735,18 +544,6 @@
         function escapeHtml(str) {
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
-
-        // Запускаем чат при входе в комнату
-        const observer = new MutationObserver(() => {
-            if (document.getElementById('screen-room').classList.contains('active')) {
-                if (window.appState.roomId && !window._chatLoaded) {
-                    window._chatLoaded = true;
-                    window.loadMessages();
-                    window.loadLikes();
-                }
-            }
-        });
-        observer.observe(document.getElementById('screen-room'), { attributes: true });
     </script>
 </body>
 </html>
