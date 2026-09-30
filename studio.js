@@ -1,12 +1,11 @@
 // ============================================================
-// STUDIO.JS — Обработчик одного видео (1920x1080 FullHD)
+// STUDIO.JS — Обработчик одного видео (1920x1080) + рабочий MediaPipe
 // ============================================================
 
 export class Studio {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        // FullHD по умолчанию
         this.canvas.width = 1920;
         this.canvas.height = 1080;
 
@@ -14,12 +13,15 @@ export class Studio {
         this.videoEl.autoplay = true;
         this.videoEl.playsInline = true;
         this.videoEl.muted = true;
+        this.videoEl.style.display = 'none';
+        document.body.appendChild(this.videoEl);
 
         this.ownStream = null;
         this.currentSourceStream = null;
         this.outputStream = null;
         this.running = false;
         this.rafId = null;
+        this._sending = false; // защита от наложения send()
 
         this.state = {
             background: 'none',
@@ -33,7 +35,7 @@ export class Studio {
             textFrontColor: '#ff3366',
             textSize: 80,
             showText: false,
-            orientation: 'horizontal', // horizontal | vertical
+            orientation: 'horizontal',
             sourceLabel: 'Своя камера',
             selfieSegmentation: null,
             lastResults: null,
@@ -46,33 +48,41 @@ export class Studio {
 
     async _initMediaPipe() {
         try {
-            const mod = await import('https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js');
-            const SelfieSegmentation = window.SelfieSegmentation || mod.SelfieSegmentation;
-            if (!SelfieSegmentation) {
-                console.warn('MediaPipe SDK не загрузился');
+            // Ждём пока window.SelfieSegmentation появится (грузится в HTML)
+            let waited = 0;
+            while (!window.SelfieSegmentation && waited < 10000) {
+                await new Promise(r => setTimeout(r, 200));
+                waited += 200;
+            }
+
+            if (!window.SelfieSegmentation) {
+                console.error('❌ window.SelfieSegmentation не найден. Добавь <script> в <head>');
                 return;
             }
 
-            this.selfieSegmentation = new SelfieSegmentation({
+            this.selfieSegmentation = new window.SelfieSegmentation({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
             });
-            // modelSelection: 1 — landscape (лучше для 16:9)
+
             this.selfieSegmentation.setOptions({ modelSelection: 1 });
+
             this.selfieSegmentation.onResults((results) => {
                 this.state.lastResults = results;
-                this.state.mediaPipeReady = true;
+                if (!this.state.mediaPipeReady) {
+                    this.state.mediaPipeReady = true;
+                    console.log('✅ MediaPipe Selfie Segmentation ГОТОВ');
+                }
             });
 
-            // Прогреваем модель
-            console.log('✅ MediaPipe Selfie Segmentation инициализирован');
+            console.log('✅ MediaPipe инициализирован');
         } catch (e) {
-            console.warn('MediaPipe не загрузился:', e);
+            console.error('❌ Ошибка MediaPipe:', e);
         }
     }
 
     async start() {
         this.ownStream = await navigator.mediaDevices.getUserMedia({
-            video: { width: { ideal: 1920 }, height: { ideal: 1080 } },
+            video: { width: { ideal: 1280 }, height: { ideal: 720 } },
             audio: true
         });
 
@@ -80,7 +90,6 @@ export class Studio {
         this.videoEl.srcObject = this.ownStream;
         await this.videoEl.play();
 
-        // Выходной поток — FullHD, 30 fps
         this.outputStream = this.canvas.captureStream(30);
 
         const audioTrack = this.ownStream.getAudioTracks()[0];
@@ -98,38 +107,39 @@ export class Studio {
         if (this.outputStream) this.outputStream.getTracks().forEach(t => t.stop());
         this.ownStream = null;
         this.outputStream = null;
-        this.currentSourceStream = null;
     }
 
-    // ============ СМЕНА ИСТОЧНИКА ============
     async setSource(stream, label) {
-        if (!stream) {
-            console.warn('setSource: пустой стрим');
-            return;
-        }
-        console.log('🎬 Студия переключается на:', label, 'треки:', stream.getTracks().length);
+        if (!stream) return;
+        console.log('🎬 Источник:', label);
         this.currentSourceStream = stream;
         this.videoEl.srcObject = stream;
-        try {
-            await this.videoEl.play();
-            this.state.sourceLabel = label || 'Источник';
-            this.state.lastResults = null; // сброс маски
-        } catch (e) {
-            console.warn('Ошибка play:', e);
-        }
+        try { await this.videoEl.play(); } catch (e) {}
+        this.state.sourceLabel = label || 'Источник';
+        this.state.lastResults = null;
     }
 
-    async _loop() {
+    // ============ ЦИКЛ: рисуем ВСЕГДА, маску шлём параллельно ============
+    _loop() {
         if (!this.running) return;
+
         if (this.videoEl.readyState >= 2) {
-            const useMask = this.state.background === 'blur' || this.state.background === 'green' || this.state.background === 'image';
-            if (this.selfieSegmentation && useMask) {
-                try {
-                    await this.selfieSegmentation.send({ image: this.videoEl });
-                } catch (e) {}
+            const needsMask = this.state.background === 'blur'
+                           || this.state.background === 'green'
+                           || this.state.background === 'image';
+
+            // Отправляем в MediaPipe ТОЛЬКО если не занят (не блокируем цикл)
+            if (this.selfieSegmentation && this.state.mediaPipeReady && needsMask && !this._sending) {
+                this._sending = true;
+                this.selfieSegmentation.send({ image: this.videoEl })
+                    .catch(() => {})
+                    .finally(() => { this._sending = false; });
             }
+
+            // Рисуем КАЖДЫЙ кадр — с последней готовой маской (или без неё)
             this._draw();
         }
+
         this.rafId = requestAnimationFrame(() => this._loop());
     }
 
@@ -137,65 +147,60 @@ export class Studio {
         const ctx = this.ctx;
         const w = this.canvas.width;
         const h = this.canvas.height;
-        const video = this.videoEl;
 
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.globalAlpha = 1;
         ctx.globalCompositeOperation = 'source-over';
         ctx.filter = 'none';
 
-        ctx.save();
         ctx.clearRect(0, 0, w, h);
 
-        // 1. ФОН
-        if (this.state.background === 'image' && this.state.backgroundImage) {
-            ctx.drawImage(this.state.backgroundImage, 0, 0, w, h);
-        } else if (this.state.background === 'green') {
-            ctx.fillStyle = '#00b140';
-            ctx.fillRect(0, 0, w, h);
-        } else if (this.state.background === 'blur') {
-            ctx.fillStyle = '#1a1a2e';
-            ctx.fillRect(0, 0, w, h);
-        }
-
-        // 2. ВИДЕО
         const results = this.state.lastResults;
-        const useMask = (this.state.background === 'blur' || this.state.background === 'green' || this.state.background === 'image') && results;
-        const scale = this.state.videoScale;
-        const offsetY = this.state.videoY;
+        const useMask = (this.state.background === 'blur'
+                      || this.state.background === 'green'
+                      || this.state.background === 'image') && results;
 
+        // === 1. ФОН ===
         if (useMask) {
-            // По маске (с учётом scale)
+            if (this.state.background === 'image' && this.state.backgroundImage) {
+                ctx.drawImage(this.state.backgroundImage, 0, 0, w, h);
+            } else if (this.state.background === 'green') {
+                ctx.fillStyle = '#00b140';
+                ctx.fillRect(0, 0, w, h);
+            } else if (this.state.background === 'blur') {
+                ctx.save();
+                ctx.filter = 'blur(20px)';
+                ctx.drawImage(results.image, 0, 0, w, h);
+                ctx.restore();
+            }
+
+            // === 2. ЧЕЛОВЕК ПО МАСКЕ ===
             ctx.save();
-            ctx.filter = 'blur(2px)';
-            ctx.drawImage(results.segmentationMask, 0, offsetY, w * scale, h * scale);
+            ctx.filter = 'blur(4px)';
+            ctx.drawImage(results.segmentationMask, 0, 0, w, h);
             ctx.filter = 'none';
             ctx.globalCompositeOperation = 'source-in';
-            ctx.drawImage(results.image, 0, offsetY, w * scale, h * scale);
+            ctx.drawImage(results.image, 0, 0, w, h);
             ctx.restore();
         } else {
-            // Обычное видео
-            const vr = video.videoWidth / video.videoHeight || 16/9;
+            // Без фона — просто видео
+            const vr = this.videoEl.videoWidth / this.videoEl.videoHeight || 16/9;
             const cr = w / h;
             let dw, dh, dx, dy;
-            if (vr > cr) { dh = h * scale; dw = dh * vr; dx = (w - dw) / 2; dy = offsetY; }
-            else { dw = w * scale; dh = dw / vr; dx = (w - dw) / 2; dy = (h - dh) / 2 + offsetY; }
-            ctx.globalAlpha = this.state.opacity;
-            ctx.drawImage(video, dx, dy, dw, dh);
-            ctx.globalAlpha = 1;
+            if (vr > cr) { dh = h; dw = h * vr; dx = (w - dw) / 2; dy = 0; }
+            else { dw = w; dh = w / vr; dx = 0; dy = (h - dh) / 2; }
+            ctx.drawImage(this.videoEl, dx, dy, dw, dh);
         }
 
-        // 3. ЭФФЕКТЫ
+        // === 3. ЭФФЕКТЫ ===
         if (this.state.videoEffect !== 'original') {
             this._applyVideoEffect();
         }
 
-        // 4. ТЕКСТ
+        // === 4. ТЕКСТ ===
         if (this.state.showText && this.state.textFront) {
             this._drawText();
         }
-
-        ctx.restore();
     }
 
     _applyVideoEffect() {
@@ -205,37 +210,6 @@ export class Studio {
         const intensity = this.state.intensity;
 
         switch (this.state.videoEffect) {
-            case 'glitch': {
-                const shift = Math.floor(5 + Math.random() * 15 * intensity);
-                try {
-                    const imageData = ctx.getImageData(0, 0, w, h);
-                    ctx.putImageData(imageData, shift, 0);
-                } catch (e) {}
-                break;
-            }
-            case 'pixel': {
-                const size = Math.max(6, Math.floor(24 / intensity));
-                try {
-                    const imageData = ctx.getImageData(0, 0, w, h);
-                    const data = imageData.data;
-                    for (let y = 0; y < h; y += size) {
-                        for (let x = 0; x < w; x += size) {
-                            const i = (y * w + x) * 4;
-                            ctx.fillStyle = `rgb(${data[i]},${data[i+1]},${data[i+2]})`;
-                            ctx.fillRect(x, y, size, size);
-                        }
-                    }
-                } catch (e) {}
-                break;
-            }
-            case 'vhs': {
-                for (let i = 0; i < 40 * intensity; i++) {
-                    const y = Math.random() * h;
-                    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.15})`;
-                    ctx.fillRect(0, y, w, 3);
-                }
-                break;
-            }
             case 'invert': {
                 ctx.globalCompositeOperation = 'difference';
                 ctx.fillStyle = 'white';
@@ -250,27 +224,12 @@ export class Studio {
                 ctx.globalCompositeOperation = 'source-over';
                 break;
             }
-            case 'noise': {
-                try {
-                    const imageData = ctx.getImageData(0, 0, w, h);
-                    const data = imageData.data;
-                    for (let i = 0; i < data.length; i += 4) {
-                        const noise = (Math.random() - 0.5) * 100 * intensity;
-                        data[i] = Math.min(255, Math.max(0, data[i] + noise));
-                        data[i+1] = Math.min(255, Math.max(0, data[i+1] + noise));
-                        data[i+2] = Math.min(255, Math.max(0, data[i+2] + noise));
-                    }
-                    ctx.putImageData(imageData, 0, 0);
-                } catch (e) {}
-                break;
-            }
-            case 'blur': {
-                const tmp = document.createElement('canvas');
-                tmp.width = w; tmp.height = h;
-                tmp.getContext('2d').drawImage(this.canvas, 0, 0);
-                ctx.filter = `blur(${Math.max(1, 8 * intensity)}px)`;
-                ctx.drawImage(tmp, 0, 0);
-                ctx.filter = 'none';
+            case 'vhs': {
+                for (let i = 0; i < 40 * intensity; i++) {
+                    const y = Math.random() * h;
+                    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.15})`;
+                    ctx.fillRect(0, y, w, 3);
+                }
                 break;
             }
         }
@@ -294,7 +253,6 @@ export class Studio {
         ctx.restore();
     }
 
-    // ============ ПУБЛИЧНЫЕ МЕТОДЫ ============
     setBackground(type, imageUrl) {
         this.state.background = type;
         if (type === 'image' && imageUrl) {
@@ -303,6 +261,7 @@ export class Studio {
             img.onload = () => { this.state.backgroundImage = img; };
             img.src = imageUrl;
         }
+        console.log('🎨 Фон:', type);
     }
 
     setVideoEffect(effect) { this.state.videoEffect = effect; }
@@ -318,7 +277,6 @@ export class Studio {
     }
     setTextSize(size) { this.state.textSize = size; }
 
-    // Формат: 16:9 (1920x1080) или 9:16 (1080x1920)
     setOrientation(orientation) {
         this.state.orientation = orientation;
         if (orientation === 'vertical') {
@@ -328,7 +286,6 @@ export class Studio {
             this.canvas.width = 1920;
             this.canvas.height = 1080;
         }
-        console.log('🎬 Формат:', orientation, this.canvas.width + 'x' + this.canvas.height);
     }
 
     setMicEnabled(enabled) {
