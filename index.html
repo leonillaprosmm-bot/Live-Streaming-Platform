@@ -335,14 +335,14 @@
         let peerConnection = null;
         let socket = null;
         let localStreamForCall = null;
-        const ROOM_ID = "PRO-LIVE-88";
+        const ROOM_ID_WEBRTC = "PRO-LIVE-88";
 
         function initWebRTC() {
             socket = io(SIGNALING_URL, { transports: ['websocket', 'polling'] });
 
             socket.on('connect', () => {
                 console.log('✅ Signaling connected');
-                socket.emit('join-room', ROOM_ID);
+                socket.emit('join-room', ROOM_ID_WEBRTC);
             });
 
             socket.on('ready', async () => {
@@ -362,7 +362,7 @@
                         if (data.description.type === 'offer') {
                             const answer = await peerConnection.createAnswer();
                             await peerConnection.setLocalDescription(answer);
-                            socket.emit('signal', { roomId: ROOM_ID, data: { description: peerConnection.localDescription } });
+                            socket.emit('signal', { roomId: ROOM_ID_WEBRTC, data: { description: peerConnection.localDescription } });
                         }
                     } else if (data.candidate) {
                         await peerConnection.addIceCandidate(data.candidate);
@@ -396,12 +396,12 @@
                 };
 
                 peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) socket.emit('signal', { roomId: ROOM_ID, data: { candidate: event.candidate } });
+                    if (event.candidate) socket.emit('signal', { roomId: ROOM_ID_WEBRTC, data: { candidate: event.candidate } });
                 };
 
                 const offer = await peerConnection.createOffer();
                 await peerConnection.setLocalDescription(offer);
-                socket.emit('signal', { roomId: ROOM_ID, data: { description: peerConnection.localDescription } });
+                socket.emit('signal', { roomId: ROOM_ID_WEBRTC, data: { description: peerConnection.localDescription } });
                 console.log('📤 Offer sent');
             } catch (err) { console.error('WebRTC error:', err); }
         }
