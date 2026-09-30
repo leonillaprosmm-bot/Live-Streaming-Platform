@@ -3,76 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProStream Studio - Interactive Multi-Cam & TikTok Live</title>
+    <title>ProStream Studio - TikTok Live</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        studio: {
-                            900: '#0b0f19',
-                            800: '#111827',
-                            700: '#1f2937',
-                            600: '#374151',
-                            accent: '#ff0050',
-                            accentHover: '#e00045',
-                            cyan: '#00f2fe'
-                        }
-                    }
-                }
-            }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: { colors: { studio: { 900: '#0b0f19', 800: '#111827', 700: '#1f2937', 600: '#374151', accent: '#ff0050', accentHover: '#e00045', cyan: '#00f2fe' } } } } }
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #111827; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-        @keyframes floatUp {
-            0% { transform: translateY(0px) scale(0.6) rotate(0deg); opacity: 1; }
-            50% { transform: translateY(-180px) scale(1.2) rotate(15deg); opacity: 0.8; }
-            100% { transform: translateY(-350px) scale(1.6) rotate(-15deg); opacity: 0; }
-        }
-        .floating-heart {
-            position: absolute;
-            animation: floatUp 3s ease-in-out forwards;
-            pointer-events: none;
-        }
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 15px rgba(255, 0, 80, 0.4); }
-            50% { box-shadow: 0 0 25px rgba(255, 0, 80, 0.8); }
-        }
-        .live-glow { animation: pulseGlow 2s infinite; }
+        @keyframes floatUp { 0% { transform: translateY(0px) scale(0.6); opacity: 1; } 50% { transform: translateY(-180px) scale(1.2); opacity: 0.8; } 100% { transform: translateY(-350px) scale(1.6); opacity: 0; } }
+        .floating-heart { position: absolute; animation: floatUp 3s ease-in-out forwards; pointer-events: none; }
     </style>
 </head>
-<body class="bg-studio-900 text-gray-100 min-h-screen flex flex-col antialiased selection:bg-studio-accent selection:text-white">
+<body class="bg-studio-900 text-gray-100 min-h-screen flex flex-col antialiased">
 
-    <!-- Top Navigation Header -->
     <header class="bg-studio-800 border-b border-studio-700 px-4 py-3 flex items-center justify-between z-30">
         <div class="flex items-center space-x-3">
             <div class="bg-gradient-to-r from-studio-accent to-studio-cyan p-2 rounded-xl text-white font-bold flex items-center justify-center shadow-lg">
                 <i class="fa-solid fa-video text-xl"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg text-white flex items-center gap-2">
-                    ProStream Studio <span class="bg-studio-accent text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold live-glow">LIVE</span>
-                </h1>
-                <p class="text-xs text-gray-400">Multi-Cam Studio & TikTok Live Interactive Hub</p>
+                <h1 class="font-bold text-lg text-white flex items-center gap-2">ProStream Studio <span class="bg-studio-accent text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">LIVE</span></h1>
+                <p class="text-xs text-gray-400">Multi-Cam Studio & TikTok Live</p>
             </div>
         </div>
-
         <div class="flex items-center space-x-4">
             <div class="hidden md:flex items-center bg-studio-700/60 px-3 py-1.5 rounded-lg border border-studio-600 text-xs text-gray-300">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2 animate-ping"></span>
-                <span>Room ID: <strong id="currentRoomDisplay" class="text-white">#PRO-LIVE-88</strong></span>
+                <span>Room: <strong class="text-white">#PRO-LIVE-88</strong></span>
             </div>
-            <button onclick="openConfigModal()" class="bg-studio-700 hover:bg-studio-600 px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-2 border border-studio-600">
-                <i class="fa-solid fa-gear text-studio-cyan"></i> Firebase & Render Setup
-            </button>
             <div class="flex items-center gap-2 bg-studio-700 px-3 py-1.5 rounded-lg">
                 <img id="userAvatar" src="https://placehold.co/32x32/111827/ffffff?text=U" class="w-6 h-6 rounded-full border border-studio-cyan" alt="User">
                 <span id="userNameDisplay" class="text-xs font-semibold">Connecting...</span>
@@ -80,11 +44,9 @@
         </div>
     </header>
 
-    <!-- Main Studio Workspace -->
-    <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 overflow-hidden">
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4 overflow-hidden">
 
-        <!-- Left / Center: Multi-Camera Video Grid & Controls -->
-        <div class="lg:col-span-3 xl:col-span-4 flex flex-col gap-4">
+        <div class="lg:col-span-3 flex flex-col gap-4">
             <div class="relative flex-1 bg-studio-800 rounded-2xl border border-studio-700 overflow-hidden flex flex-col min-h-[480px] shadow-2xl">
 
                 <div class="absolute top-4 left-4 z-20 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-xs">
@@ -92,11 +54,6 @@
                     <span class="font-bold text-white">MAIN BROADCAST</span>
                     <span class="text-gray-400">|</span>
                     <span id="viewerCount" class="text-studio-cyan font-semibold"><i class="fa-solid fa-users mr-1"></i> 0 Watching</span>
-                </div>
-
-                <div class="absolute top-4 right-4 z-20 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-xs">
-                    <i class="fa-solid fa-wand-magic-sparkles text-studio-accent"></i>
-                    <span id="activeFilterBadge" class="text-gray-200">Filter: None</span>
                 </div>
 
                 <div id="videoGrid" class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-gradient-to-br from-studio-900 to-studio-800 items-center justify-center relative overflow-hidden">
@@ -108,172 +65,100 @@
                             <span id="localStreamLabel">Model / Main Host (You)</span>
                         </div>
                         <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition bg-black/60 p-1.5 rounded-lg flex gap-1">
-                            <button onclick="toggleVideo()" class="p-1.5 bg-studio-700 hover:bg-studio-600 rounded text-xs" title="Toggle Cam"><i class="fa-solid fa-video text-white"></i></button>
-                            <button onclick="toggleAudio()" class="p-1.5 bg-studio-700 hover:bg-studio-600 rounded text-xs" title="Toggle Mic"><i class="fa-solid fa-microphone text-white"></i></button>
+                            <button onclick="toggleVideo()" class="p-1.5 bg-studio-700 hover:bg-studio-600 rounded text-xs"><i class="fa-solid fa-video text-white"></i></button>
+                            <button onclick="toggleAudio()" class="p-1.5 bg-studio-700 hover:bg-studio-600 rounded text-xs"><i class="fa-solid fa-microphone text-white"></i></button>
                         </div>
                     </div>
 
                     <div class="relative bg-studio-900 rounded-xl overflow-hidden border border-studio-700 shadow-lg group aspect-video flex items-center justify-center">
                         <div id="remotePlaceholder1" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-studio-800/80">
                             <i class="fa-solid fa-user-gear text-4xl mb-2 text-studio-cyan animate-pulse"></i>
-                            <p class="text-xs font-medium text-gray-400">Assistant / Co-Host Slot #2</p>
-                            <button onclick="connectAssistantCam(1)" class="mt-2 bg-studio-cyan/20 hover:bg-studio-cyan/30 text-studio-cyan text-xs px-3 py-1 rounded-lg border border-studio-cyan/40 transition">Connect Stream</button>
+                            <p class="text-xs font-medium text-gray-400">Remote Peer (WebRTC)</p>
+                            <p id="remoteStatus1" class="text-[10px] text-gray-500 mt-1">Ожидание подключения...</p>
                         </div>
                         <video id="remoteVideo1" autoplay playsinline class="w-full h-full object-cover hidden"></video>
                         <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10">
                             <i class="fa-solid fa-microphone text-emerald-400"></i>
-                            <span>Assistant (Alex)</span>
+                            <span>Remote Peer</span>
                         </div>
                     </div>
 
                     <div class="relative bg-studio-900 rounded-xl overflow-hidden border border-studio-700 shadow-lg group aspect-video flex items-center justify-center">
                         <div id="remotePlaceholder2" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-studio-800/80">
                             <i class="fa-solid fa-user-plus text-4xl mb-2 text-studio-accent animate-pulse"></i>
-                            <p class="text-xs font-medium text-gray-400">Model Slot #3 / Guest</p>
-                            <button onclick="connectAssistantCam(2)" class="mt-2 bg-studio-accent/20 hover:bg-studio-accent/30 text-studio-accent text-xs px-3 py-1 rounded-lg border border-studio-accent/40 transition">Connect Stream</button>
+                            <p class="text-xs font-medium text-gray-400">Guest Slot #2</p>
+                            <p class="text-[10px] text-gray-500 mt-1">Занято</p>
                         </div>
                         <video id="remoteVideo2" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                        <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10">
-                            <i class="fa-solid fa-microphone-slash text-red-400"></i>
-                            <span>Guest / Co-Presenter</span>
-                        </div>
                     </div>
 
                     <div class="relative bg-studio-800/90 rounded-xl p-4 border border-studio-700 flex flex-col justify-between aspect-video shadow-lg">
                         <div>
-                            <h3 class="font-bold text-sm text-white mb-1 flex items-center gap-2">
-                                <i class="fa-solid fa-sliders text-studio-cyan"></i> Assistant Control Panel
-                            </h3>
-                            <p class="text-xs text-gray-400">Manage angles, model positions & lighting presets.</p>
+                            <h3 class="font-bold text-sm text-white mb-1 flex items-center gap-2"><i class="fa-solid fa-sliders text-studio-cyan"></i> Control Panel</h3>
+                            <p class="text-xs text-gray-400">Presets & lighting</p>
                         </div>
                         <div class="grid grid-cols-2 gap-2 my-2">
-                            <button onclick="triggerPreset('Full Shot')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between">
-                                <span>Full Body Pose</span> <i class="fa-solid fa-camera text-studio-cyan"></i>
-                            </button>
-                            <button onclick="triggerPreset('Close Up')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between">
-                                <span>Portrait / Face</span> <i class="fa-solid fa-camera text-studio-accent"></i>
-                            </button>
-                            <button onclick="triggerPreset('Warm Light')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between">
-                                <span>Warm Studio Tone</span> <i class="fa-solid fa-sun text-amber-400"></i>
-                            </button>
-                            <button onclick="triggerPreset('Cool Neon')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between">
-                                <span>Cyber Neon Tone</span> <i class="fa-solid fa-moon text-indigo-400"></i>
-                            </button>
+                            <button onclick="triggerPreset('Full Shot')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between"><span>Full Body</span> <i class="fa-solid fa-camera text-studio-cyan"></i></button>
+                            <button onclick="triggerPreset('Close Up')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between"><span>Portrait</span> <i class="fa-solid fa-camera text-studio-accent"></i></button>
+                            <button onclick="triggerPreset('Warm Light')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between"><span>Warm</span> <i class="fa-solid fa-sun text-amber-400"></i></button>
+                            <button onclick="triggerPreset('Cool Neon')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between"><span>Neon</span> <i class="fa-solid fa-moon text-indigo-400"></i></button>
                         </div>
                         <div class="text-[11px] bg-studio-900/80 p-2 rounded text-emerald-400 flex items-center gap-2 border border-emerald-900">
                             <i class="fa-solid fa-circle-check"></i>
-                            <span id="presetStatusText">Assistant synced with Model live feed.</span>
+                            <span id="presetStatusText">Assistant synced</span>
                         </div>
                     </div>
-
                 </div>
 
                 <div id="floatingReactionsContainer" class="absolute bottom-16 right-8 w-48 h-64 pointer-events-none overflow-hidden z-20"></div>
 
                 <div class="bg-studio-800 border-t border-studio-700 px-6 py-3 flex flex-wrap items-center justify-between gap-3 z-20">
                     <div class="flex items-center space-x-2">
-                        <button onclick="toggleVideo()" id="camBtn" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow">
-                            <i class="fa-solid fa-video text-studio-cyan"></i> Cam On/Off
-                        </button>
-                        <button onclick="toggleAudio()" id="micBtn" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow">
-                            <i class="fa-solid fa-microphone text-emerald-400"></i> Mic Mute
-                        </button>
-                        <button onclick="toggleScreenShare()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow">
-                            <i class="fa-solid fa-desktop text-purple-400"></i> Share Screen
-                        </button>
+                        <button onclick="toggleVideo()" id="camBtn" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow"><i class="fa-solid fa-video text-studio-cyan"></i> Cam</button>
+                        <button onclick="toggleAudio()" id="micBtn" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow"><i class="fa-solid fa-microphone text-emerald-400"></i> Mic</button>
+                        <button onclick="toggleScreenShare()" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow"><i class="fa-solid fa-desktop text-purple-400"></i> Screen</button>
                     </div>
-
-                    <div class="flex items-center space-x-2">
-                        <span class="text-xs text-gray-400 hidden sm:inline">Virtual Background:</span>
-                        <button onclick="applyBackground('none')" class="bg-studio-700 hover:bg-studio-600 px-3 py-1.5 rounded-lg text-xs font-medium border border-studio-600">None</button>
-                        <button onclick="applyBackground('blur')" class="bg-studio-700 hover:bg-studio-600 px-3 py-1.5 rounded-lg text-xs font-medium border border-studio-600 text-studio-cyan">Blur</button>
-                        <button onclick="applyBackground('studio')" class="bg-studio-700 hover:bg-studio-600 px-3 py-1.5 rounded-lg text-xs font-medium border border-studio-600 text-studio-accent">Neon Loft</button>
-                    </div>
-
                     <div class="flex items-center gap-2">
-                        <button onclick="sendLikeBurst()" class="bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg live-glow">
-                            <i class="fa-solid fa-heart animate-bounce"></i> Send Like (Tap!)
-                        </button>
+                        <button onclick="sendLikeBurst()" class="bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg"><i class="fa-solid fa-heart animate-bounce"></i> Send Like</button>
                     </div>
                 </div>
-
             </div>
         </div>
 
-        <!-- Right Column: Chat -->
-        <div class="lg:col-span-1 xl:col-span-1 bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-[650px] lg:h-auto shadow-2xl overflow-hidden">
-
+        <div class="lg:col-span-1 bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-[650px] shadow-2xl overflow-hidden">
             <div class="p-3.5 bg-studio-800 border-b border-studio-700 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-comments text-studio-accent"></i>
-                    <h2 class="font-bold text-sm text-white">Live TikTok Chat & Feed</h2>
+                    <h2 class="font-bold text-sm text-white">Live Chat</h2>
                 </div>
-                <span class="bg-studio-700 text-studio-cyan text-[10px] px-2 py-0.5 rounded-full font-semibold border border-studio-600">Firebase RTDB</span>
+                <span class="bg-studio-700 text-studio-cyan text-[10px] px-2 py-0.5 rounded-full font-semibold border border-studio-600">Firebase</span>
             </div>
 
             <div class="bg-gradient-to-r from-purple-900/60 to-studio-700/60 p-2.5 border-b border-studio-700 flex items-center justify-between text-xs">
                 <div class="flex items-center gap-2">
                     <span class="text-amber-400 text-base animate-bounce">🎁</span>
-                    <div>
-                        <p class="font-semibold text-white">Top Gift: <span class="text-amber-300">Galaxy Universe</span></p>
-                        <p class="text-[10px] text-gray-300">Sent by @dmitry_vip ($50)</p>
-                    </div>
+                    <div><p class="font-semibold text-white">Top Gift: <span class="text-amber-300">Galaxy</span></p></div>
                 </div>
-                <button onclick="sendGiftModal()" class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold px-2.5 py-1 rounded text-[11px] transition shadow">Send Gift</button>
+                <button onclick="sendGiftModal()" class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold px-2.5 py-1 rounded text-[11px] transition shadow">Gift</button>
             </div>
 
             <div id="chatMessages" class="flex-1 p-3 overflow-y-auto space-y-3 flex flex-col text-xs">
-                <div class="text-center my-2">
-                    <span class="bg-studio-700/80 text-gray-400 text-[10px] px-3 py-1 rounded-full border border-studio-600">Welcome! Keep it respectful.</span>
-                </div>
+                <div class="text-center my-2"><span class="bg-studio-700/80 text-gray-400 text-[10px] px-3 py-1 rounded-full border border-studio-600">Welcome!</span></div>
             </div>
 
             <div class="p-3 bg-studio-800 border-t border-studio-700">
                 <form id="chatForm" onsubmit="handleSendMessage(event)" class="flex items-center gap-2">
-                    <input type="text" id="chatInput" placeholder="Send public comment..." maxlength="300" class="flex-1 bg-studio-900 border border-studio-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-studio-accent transition">
-                    <button type="submit" class="bg-studio-accent hover:bg-studio-accentHover text-white px-3 py-2 rounded-xl text-xs font-bold transition shadow">
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
+                    <input type="text" id="chatInput" placeholder="Send comment..." maxlength="300" class="flex-1 bg-studio-900 border border-studio-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-studio-accent transition">
+                    <button type="submit" class="bg-studio-accent hover:bg-studio-accentHover text-white px-3 py-2 rounded-xl text-xs font-bold transition shadow"><i class="fa-solid fa-paper-plane"></i></button>
                 </form>
             </div>
-
         </div>
-
     </main>
 
-    <!-- Setup Modal -->
-    <div id="configModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-studio-800 border border-studio-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
-            <button onclick="closeConfigModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-cloud text-studio-cyan"></i> Deployment Info
-            </h2>
-            <p class="text-xs text-gray-400 mb-4">Firebase уже подключён напрямую в коде. Комментарии, лайки и счётчик зрителей работают в реальном времени.</p>
-            <div class="space-y-3 text-xs">
-                <div class="bg-studio-900/80 p-3 rounded-lg border border-studio-700 text-gray-400">
-                    <p class="font-semibold text-white mb-1"><i class="fa-solid fa-rocket text-studio-accent mr-1"></i> Deployment Steps:</p>
-                    <ol class="list-decimal list-inside space-y-1 text-[11px]">
-                        <li>Push code to <strong>GitHub</strong>.</li>
-                        <li>Import to <strong>Vercel</strong> for instant deploy.</li>
-                        <li>Firebase RTDB + Auth уже настроены.</li>
-                    </ol>
-                </div>
-            </div>
-            <div class="mt-6 flex justify-end gap-3">
-                <button onclick="closeConfigModal()" class="bg-studio-accent hover:bg-studio-accentHover text-white px-4 py-2 rounded-xl text-xs font-bold shadow">OK</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================================= -->
-    <!-- FIREBASE SDK + APP LOGIC                                       -->
-    <!-- ============================================================= -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged }
-            from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-        import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, query, limitToLast, remove }
-            from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, query, limitToLast, remove } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyB0G2ZiFEwSr3472_9SsLJUMs6RORmLFWs",
@@ -291,7 +176,6 @@
         const ROOM_ID = "PRO-LIVE-88";
         let currentUser = null;
 
-        // ============ LOCAL VIDEO CONTROLS ============
         let localStream = null;
         let isVideoActive = true;
         let isAudioActive = true;
@@ -305,9 +189,7 @@
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 localVideo.srcObject = localStream;
-            } catch (err) {
-                console.warn("Webcam unavailable:", err);
-            }
+            } catch (err) { console.warn("Webcam unavailable:", err); }
         });
 
         window.toggleVideo = function() {
@@ -332,35 +214,14 @@
             } catch (e) { console.error(e); }
         };
 
-        window.applyBackground = function(type) {
-            document.getElementById('activeFilterBadge').innerText = `Filter: ${type.toUpperCase()}`;
-            if (type === 'blur') localVideo.style.filter = 'blur(8px) contrast(1.1)';
-            else if (type === 'studio') localVideo.style.filter = 'sepia(0.3) hue-rotate(180deg) saturate(1.4)';
-            else localVideo.style.filter = 'none';
-        };
-
-        window.connectAssistantCam = function(slot) {
-            const ph = document.getElementById(`remotePlaceholder${slot}`);
-            const vid = document.getElementById(`remoteVideo${slot}`);
-            ph.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-2xl text-studio-cyan"></i>`;
-            setTimeout(() => {
-                ph.style.display = 'none';
-                vid.classList.remove('hidden');
-                vid.srcObject = localStream;
-            }, 1000);
-        };
-
         window.triggerPreset = function(name) {
             const s = document.getElementById('presetStatusText');
-            s.innerText = `Preset applied: "${name}"`;
-            setTimeout(() => s.innerText = "Assistant synced with Model live feed.", 3000);
+            s.innerText = `Preset: "${name}"`;
+            setTimeout(() => s.innerText = "Assistant synced", 3000);
         };
 
-        window.openConfigModal = () => document.getElementById('configModal').classList.remove('hidden');
-        window.closeConfigModal = () => document.getElementById('configModal').classList.add('hidden');
         window.sendGiftModal = () => { alert("Gift sent! 🎁"); window.sendLikeBurst(); };
 
-        // ============ FIREBASE AUTH ============
         signInAnonymously(auth).catch(err => console.error("Auth error:", err));
 
         onAuthStateChanged(auth, (user) => {
@@ -375,23 +236,20 @@
                 initPresence();
                 loadMessages();
                 loadLikes();
-                console.log("🔥 Firebase подключён. Room:", ROOM_ID);
+                console.log("🔥 Firebase OK. Room:", ROOM_ID);
             }
         });
 
-        // ============ PRESENCE (viewer count) ============
         function initPresence() {
             const myRef = ref(db, `rooms/${ROOM_ID}/viewers/${currentUser.uid}`);
             set(myRef, { online: true, ts: serverTimestamp() });
             onDisconnect(myRef).remove();
-
             onValue(ref(db, `rooms/${ROOM_ID}/viewers`), (snap) => {
                 const count = snap.exists() ? Object.keys(snap.val()).length : 0;
                 document.getElementById('viewerCount').innerHTML = `<i class="fa-solid fa-users mr-1"></i> ${count} Watching`;
             });
         }
 
-        // ============ MESSAGES ============
         const chatMessages = document.getElementById('chatMessages');
 
         function loadMessages() {
@@ -400,9 +258,7 @@
                 chatMessages.querySelectorAll('[data-msg]').forEach(el => el.remove());
                 const data = snap.val();
                 if (!data) return;
-                Object.entries(data)
-                    .sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0))
-                    .forEach(([id, msg]) => renderMessage(id, msg));
+                Object.entries(data).sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0)).forEach(([id, msg]) => renderMessage(id, msg));
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             });
         }
@@ -411,38 +267,31 @@
             const isSelf = currentUser && msg.uid === currentUser.uid;
             const div = document.createElement('div');
             div.dataset.msg = id;
-            div.className = 'flex items-start gap-2 p-2 rounded-xl border ' +
-                (isSelf ? 'bg-studio-accent/10 border-studio-accent/40' : 'bg-studio-700/30 border-studio-700/50');
+            div.className = 'flex items-start gap-2 p-2 rounded-xl border ' + (isSelf ? 'bg-studio-accent/10 border-studio-accent/40' : 'bg-studio-700/30 border-studio-700/50');
             div.innerHTML = `
                 <img src="${msg.avatar}" class="w-6 h-6 rounded-full" alt="avatar">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <span class="font-bold ${isSelf ? 'text-studio-accent' : 'text-studio-cyan'}">${escapeHtml(msg.name)}</span>
-                        ${isSelf ? '<span class="bg-studio-accent text-[9px] px-1.5 rounded text-white font-semibold">YOU</span>' : ''}
                     </div>
                     <p class="text-gray-200 mt-0.5 break-words">${escapeHtml(msg.text)}</p>
-                </div>
-            `;
+                </div>`;
             chatMessages.appendChild(div);
         }
 
         window.handleSendMessage = function(event) {
             event.preventDefault();
-            if (!currentUser) { alert("Подключение... подожди секунду."); return; }
+            if (!currentUser) return;
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if (!text) return;
             push(ref(db, `rooms/${ROOM_ID}/messages`), {
-                uid: currentUser.uid,
-                name: currentUser.name,
-                avatar: currentUser.avatar,
-                text: text.slice(0, 300),
-                ts: serverTimestamp()
+                uid: currentUser.uid, name: currentUser.name, avatar: currentUser.avatar,
+                text: text.slice(0, 300), ts: serverTimestamp()
             }).catch(err => console.error("Send error:", err));
             input.value = '';
         };
 
-        // ============ LIKES ============
         function loadLikes() {
             const q = query(ref(db, `rooms/${ROOM_ID}/likes`), limitToLast(1));
             onValue(q, (snap) => {
@@ -459,10 +308,7 @@
         window.sendLikeBurst = function() {
             if (!currentUser) return;
             animateLikeBurst();
-            push(ref(db, `rooms/${ROOM_ID}/likes`), {
-                uid: currentUser.uid,
-                ts: Date.now()
-            }).catch(err => console.error("Like error:", err));
+            push(ref(db, `rooms/${ROOM_ID}/likes`), { uid: currentUser.uid, ts: Date.now() }).catch(err => console.error("Like error:", err));
         };
 
         function animateLikeBurst() {
@@ -479,10 +325,88 @@
             }
         }
 
-        // ============ UTILS ============
         function escapeHtml(str) {
             return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
+    </script>
+
+    <script>
+        const SIGNALING_URL = "https://prostream-signaling.onrender.com";
+        let peerConnection = null;
+        let socket = null;
+        let localStreamForCall = null;
+        const ROOM_ID = "PRO-LIVE-88";
+
+        function initWebRTC() {
+            socket = io(SIGNALING_URL, { transports: ['websocket', 'polling'] });
+
+            socket.on('connect', () => {
+                console.log('✅ Signaling connected');
+                socket.emit('join-room', ROOM_ID);
+            });
+
+            socket.on('ready', async () => {
+                console.log('🎯 Peer found!');
+                await startWebRTCCall();
+            });
+
+            socket.on('waiting', () => {
+                document.getElementById('remoteStatus1').innerText = 'Ожидание второго участника...';
+            });
+
+            socket.on('signal', async (data) => {
+                if (!peerConnection) return;
+                try {
+                    if (data.description) {
+                        await peerConnection.setRemoteDescription(data.description);
+                        if (data.description.type === 'offer') {
+                            const answer = await peerConnection.createAnswer();
+                            await peerConnection.setLocalDescription(answer);
+                            socket.emit('signal', { roomId: ROOM_ID, data: { description: peerConnection.localDescription } });
+                        }
+                    } else if (data.candidate) {
+                        await peerConnection.addIceCandidate(data.candidate);
+                    }
+                } catch (err) { console.error('Signal error:', err); }
+            });
+
+            socket.on('peer-disconnected', () => {
+                console.log('❌ Peer disconnected');
+                if (peerConnection) { peerConnection.close(); peerConnection = null; }
+                document.getElementById('remotePlaceholder1').style.display = 'flex';
+                document.getElementById('remoteVideo1').classList.add('hidden');
+            });
+        }
+
+        async function startWebRTCCall() {
+            try {
+                if (!localStreamForCall) {
+                    localStreamForCall = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                }
+                const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+                peerConnection = new RTCPeerConnection(config);
+
+                localStreamForCall.getTracks().forEach(track => peerConnection.addTrack(track, localStreamForCall));
+
+                peerConnection.ontrack = (event) => {
+                    const remoteVideo = document.getElementById('remoteVideo1');
+                    remoteVideo.srcObject = event.streams[0];
+                    remoteVideo.classList.remove('hidden');
+                    document.getElementById('remotePlaceholder1').style.display = 'none';
+                };
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) socket.emit('signal', { roomId: ROOM_ID, data: { candidate: event.candidate } });
+                };
+
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                socket.emit('signal', { roomId: ROOM_ID, data: { description: peerConnection.localDescription } });
+                console.log('📤 Offer sent');
+            } catch (err) { console.error('WebRTC error:', err); }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => setTimeout(initWebRTC, 1000));
     </script>
 </body>
 </html>
