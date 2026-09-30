@@ -1,51 +1,74 @@
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
+const cors = require('cors');
+const { AccessToken } = require('livekit-server-sdk');
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*", methods: ["GET", "POST"] }
-});
+app.use(cors());
+app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-const rooms = {};
 
-io.on('connection', (socket) => {
-    console.log('🔌 Client connected:', socket.id);
+const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY;
+const LIVEKIT_API_SECRET = process.env.LIVEKIT_API_SECRET;
+const LIVEKIT_URL = process.env.LIVEKIT_URL;
 
-    socket.on('join-room', (roomId) => {
-        if (!rooms[roomId]) rooms[roomId] = [];
-        if (rooms[roomId].length >= 2) {
-            socket.emit('room-full', roomId);
-            return;
-        }
-        rooms[roomId].push(socket.id);
-        socket.join(roomId);
-        socket.roomId = roomId;
-        if (rooms[roomId].length === 2) {
-            io.to(roomId).emit('ready', roomId);
-            console.log(`✅ Room ${roomId} ready`);
-        } else {
-            socket.emit('waiting', roomId);
-        }
-    });
+// Проверка что переменные окружения заданы
+if (!LIVEKIT_API_KEY || !LIVEKIT_API_SECRET || !LIVEKIT_URL) {
+    console.error('❌ ОШИБКА: Не заданы переменные окружения LIVEKIT_*');
+}
 
-    socket.on('signal', ({ roomId, data }) => {
-        socket.to(roomId).emit('signal', data);
-    });
-
-    socket.on('disconnect', () => {
-        const roomId = socket.roomId;
-        if (roomId && rooms[roomId]) {
-            rooms[roomId] = rooms[roomId].filter(id => id !== socket.id);
-            if (rooms[roomId].length === 0) delete rooms[roomId];
-            else io.to(roomId).emit('peer-disconnected');
-        }
+// Health check (для cron-job.org)
+app.get('/', (req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'ProStream LiveKit Token Server',
+        livekit_url: LIVEKIT_URL
     });
 });
 
-app.get('/', (req, res) => res.send('✅ ProStream Signaling Server works'));
-app.get('/health', (req, res) => res.json({ status: 'ok', rooms: Object.keys(rooms).length }));
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', ts: Date.now() });
+});
 
-server.listen(PORT, () => console.log(`🚀 Server on port ${PORT}`));
+// Генерация токена для подключения к LiveKit
+app.post('/token', async (req, res) => {
+    try {
+        const { roomName, participantName } = req.body;
+
+        if (!roomName || !participantName) {
+            return res.status(400).json({
+                error: 'roomName и participantName обязательны'
+            });
+        }
+
+        // Создаём токен с правами на вход в комнату
+        const at = new AccessToken(LIVEKIT_API_KEY, LIVEKIT_API_SECRET, {
+            identity: participantName,
+            ttl: '6h' // токен живёт 6 часов
+        });
+
+        at.addGrant({
+            room: roomName,
+            roomJoin: true,
+            canPublish: true,
+            canSubscribe: true,
+            canPublishData: true
+        });
+
+        const token = await at.toJwt();
+
+        res.json({
+            token,
+            url: LIVEKIT_URL
+        });
+
+    } catch (err) {
+        console.error('❌ Ошибка генерации токена:', err);
+        res.status(500).json({ error: 'Ошибка генерации токена' });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`🚀 LiveKit Token Server on port ${PORT}`);
+    console.log(`🔗 LiveKit URL: ${LIVEKIT_URL}`);
+});
