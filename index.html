@@ -105,6 +105,11 @@
                 </button>
             </div>
 
+            <!-- Кнопка ВЕРНУТЬ СЕБЯ НА СЦЕНУ (для ведущего, когда убран) -->
+            <button id="returnSelfBtn" onclick="returnSelfToStage()" style="display:none; background:linear-gradient(90deg,#10b981,#059669); color:white; border:none; padding:12px; border-radius:12px; font-size:13px; font-weight:bold; cursor:pointer; width:100%;">
+                <i class="fa-solid fa-arrow-up"></i> Вернуть себя на сцену
+            </button>
+
             <!-- УЧАСТНИКИ -->
             <div>
                 <h3 style="font-size:11px; color:#999; text-transform:uppercase; margin:0 0 8px 0;">
@@ -148,7 +153,7 @@
                 <button onclick="showIframe()" style="background:#10b981; border:none; color:white; padding:8px; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer;">Показать сайт</button>
                 <button onclick="hideIframe()" style="background:#374151; border:none; color:white; padding:8px; border-radius:6px; font-size:10px; cursor:pointer;">Скрыть</button>
             </div>
-            <p style="font-size:9px; color:#666; margin:0 0 16px 0;">⚠ Не все сайты разрешают встраивание. Google, YouTube, Figma, Notion — да. ВК, Telegram — нет.</p>
+            <p style="font-size:9px; color:#666; margin:0 0 16px 0;">⚠ Google, YouTube, Figma, Notion — да. ВК, Telegram — нет.</p>
 
             <h3 style="font-size:11px; color:#999; margin:0 0 8px 0;">Фон</h3>
             <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:10px;">
@@ -219,7 +224,7 @@
         isRoomCamOn: false, isRoomMicOn: true,
         stageIdentity: null, studioTrack: null,
         screenShareTrack: null, orientation: 'horizontal',
-        iframeActive: false,
+        iframeActive: false, selfOnStage: false,
         remoteStreams: {}
     };
 
@@ -374,7 +379,11 @@
         window.studioCanvas.style.objectFit = 'cover';
         c.appendChild(window.studioCanvas);
 
-        setTimeout(() => putOnStage(window.appState.name), 500);
+        // Автоподнятие себя на сцену через 1 секунду
+        setTimeout(() => {
+            putOnStage(window.appState.name);
+            window.appState.selfOnStage = true;
+        }, 1000);
     }
 
     function renderGuestTile(identity, isLocal) {
@@ -492,8 +501,10 @@
         }
 
         window.appState.stageIdentity = identity;
+        window.appState.selfOnStage = (identity === window.appState.name);
         document.getElementById('mainNameLabel').innerText = identity === window.appState.name ? identity + ' (Вы)' : identity;
         document.getElementById('clearStageBtn').style.display = 'block';
+        document.getElementById('returnSelfBtn').style.display = 'none';
 
         document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
         const tile = document.getElementById('guest-tile-' + identity);
@@ -517,6 +528,7 @@
         document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
         document.getElementById('clearStageBtn').style.display = 'none';
         window.appState.stageIdentity = null;
+        window.appState.selfOnStage = false;
         document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
 
         if (window.appState.isHost && window.appState.room) {
@@ -524,11 +536,15 @@
             window.appState.room.localParticipant.publishData(payload, { reliable: true });
         }
 
-        if (window.appState.isHost && window.appState.name) {
-            setTimeout(() => {
-                if (!window.appState.stageIdentity && !window.appState.iframeActive) putOnStage(window.appState.name);
-            }, 300);
+        // У ведущего — показать кнопку "Вернуть себя"
+        if (window.appState.isHost) {
+            document.getElementById('returnSelfBtn').style.display = 'block';
         }
+    };
+
+    window.returnSelfToStage = function() {
+        document.getElementById('returnSelfBtn').style.display = 'none';
+        putOnStage(window.appState.name);
     };
 
     function clearStageLocal() {
@@ -540,10 +556,11 @@
         document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
         document.getElementById('clearStageBtn').style.display = 'none';
         window.appState.stageIdentity = null;
+        window.appState.selfOnStage = false;
         document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
     }
 
-    // ============ IFRAME (САЙТ В ЭФИРЕ) ============
+    // ============ IFRAME ============
     window.showIframe = function() {
         const url = document.getElementById('iframeUrl').value.trim();
         if (!url) { alert('Вставь ссылку'); return; }
@@ -552,19 +569,20 @@
             finalUrl = 'https://' + url;
         }
 
-        const iframe = document.getElementById('stageIframe');
+        // Очищаем сцену
         const box = document.getElementById('mainVideoBox');
         box.querySelectorAll('video, canvas').forEach(v => v.remove());
         document.getElementById('stageBgImage').style.display = 'none';
 
+        const iframe = document.getElementById('stageIframe');
         iframe.src = finalUrl;
         iframe.style.display = 'block';
         window.appState.iframeActive = true;
         window.appState.stageIdentity = null;
         document.getElementById('mainNameLabel').innerText = '🌐 ' + finalUrl;
         document.getElementById('clearStageBtn').style.display = 'block';
+        document.getElementById('returnSelfBtn').style.display = 'none';
 
-        // Отправляем всем гостям
         if (window.appState.isHost && window.appState.room) {
             const payload = new TextEncoder().encode(JSON.stringify({
                 type: 'stage-iframe',
@@ -575,18 +593,20 @@
     };
 
     window.hideIframe = function() {
-        document.getElementById('stageIframe').style.display = 'none';
-        document.getElementById('stageIframe').src = '';
+        const iframe = document.getElementById('stageIframe');
+        iframe.style.display = 'none';
+        iframe.src = '';
         window.appState.iframeActive = false;
         document.getElementById('stageBgImage').style.display = 'block';
         document.getElementById('clearStageBtn').style.display = 'none';
         document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
 
         if (window.appState.isHost && window.appState.room) {
-            const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-iframe-hide' }));
+            const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-clear' }));
             window.appState.room.localParticipant.publishData(payload, { reliable: true });
         }
 
+        // Вернуть себя
         if (window.appState.isHost) {
             setTimeout(() => putOnStage(window.appState.name), 300);
         }
@@ -615,10 +635,12 @@
             if (data.identity) setTimeout(() => putOnStage(data.identity), 500);
         } else if (data.type === 'stage-clear') {
             clearStageLocal();
+            // Если я ведущий — вернуть себя автоматически
+            if (window.appState.isHost && window.appState.name) {
+                setTimeout(() => putOnStage(window.appState.name), 500);
+            }
         } else if (data.type === 'stage-iframe') {
-            if (!window.appState.isHost && data.url) showIframeLocal(data.url);
-        } else if (data.type === 'stage-iframe-hide') {
-            if (!window.appState.isHost) clearStageLocal();
+            if (data.url) showIframeLocal(data.url);
         }
     }
 
@@ -785,7 +807,10 @@
                 document.getElementById('shareScreenLabel').innerText = 'Стоп';
                 screenTrack.onended = () => { if (window.appState.screenShareTrack) window.toggleScreenShare(); };
             }
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+            console.error(err);
+            alert('Screen share не удалось: ' + err.message);
+        }
     };
 
     function updateRoomIcons() {
