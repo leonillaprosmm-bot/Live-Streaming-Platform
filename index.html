@@ -205,10 +205,15 @@
                 if (!res.ok) throw new Error('Не удалось получить токен');
                 const { token, url } = await res.json();
 
+                // ⚠️ ГЛАВНОЕ ИСПРАВЛЕНИЕ: forceTURN через iceTransportPolicy: 'relay'
                 const room = new Room({
                     adaptiveStream: true,
                     dynacast: true,
-                    videoCaptureDefaults: { resolution: { width: 1280, height: 720 } }
+                    videoCaptureDefaults: { resolution: { width: 1280, height: 720 } },
+                    // 🎯 ЭТО ЗАСТАВЛЯЕТ ИСПОЛЬЗОВАТЬ TURN (порт 443, как обычный сайт)
+                    rtcConfig: {
+                        iceTransportPolicy: 'relay'
+                    }
                 });
                 window.appState.room = room;
 
