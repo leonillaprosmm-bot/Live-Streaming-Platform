@@ -20,7 +20,8 @@
         .screen { display: none; }
         .screen.active { display: flex; }
 
-        .main-video-box { position: relative; background: #000; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; width: 100%; }
+        .main-video-box { position: relative; background: #000; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9; width: 100%; transition: aspect-ratio 0.3s; }
+        .main-video-box.vertical { aspect-ratio: 9/16; max-width: 420px; margin: 0 auto; }
         .main-video-box video, .main-video-box canvas, .main-video-box img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
 
         .guest-tile { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
@@ -104,6 +105,11 @@
                     <span id="participantCountHeader">1 участник</span>
                 </div>
 
+                <button onclick="toggleOrientation()" class="bg-studio-700 hover:bg-studio-600 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition border border-studio-600 flex items-center gap-1.5">
+                    <i id="orientationIcon" class="fa-solid fa-mobile-screen text-studio-cyan"></i>
+                    <span id="orientationLabel">9:16</span>
+                </button>
+
                 <button onclick="copyInviteLink()" class="bg-gradient-to-r from-studio-cyan to-blue-500 hover:from-blue-500 hover:to-studio-cyan text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg flex items-center gap-2">
                     <i class="fa-solid fa-link"></i> Ссылка
                 </button>
@@ -117,10 +123,10 @@
         <main class="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-3 p-3 overflow-hidden">
             <div class="lg:col-span-3 flex flex-col gap-3 overflow-hidden">
 
-                <!-- ГЛАВНОЕ ОКНО (сцена) -->
+                <!-- СЦЕНА -->
                 <div class="relative flex-shrink-0 flex justify-center">
                     <div id="mainVideoBox" class="main-video-box">
-                        <img id="stageBgImage" src="https://placehold.co/1280x720/0b0f19/00f2fe?text=ProStream+Studio&font=montserrat" class="w-full h-full object-cover">
+                        <img id="stageBgImage" src="https://placehold.co/1920x1080/0b0f19/00f2fe?text=ProStream+Studio&font=montserrat" class="w-full h-full object-cover">
                     </div>
 
                     <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10 z-10">
@@ -171,10 +177,9 @@
                 </div>
             </div>
 
-            <!-- ПРАВАЯ ПАНЕЛЬ: СТУДИЯ или ЧАТ -->
+            <!-- СТУДИЯ / ЧАТ -->
             <div class="lg:col-span-1 flex flex-col h-[600px] shadow-2xl overflow-hidden">
 
-                <!-- СТУДИЯ -->
                 <div id="studioPanel" class="bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-full overflow-hidden hidden">
                     <div class="p-3 border-b border-studio-700 flex items-center justify-between">
                         <div class="flex items-center space-x-2">
@@ -188,15 +193,25 @@
 
                     <div class="flex-1 overflow-y-auto p-3 space-y-4 text-xs">
 
-                        <!-- ИСТОЧНИК -->
+                        <!-- ФОРМАТ -->
+                        <div>
+                            <h3 class="font-bold text-white mb-2 flex items-center gap-1.5">
+                                <i class="fa-solid fa-crop-simple text-purple-400"></i> Формат
+                            </h3>
+                            <button id="studioOrientationBtn" onclick="studioToggleOrientation()" class="w-full bg-studio-700 hover:bg-studio-600 text-white p-2 rounded text-[11px] border border-studio-600 flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-desktop text-studio-cyan"></i> 16:9 (1920×1080)
+                            </button>
+                        </div>
+
+                        <!-- ЧТО ОБРАБАТЫВАТЬ -->
                         <div>
                             <h3 class="font-bold text-white mb-2 flex items-center gap-1.5">
                                 <i class="fa-solid fa-crosshairs text-red-400"></i> Что обрабатывать
                             </h3>
                             <div id="sourceList" class="space-y-1">
-                                <!-- Заполняется динамически -->
+                                <!-- динамически -->
                             </div>
-                            <p class="text-[9px] text-gray-500 mt-1">Обработанное видео летит зрителям</p>
+                            <p id="mediaPipeStatus" class="text-[9px] text-gray-500 mt-1">⏳ MediaPipe: загрузка...</p>
                         </div>
 
                         <!-- ФОН -->
@@ -246,7 +261,7 @@
                                 class="w-full bg-studio-900 border border-studio-700 rounded px-2 py-1.5 text-xs text-white mb-2 focus:outline-none focus:border-studio-accent">
                             <div class="flex gap-2 items-center">
                                 <input type="color" id="studioTextColor" value="#ff3366" onchange="studioSetText()" class="w-8 h-7 rounded cursor-pointer bg-transparent border border-studio-700">
-                                <input type="range" id="studioTextSize" min="20" max="140" value="60" oninput="studioSetTextSize()" class="flex-1">
+                                <input type="range" id="studioTextSize" min="20" max="180" value="80" oninput="studioSetTextSize()" class="flex-1">
                             </div>
                         </div>
 
@@ -273,13 +288,12 @@
                             <h3 class="font-bold text-white mb-2 flex items-center gap-1.5">
                                 <i class="fa-solid fa-arrows-up-down text-cyan-400"></i> Сдвиг Y
                             </h3>
-                            <input type="range" id="studioVideoY" min="-300" max="300" value="0" oninput="studioSetVideoY()" class="w-full">
+                            <input type="range" id="studioVideoY" min="-500" max="500" value="0" oninput="studioSetVideoY()" class="w-full">
                         </div>
 
                     </div>
                 </div>
 
-                <!-- ЧАТ -->
                 <div id="chatPanel" class="bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-full overflow-hidden">
                     <div class="p-3.5 border-b border-studio-700 flex items-center justify-between">
                         <div class="flex items-center space-x-2">
@@ -344,14 +358,14 @@
             isRoomCamOn: false,
             isRoomMicOn: true,
             stageIdentity: null,
-            studioSource: 'self', // self | screen | <identity гостя>
-            studioTrack: null,    // опубликованный обработанный трек
-            remoteStreams: {}     // identity -> MediaStream (для источников)
+            studioSource: 'self',
+            studioTrack: null,
+            remoteStreams: {}
         };
 
         window.studioCanvas = document.createElement('canvas');
-        window.studioCanvas.width = 1280;
-        window.studioCanvas.height = 720;
+        window.studioCanvas.width = 1920;
+        window.studioCanvas.height = 1080;
         window.studioCanvas.style.display = 'none';
         document.body.appendChild(window.studioCanvas);
 
@@ -376,7 +390,6 @@
             }
         };
 
-        // ============ ВХОД ============
         window.enterStream = async function() {
             const name = document.getElementById('inputName').value.trim();
             const hostKey = document.getElementById('inputHostKey').value;
@@ -387,8 +400,7 @@
             window.appState.isHost = isHost;
 
             showScreen('screen-room');
-            document.getElementById('roomSubtitle').innerText =
-                (isHost ? '👑 Ведущий: ' : '👤 Гость: ') + name;
+            document.getElementById('roomSubtitle').innerText = (isHost ? '👑 Ведущий: ' : '👤 Гость: ') + name;
 
             if (!isHost) {
                 document.getElementById('requestStageBtn').classList.remove('hidden');
@@ -399,7 +411,6 @@
             await connectToLiveKit(isHost);
         };
 
-        // ============ LIVEKIT ============
         async function connectToLiveKit(isHost) {
             try {
                 const res = await fetch(`${TOKEN_SERVER_URL}/token`, {
@@ -424,7 +435,6 @@
                         delete window.appState.remoteStreams[p.identity];
                         if (window.appState.stageIdentity === p.identity) clearStage();
                         if (window.appState.studioSource === p.identity) {
-                            // Источник пропал — переключаемся на себя
                             switchStudioSource('self');
                         }
                         updateSourceList();
@@ -477,13 +487,28 @@
 
                 updateParticipantCount();
 
+                // Обновление статуса MediaPipe
+                if (isHost) {
+                    setInterval(() => {
+                        const el = document.getElementById('mediaPipeStatus');
+                        if (el && window.appState.studio) {
+                            if (window.appState.studio.isMediaPipeReady()) {
+                                el.innerText = '✅ MediaPipe: готов';
+                                el.className = 'text-[9px] text-emerald-400 mt-1';
+                            } else {
+                                el.innerText = '⏳ MediaPipe: загрузка...';
+                                el.className = 'text-[9px] text-amber-400 mt-1';
+                            }
+                        }
+                    }, 1000);
+                }
+
             } catch (err) {
                 console.error('❌ Ошибка LiveKit:', err);
                 alert('Ошибка подключения: ' + err.message);
             }
         }
 
-        // ============ СТУДИЯ У ВЕДУЩЕГО ============
         async function startHostStudio() {
             const room = window.appState.room;
             const studio = new Studio(window.studioCanvas);
@@ -493,14 +518,12 @@
             const videoTrack = outputStream.getVideoTracks()[0];
             const audioTrack = outputStream.getAudioTracks()[0];
 
-            // Публикуем ОБРАБОТАННОЕ видео
-            const pub = await room.localParticipant.publishTrack(videoTrack, {
+            await room.localParticipant.publishTrack(videoTrack, {
                 name: 'studio-video',
                 source: Track.Source.Camera
             });
             window.appState.studioTrack = videoTrack;
 
-            // Аудио ведущего
             if (audioTrack) {
                 await room.localParticipant.publishTrack(audioTrack, {
                     name: 'studio-audio',
@@ -512,7 +535,6 @@
             window.appState.isRoomMicOn = true;
             updateRoomIcons();
 
-            // Превью студии
             renderGuestTile(window.appState.name, true);
             const c = document.getElementById('guest-video-' + window.appState.name);
             c.innerHTML = '';
@@ -527,7 +549,7 @@
             }, 100);
         }
 
-        // ============ СПИСОК ИСТОЧНИКОВ В СТУДИИ ============
+        // ============ СПИСОК ИСТОЧНИКОВ ============
         window.updateSourceList = function() {
             const room = window.appState.room;
             if (!room || !window.appState.isHost) return;
@@ -535,7 +557,6 @@
             const list = document.getElementById('sourceList');
             list.innerHTML = '';
 
-            // Своя камера
             const selfBtn = document.createElement('button');
             selfBtn.className = 'source-option w-full text-left bg-studio-700 text-white p-2 rounded text-[10px] border border-studio-600' +
                 (window.appState.studioSource === 'self' ? ' active' : '');
@@ -543,7 +564,6 @@
             selfBtn.onclick = () => switchStudioSource('self');
             list.appendChild(selfBtn);
 
-            // Screen share (если есть)
             if (window.appState.screenShareTrack) {
                 const scrBtn = document.createElement('button');
                 scrBtn.className = 'source-option w-full text-left bg-studio-700 text-white p-2 rounded text-[10px] border border-studio-600' +
@@ -553,20 +573,20 @@
                 list.appendChild(scrBtn);
             }
 
-            // Гости
             room.remoteParticipants.forEach((p) => {
-                if (p.identity.startsWith('screen-')) return; // пропускаем screen share других
+                if (p.identity.startsWith('screen-')) return;
+                const hasStream = !!window.appState.remoteStreams[p.identity];
                 const btn = document.createElement('button');
                 btn.className = 'source-option w-full text-left bg-studio-700 text-white p-2 rounded text-[10px] border border-studio-600' +
                     (window.appState.studioSource === p.identity ? ' active' : '');
-                btn.innerHTML = `<i class="fa-solid fa-user text-amber-400 mr-1"></i> Гость: ${escapeHtml(p.identity)}`;
+                btn.innerHTML = `<i class="fa-solid fa-user ${hasStream ? 'text-emerald-400' : 'text-gray-500'} mr-1"></i> Гость: ${escapeHtml(p.identity)} ${hasStream ? '' : '(нет видео)'}`;
                 btn.onclick = () => switchStudioSource(p.identity);
                 list.appendChild(btn);
             });
         };
 
-        // ============ ПЕРЕКЛЮЧЕНИЕ ИСТОЧНИКА ============
-        window.switchStudioSource = async function(source) {
+        // ============ ПЕРЕКЛЮЧЕНИЕ ИСТОЧНИКА (с повтором) ============
+        window.switchStudioSource = async function(source, attempt = 1) {
             const studio = window.appState.studio;
             if (!studio) return;
 
@@ -588,21 +608,40 @@
                 return;
             }
 
-            // Гость
+            // Гость — с повтором
             const stream = window.appState.remoteStreams[source];
-            if (stream) {
+            if (stream && stream.getVideoTracks().length > 0) {
                 await studio.setSource(stream, 'Гость: ' + source);
                 showToast('👤 Источник: ' + source);
-                // Подсветим тайл гостя
                 document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-studio'));
                 const tile = document.getElementById('guest-tile-' + source);
                 if (tile) tile.classList.add('on-studio');
+            } else if (attempt < 10) {
+                showToast('⏳ Ждём видео гостя... (' + attempt + ')');
+                setTimeout(() => switchStudioSource(source, attempt + 1), 500);
             } else {
-                showToast('⚠ Видео гостя ещё не загружено');
+                showToast('⚠ Видео гостя не загрузилось');
             }
         };
 
-        // ============ СТУДИЯ: УПРАВЛЕНИЕ ============
+        // ============ ФОРМАТ 16:9 / 9:16 ============
+        window.studioToggleOrientation = function() {
+            const studio = window.appState.studio;
+            if (!studio) return;
+            const current = studio.state.orientation;
+            const next = current === 'horizontal' ? 'vertical' : 'horizontal';
+            studio.setOrientation(next);
+
+            const btn = document.getElementById('studioOrientationBtn');
+            if (next === 'vertical') {
+                btn.innerHTML = '<i class="fa-solid fa-mobile-screen text-studio-cyan"></i> 9:16 (1080×1920)';
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-desktop text-studio-cyan"></i> 16:9 (1920×1080)';
+            }
+            showToast('📐 Формат: ' + (next === 'vertical' ? '9:16' : '16:9'));
+        };
+
+        // ============ СТУДИЯ УПРАВЛЕНИЕ ============
         window.studioSetBg = function(type, imageUrl, el) {
             if (!window.appState.studio) return;
             window.appState.studio.setBackground(type, imageUrl);
@@ -658,19 +697,13 @@
             if (!window.appState.room) return;
             try {
                 const newState = !window.appState.isRoomMicOn;
-
-                // Меняем состояние через LiveKit — он сам раздаст всем
                 await window.appState.room.localParticipant.setMicrophoneEnabled(newState);
                 window.appState.isRoomMicOn = newState;
-
-                // Плюс гасим напрямую в audio track студии
                 if (window.appState.studio) {
                     window.appState.studio.setMicEnabled(newState);
                 }
                 updateRoomIcons();
-            } catch (err) {
-                console.error('Ошибка микрофона:', err);
-            }
+            } catch (err) { console.error('Ошибка микрофона:', err); }
         };
 
         // ============ ВИДЕО ============
@@ -678,19 +711,14 @@
             if (!window.appState.room) return;
             try {
                 const newState = !window.appState.isRoomCamOn;
-
-                // У ведущего — гасим видео-трек студии
                 if (window.appState.isHost && window.appState.studioTrack) {
                     window.appState.studioTrack.enabled = newState;
                 } else {
                     await window.appState.room.localParticipant.setCameraEnabled(newState);
                 }
-
                 window.appState.isRoomCamOn = newState;
                 updateRoomIcons();
-            } catch (err) {
-                console.error('Ошибка камеры:', err);
-            }
+            } catch (err) { console.error('Ошибка камеры:', err); }
         };
 
         // ============ SCREEN SHARE ============
@@ -705,7 +733,6 @@
                     window.appState.screenShareTrack = null;
                     document.getElementById('shareScreenLabel').innerText = 'Экран';
                     showToast('🖥 Демонстрация остановлена');
-                    // Если студия смотрела экран — переключаемся на себя
                     if (window.appState.studioSource === 'screen') switchStudioSource('self');
                     updateSourceList();
                 } else {
@@ -772,7 +799,6 @@
             }
         }
 
-        // ============ УЧАСТНИКИ ============
         function renderGuestTile(identity, isLocal) {
             if (document.getElementById('guest-tile-' + identity)) return;
             const hint = document.getElementById('noGuestsHint');
@@ -819,7 +845,6 @@
             document.getElementById('guestsCount').innerText = document.querySelectorAll('.guest-tile').length;
         }
 
-        // ============ ТРЕКИ ============
         function attachLocalTrack(track) {
             if (window.appState.isHost) return;
             if (track.kind === Track.Kind.Video) {
@@ -837,7 +862,6 @@
             const containerId = isScreen ? 'screen-' + participant.identity : participant.identity;
 
             if (track.kind === Track.Kind.Video) {
-                // Запоминаем стрим для студии
                 let stream = window.appState.remoteStreams[participant.identity];
                 if (!stream) {
                     stream = new MediaStream();
@@ -853,7 +877,6 @@
                 c.appendChild(v);
                 if (isScreen) setTimeout(() => putOnStage(containerId), 300);
 
-                // Обновляем список источников
                 if (window.appState.isHost) updateSourceList();
             } else if (track.kind === Track.Kind.Audio) {
                 const a = track.attach();
@@ -929,7 +952,6 @@
             }
         };
 
-        // ============ ЗАПРОС ============
         window.requestStage = function() {
             if (!window.appState.room || window.appState.isHost) return;
             const payload = new TextEncoder().encode(JSON.stringify({
@@ -998,6 +1020,20 @@
             }));
             room.localParticipant.publishData(payload, { reliable: true });
             setTimeout(() => putOnStage(identity), 1200);
+        };
+
+        // ============ ОРИЕНТАЦИЯ СЦЕНЫ ============
+        window.toggleOrientation = function() {
+            const box = document.getElementById('mainVideoBox');
+            if (box.classList.contains('vertical')) {
+                box.classList.remove('vertical');
+                document.getElementById('orientationIcon').className = 'fa-solid fa-mobile-screen text-studio-cyan';
+                document.getElementById('orientationLabel').innerText = '9:16';
+            } else {
+                box.classList.add('vertical');
+                document.getElementById('orientationIcon').className = 'fa-solid fa-desktop text-studio-cyan';
+                document.getElementById('orientationLabel').innerText = '16:9';
+            }
         };
 
         window.copyInviteLink = function() {
