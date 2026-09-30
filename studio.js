@@ -1,22 +1,22 @@
 // ============================================================
-// STUDIO.JS — Обработчик одного видео (своего / гостя / screen)
+// STUDIO.JS — Обработчик одного видео (1920x1080 FullHD)
 // ============================================================
 
 export class Studio {
     constructor(canvas) {
         this.canvas = canvas;
         this.ctx = canvas.getContext('2d');
-        this.canvas.width = 1280;
-        this.canvas.height = 720;
+        // FullHD по умолчанию
+        this.canvas.width = 1920;
+        this.canvas.height = 1080;
 
-        // Скрытое видео (источник для canvas)
         this.videoEl = document.createElement('video');
         this.videoEl.autoplay = true;
         this.videoEl.playsInline = true;
         this.videoEl.muted = true;
 
-        this.ownStream = null;      // наша камера
-        this.currentSourceStream = null; // что сейчас обрабатываем
+        this.ownStream = null;
+        this.currentSourceStream = null;
         this.outputStream = null;
         this.running = false;
         this.rafId = null;
@@ -31,11 +31,13 @@ export class Studio {
             videoY: 0,
             textFront: '',
             textFrontColor: '#ff3366',
-            textSize: 60,
+            textSize: 80,
             showText: false,
+            orientation: 'horizontal', // horizontal | vertical
             sourceLabel: 'Своя камера',
             selfieSegmentation: null,
-            lastResults: null
+            lastResults: null,
+            mediaPipeReady: false
         };
 
         this.selfieSegmentation = null;
@@ -46,36 +48,41 @@ export class Studio {
         try {
             const mod = await import('https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js');
             const SelfieSegmentation = window.SelfieSegmentation || mod.SelfieSegmentation;
-            if (!SelfieSegmentation) return;
+            if (!SelfieSegmentation) {
+                console.warn('MediaPipe SDK не загрузился');
+                return;
+            }
 
             this.selfieSegmentation = new SelfieSegmentation({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`
             });
+            // modelSelection: 1 — landscape (лучше для 16:9)
             this.selfieSegmentation.setOptions({ modelSelection: 1 });
             this.selfieSegmentation.onResults((results) => {
                 this.state.lastResults = results;
+                this.state.mediaPipeReady = true;
             });
+
+            // Прогреваем модель
+            console.log('✅ MediaPipe Selfie Segmentation инициализирован');
         } catch (e) {
             console.warn('MediaPipe не загрузился:', e);
         }
     }
 
-    // Запуск: получаем свою камеру + стартуем цикл
     async start() {
         this.ownStream = await navigator.mediaDevices.getUserMedia({
-            video: { width: 1280, height: 720 },
+            video: { width: { ideal: 1920 }, height: { ideal: 1080 } },
             audio: true
         });
 
-        // По умолчанию источник — своя камера
         this.currentSourceStream = this.ownStream;
         this.videoEl.srcObject = this.ownStream;
         await this.videoEl.play();
 
-        // Выходной поток из canvas
+        // Выходной поток — FullHD, 30 fps
         this.outputStream = this.canvas.captureStream(30);
 
-        // Подмешиваем аудио (из нашей камеры — всегда)
         const audioTrack = this.ownStream.getAudioTracks()[0];
         if (audioTrack) this.outputStream.addTrack(audioTrack);
 
@@ -94,14 +101,22 @@ export class Studio {
         this.currentSourceStream = null;
     }
 
-    // ============ ГЛАВНОЕ: смена источника ============
+    // ============ СМЕНА ИСТОЧНИКА ============
     async setSource(stream, label) {
-        if (!stream) return;
+        if (!stream) {
+            console.warn('setSource: пустой стрим');
+            return;
+        }
+        console.log('🎬 Студия переключается на:', label, 'треки:', stream.getTracks().length);
         this.currentSourceStream = stream;
         this.videoEl.srcObject = stream;
-        try { await this.videoEl.play(); } catch (e) {}
-        this.state.sourceLabel = label || 'Источник';
-        console.log('🎬 Студия переключена на:', this.state.sourceLabel);
+        try {
+            await this.videoEl.play();
+            this.state.sourceLabel = label || 'Источник';
+            this.state.lastResults = null; // сброс маски
+        } catch (e) {
+            console.warn('Ошибка play:', e);
+        }
     }
 
     async _loop() {
@@ -109,7 +124,9 @@ export class Studio {
         if (this.videoEl.readyState >= 2) {
             const useMask = this.state.background === 'blur' || this.state.background === 'green' || this.state.background === 'image';
             if (this.selfieSegmentation && useMask) {
-                try { await this.selfieSegmentation.send({ image: this.videoEl }); } catch (e) {}
+                try {
+                    await this.selfieSegmentation.send({ image: this.videoEl });
+                } catch (e) {}
             }
             this._draw();
         }
@@ -148,14 +165,16 @@ export class Studio {
         const offsetY = this.state.videoY;
 
         if (useMask) {
+            // По маске (с учётом scale)
             ctx.save();
-            ctx.filter = 'blur(3px)';
+            ctx.filter = 'blur(2px)';
             ctx.drawImage(results.segmentationMask, 0, offsetY, w * scale, h * scale);
             ctx.filter = 'none';
             ctx.globalCompositeOperation = 'source-in';
             ctx.drawImage(results.image, 0, offsetY, w * scale, h * scale);
             ctx.restore();
         } else {
+            // Обычное видео
             const vr = video.videoWidth / video.videoHeight || 16/9;
             const cr = w / h;
             let dw, dh, dx, dy;
@@ -195,7 +214,7 @@ export class Studio {
                 break;
             }
             case 'pixel': {
-                const size = Math.max(4, Math.floor(20 / intensity));
+                const size = Math.max(6, Math.floor(24 / intensity));
                 try {
                     const imageData = ctx.getImageData(0, 0, w, h);
                     const data = imageData.data;
@@ -210,10 +229,10 @@ export class Studio {
                 break;
             }
             case 'vhs': {
-                for (let i = 0; i < 30 * intensity; i++) {
+                for (let i = 0; i < 40 * intensity; i++) {
                     const y = Math.random() * h;
                     ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.15})`;
-                    ctx.fillRect(0, y, w, 2);
+                    ctx.fillRect(0, y, w, 3);
                 }
                 break;
             }
@@ -249,7 +268,7 @@ export class Studio {
                 const tmp = document.createElement('canvas');
                 tmp.width = w; tmp.height = h;
                 tmp.getContext('2d').drawImage(this.canvas, 0, 0);
-                ctx.filter = `blur(${Math.max(1, 6 * intensity)}px)`;
+                ctx.filter = `blur(${Math.max(1, 8 * intensity)}px)`;
                 ctx.drawImage(tmp, 0, 0);
                 ctx.filter = 'none';
                 break;
@@ -269,9 +288,9 @@ export class Studio {
         ctx.font = `900 ${size}px Arial, sans-serif`;
         ctx.lineWidth = size * 0.06;
         ctx.strokeStyle = '#000';
-        ctx.strokeText(this.state.textFront, w / 2, h - 80);
+        ctx.strokeText(this.state.textFront, w / 2, h - 100);
         ctx.fillStyle = this.state.textFrontColor;
-        ctx.fillText(this.state.textFront, w / 2, h - 80);
+        ctx.fillText(this.state.textFront, w / 2, h - 100);
         ctx.restore();
     }
 
@@ -299,6 +318,19 @@ export class Studio {
     }
     setTextSize(size) { this.state.textSize = size; }
 
+    // Формат: 16:9 (1920x1080) или 9:16 (1080x1920)
+    setOrientation(orientation) {
+        this.state.orientation = orientation;
+        if (orientation === 'vertical') {
+            this.canvas.width = 1080;
+            this.canvas.height = 1920;
+        } else {
+            this.canvas.width = 1920;
+            this.canvas.height = 1080;
+        }
+        console.log('🎬 Формат:', orientation, this.canvas.width + 'x' + this.canvas.height);
+    }
+
     setMicEnabled(enabled) {
         if (this.ownStream) {
             const audioTrack = this.ownStream.getAudioTracks()[0];
@@ -315,4 +347,5 @@ export class Studio {
         return this.outputStream ? this.outputStream.getVideoTracks()[0] : null;
     }
     getSourceLabel() { return this.state.sourceLabel; }
+    isMediaPipeReady() { return this.state.mediaPipeReady; }
 }
