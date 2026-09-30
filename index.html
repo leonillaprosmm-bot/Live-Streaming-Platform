@@ -1,8 +1,9 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProStream Studio - Interactive Multi-Cam & TikTok Live</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -24,17 +25,13 @@
             }
         }
     </script>
-    <!-- FontAwesome for Pro Streaming Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        /* Custom scrollbar for chat */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #111827; }
         ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
-        /* Floating heart animation */
         @keyframes floatUp {
             0% { transform: translateY(0px) scale(0.6) rotate(0deg); opacity: 1; }
             50% { transform: translateY(-180px) scale(1.2) rotate(15deg); opacity: 0.8; }
@@ -47,7 +44,7 @@
         }
         @keyframes pulseGlow {
             0%, 100% { box-shadow: 0 0 15px rgba(255, 0, 80, 0.4); }
-            50% { box-shadow: 0 0 30px rgba(255, 0, 80, 0.8); }
+            50% { box-shadow: 0 0 25px rgba(255, 0, 80, 0.8); }
         }
         .live-glow { animation: pulseGlow 2s infinite; }
     </style>
@@ -68,7 +65,6 @@
             </div>
         </div>
 
-        <!-- Room & Connection Info -->
         <div class="flex items-center space-x-4">
             <div class="hidden md:flex items-center bg-studio-700/60 px-3 py-1.5 rounded-lg border border-studio-600 text-xs text-gray-300">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-2 animate-ping"></span>
@@ -79,41 +75,34 @@
             </button>
             <div class="flex items-center gap-2 bg-studio-700 px-3 py-1.5 rounded-lg">
                 <img id="userAvatar" src="https://placehold.co/32x32/111827/ffffff?text=U" class="w-6 h-6 rounded-full border border-studio-cyan" alt="User">
-                <span id="userNameDisplay" class="text-xs font-semibold">Host / Model</span>
+                <span id="userNameDisplay" class="text-xs font-semibold">Connecting...</span>
             </div>
         </div>
     </header>
 
     <!-- Main Studio Workspace -->
     <main class="flex-1 grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4 overflow-hidden">
-        
-        <!-- Left / Center: Multi-Camera Video Grid & Controls (3 cols on lg, 4 cols on xl) -->
+
+        <!-- Left / Center: Multi-Camera Video Grid & Controls -->
         <div class="lg:col-span-3 xl:col-span-4 flex flex-col gap-4">
-            
-            <!-- Video Feeds Stage -->
             <div class="relative flex-1 bg-studio-800 rounded-2xl border border-studio-700 overflow-hidden flex flex-col min-h-[480px] shadow-2xl">
-                
-                <!-- Stream Header Overlay -->
+
                 <div class="absolute top-4 left-4 z-20 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-xs">
                     <span class="bg-red-600 w-2.5 h-2.5 rounded-full"></span>
                     <span class="font-bold text-white">MAIN BROADCAST</span>
                     <span class="text-gray-400">|</span>
-                    <span id="viewerCount" class="text-studio-cyan font-semibold"><i class="fa-solid fa-users mr-1"></i> 1,428 Watching</span>
+                    <span id="viewerCount" class="text-studio-cyan font-semibold"><i class="fa-solid fa-users mr-1"></i> 0 Watching</span>
                 </div>
 
-                <!-- Virtual Background / Filter Badge -->
                 <div class="absolute top-4 right-4 z-20 flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-xs">
                     <i class="fa-solid fa-wand-magic-sparkles text-studio-accent"></i>
                     <span id="activeFilterBadge" class="text-gray-200">Filter: None</span>
                 </div>
 
-                <!-- Video Grid Area -->
                 <div id="videoGrid" class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3 p-4 bg-gradient-to-br from-studio-900 to-studio-800 items-center justify-center relative overflow-hidden">
-                    
-                    <!-- Local / Model Video Stream Box -->
+
                     <div class="relative bg-black rounded-xl overflow-hidden border border-studio-700 shadow-lg group aspect-video flex items-center justify-center">
                         <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover transform -scale-x-100"></video>
-                        <canvas id="virtualCanvas" class="absolute inset-0 w-full h-full object-cover hidden pointer-events-none"></canvas>
                         <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10">
                             <i class="fa-solid fa-microphone text-emerald-400" id="micStatusIcon"></i>
                             <span id="localStreamLabel">Model / Main Host (You)</span>
@@ -124,7 +113,6 @@
                         </div>
                     </div>
 
-                    <!-- Remote / Assistant 1 Stream Box -->
                     <div class="relative bg-studio-900 rounded-xl overflow-hidden border border-studio-700 shadow-lg group aspect-video flex items-center justify-center">
                         <div id="remotePlaceholder1" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-studio-800/80">
                             <i class="fa-solid fa-user-gear text-4xl mb-2 text-studio-cyan animate-pulse"></i>
@@ -134,11 +122,10 @@
                         <video id="remoteVideo1" autoplay playsinline class="w-full h-full object-cover hidden"></video>
                         <div class="absolute bottom-3 left-3 bg-black/70 backdrop-blur-sm px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-2 text-white border border-white/10">
                             <i class="fa-solid fa-microphone text-emerald-400"></i>
-                            <span>Assistant (Alex) - Lighting & Angle Manager</span>
+                            <span>Assistant (Alex)</span>
                         </div>
                     </div>
 
-                    <!-- Remote / Assistant 2 Stream Box -->
                     <div class="relative bg-studio-900 rounded-xl overflow-hidden border border-studio-700 shadow-lg group aspect-video flex items-center justify-center">
                         <div id="remotePlaceholder2" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500 bg-studio-800/80">
                             <i class="fa-solid fa-user-plus text-4xl mb-2 text-studio-accent animate-pulse"></i>
@@ -152,13 +139,12 @@
                         </div>
                     </div>
 
-                    <!-- Stream Control Quick Panel Box -->
                     <div class="relative bg-studio-800/90 rounded-xl p-4 border border-studio-700 flex flex-col justify-between aspect-video shadow-lg">
                         <div>
                             <h3 class="font-bold text-sm text-white mb-1 flex items-center gap-2">
                                 <i class="fa-solid fa-sliders text-studio-cyan"></i> Assistant Control Panel
                             </h3>
-                            <p class="text-xs text-gray-400">Manage angles, model positions & lighting presets in real-time.</p>
+                            <p class="text-xs text-gray-400">Manage angles, model positions & lighting presets.</p>
                         </div>
                         <div class="grid grid-cols-2 gap-2 my-2">
                             <button onclick="triggerPreset('Full Shot')" class="bg-studio-700 hover:bg-studio-600 p-2 rounded-lg text-xs font-medium transition text-left border border-studio-600 flex items-center justify-between">
@@ -182,10 +168,8 @@
 
                 </div>
 
-                <!-- Floating TikTok-style Reactions Layer -->
                 <div id="floatingReactionsContainer" class="absolute bottom-16 right-8 w-48 h-64 pointer-events-none overflow-hidden z-20"></div>
 
-                <!-- Bottom Control Toolbar -->
                 <div class="bg-studio-800 border-t border-studio-700 px-6 py-3 flex flex-wrap items-center justify-between gap-3 z-20">
                     <div class="flex items-center space-x-2">
                         <button onclick="toggleVideo()" id="camBtn" class="bg-studio-700 hover:bg-studio-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition flex items-center gap-2 border border-studio-600 shadow">
@@ -199,7 +183,6 @@
                         </button>
                     </div>
 
-                    <!-- Virtual Background Switcher -->
                     <div class="flex items-center space-x-2">
                         <span class="text-xs text-gray-400 hidden sm:inline">Virtual Background:</span>
                         <button onclick="applyBackground('none')" class="bg-studio-700 hover:bg-studio-600 px-3 py-1.5 rounded-lg text-xs font-medium border border-studio-600">None</button>
@@ -207,7 +190,6 @@
                         <button onclick="applyBackground('studio')" class="bg-studio-700 hover:bg-studio-600 px-3 py-1.5 rounded-lg text-xs font-medium border border-studio-600 text-studio-accent">Neon Loft</button>
                     </div>
 
-                    <!-- TikTok Quick Like Button -->
                     <div class="flex items-center gap-2">
                         <button onclick="sendLikeBurst()" class="bg-gradient-to-r from-studio-accent to-pink-600 hover:from-studio-accentHover hover:to-pink-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg live-glow">
                             <i class="fa-solid fa-heart animate-bounce"></i> Send Like (Tap!)
@@ -216,13 +198,11 @@
                 </div>
 
             </div>
-
         </div>
 
-        <!-- Right Column: TikTok Live Chat, Reactions & Gift Ticker (1 col on lg, 1 col on xl) -->
+        <!-- Right Column: Chat -->
         <div class="lg:col-span-1 xl:col-span-1 bg-studio-800 rounded-2xl border border-studio-700 flex flex-col h-[650px] lg:h-auto shadow-2xl overflow-hidden">
-            
-            <!-- Chat Header -->
+
             <div class="p-3.5 bg-studio-800 border-b border-studio-700 flex items-center justify-between">
                 <div class="flex items-center space-x-2">
                     <i class="fa-solid fa-comments text-studio-accent"></i>
@@ -231,7 +211,6 @@
                 <span class="bg-studio-700 text-studio-cyan text-[10px] px-2 py-0.5 rounded-full font-semibold border border-studio-600">Firebase RTDB</span>
             </div>
 
-            <!-- Gift / Donation Ticker Announcement Banner -->
             <div class="bg-gradient-to-r from-purple-900/60 to-studio-700/60 p-2.5 border-b border-studio-700 flex items-center justify-between text-xs">
                 <div class="flex items-center gap-2">
                     <span class="text-amber-400 text-base animate-bounce">🎁</span>
@@ -243,49 +222,15 @@
                 <button onclick="sendGiftModal()" class="bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold px-2.5 py-1 rounded text-[11px] transition shadow">Send Gift</button>
             </div>
 
-            <!-- Messages Stream Area -->
             <div id="chatMessages" class="flex-1 p-3 overflow-y-auto space-y-3 flex flex-col text-xs">
                 <div class="text-center my-2">
-                    <span class="bg-studio-700/80 text-gray-400 text-[10px] px-3 py-1 rounded-full border border-studio-600">Welcome to the Live Stream! Keep it respectful.</span>
-                </div>
-                
-                <div class="flex items-start gap-2 bg-studio-700/30 p-2 rounded-xl border border-studio-700/50">
-                    <img src="https://placehold.co/24x24/374151/ffffff?text=A" class="w-6 h-6 rounded-full" alt="avatar">
-                    <div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-bold text-studio-cyan">@alex_assistant</span>
-                            <span class="bg-studio-accent text-[9px] px-1.5 rounded text-white font-semibold">MOD</span>
-                        </div>
-                        <p class="text-gray-200 mt-0.5">Model position looking great! Adjusted studio lighting to 4500K.</p>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2 bg-studio-700/30 p-2 rounded-xl border border-studio-700/50">
-                    <img src="https://placehold.co/24x24/374151/ffffff?text=V" class="w-6 h-6 rounded-full" alt="avatar">
-                    <div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-bold text-pink-400">@vika_model</span>
-                            <span class="bg-purple-600 text-[9px] px-1.5 rounded text-white font-semibold">MODEL</span>
-                        </div>
-                        <p class="text-gray-200 mt-0.5">Ready for the second outfit presentation now!</p>
-                    </div>
-                </div>
-
-                <div class="flex items-start gap-2 bg-studio-700/20 p-2 rounded-xl border border-studio-700/30">
-                    <img src="https://placehold.co/24x24/111827/ffffff?text=S" class="w-6 h-6 rounded-full" alt="avatar">
-                    <div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="font-bold text-gray-300">@sergey_fan</span>
-                        </div>
-                        <p class="text-gray-300 mt-0.5">Awesome quality! 🔥🔥🔥</p>
-                    </div>
+                    <span class="bg-studio-700/80 text-gray-400 text-[10px] px-3 py-1 rounded-full border border-studio-600">Welcome! Keep it respectful.</span>
                 </div>
             </div>
 
-            <!-- Chat Input Form -->
             <div class="p-3 bg-studio-800 border-t border-studio-700">
                 <form id="chatForm" onsubmit="handleSendMessage(event)" class="flex items-center gap-2">
-                    <input type="text" id="chatInput" placeholder="Send public comment or question..." class="flex-1 bg-studio-900 border border-studio-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-studio-accent transition">
+                    <input type="text" id="chatInput" placeholder="Send public comment..." maxlength="300" class="flex-1 bg-studio-900 border border-studio-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-studio-accent transition">
                     <button type="submit" class="bg-studio-accent hover:bg-studio-accentHover text-white px-3 py-2 rounded-xl text-xs font-bold transition shadow">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
@@ -296,205 +241,247 @@
 
     </main>
 
-    <!-- Setup Configuration Modal -->
+    <!-- Setup Modal -->
     <div id="configModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-studio-800 border border-studio-700 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative">
             <button onclick="closeConfigModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
             <h2 class="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                <i class="fa-solid fa-cloud text-studio-cyan"></i> Deployment & Firebase Config
+                <i class="fa-solid fa-cloud text-studio-cyan"></i> Deployment Info
             </h2>
-            <p class="text-xs text-gray-400 mb-4">Connect your GitHub repository, Vercel frontend, Firebase Realtime Database for chat/signaling, and Render backend server.</p>
-            
+            <p class="text-xs text-gray-400 mb-4">Firebase уже подключён напрямую в коде. Комментарии, лайки и счётчик зрителей работают в реальном времени.</p>
             <div class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-gray-300 font-medium mb-1">Firebase Project Config (JSON / API Key)</label>
-                    <textarea id="firebaseConfigInput" rows="3" class="w-full bg-studio-900 border border-studio-700 rounded-lg p-2.5 text-gray-300 font-mono text-[11px]" placeholder='{ "apiKey": "AIzaSy...", "databaseURL": "https://your-app.firebaseio.com" }'></textarea>
-                </div>
-                <div>
-                    <label class="block text-gray-300 font-medium mb-1">Render Signaling / WebSocket Server URL</label>
-                    <input type="text" id="renderUrlInput" value="https://prostream-backend.onrender.com" class="w-full bg-studio-900 border border-studio-700 rounded-lg p-2.5 text-gray-300 font-mono text-[11px]">
-                </div>
                 <div class="bg-studio-900/80 p-3 rounded-lg border border-studio-700 text-gray-400">
-                    <p class="font-semibold text-white mb-1"><i class="fa-solid fa-rocket text-studio-accent mr-1"></i> Quick Deployment Steps:</p>
+                    <p class="font-semibold text-white mb-1"><i class="fa-solid fa-rocket text-studio-accent mr-1"></i> Deployment Steps:</p>
                     <ol class="list-decimal list-inside space-y-1 text-[11px]">
-                        <li>Push this code to a <strong>GitHub repository</strong>.</li>
-                        <li>Import repository into <strong>Vercel</strong> for instant frontend deployment.</li>
-                        <li>Create a <strong>Firebase project</strong> and paste keys above.</li>
-                        <li>Deploy the WebRTC signaling node on <strong>Render</strong> for multi-user sync.</li>
+                        <li>Push code to <strong>GitHub</strong>.</li>
+                        <li>Import to <strong>Vercel</strong> for instant deploy.</li>
+                        <li>Firebase RTDB + Auth уже настроены.</li>
                     </ol>
                 </div>
             </div>
-
             <div class="mt-6 flex justify-end gap-3">
-                <button onclick="closeConfigModal()" class="bg-studio-700 hover:bg-studio-600 px-4 py-2 rounded-xl text-xs font-medium">Cancel</button>
-                <button onclick="saveConfiguration()" class="bg-studio-accent hover:bg-studio-accentHover text-white px-4 py-2 rounded-xl text-xs font-bold shadow">Save & Connect</button>
+                <button onclick="closeConfigModal()" class="bg-studio-accent hover:bg-studio-accentHover text-white px-4 py-2 rounded-xl text-xs font-bold shadow">OK</button>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript Application Logic -->
-    <script>
-        // State variables
+    <!-- ============================================================= -->
+    <!-- FIREBASE SDK + APP LOGIC                                       -->
+    <!-- ============================================================= -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged }
+            from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, query, limitToLast, remove }
+            from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0G2ZiFEwSr3472_9SsLJUMs6RORmLFWs",
+            authDomain: "meta-live-chat.firebaseapp.com",
+            databaseURL: "https://meta-live-chat-default-rtdb.firebaseio.com",
+            projectId: "meta-live-chat",
+            storageBucket: "meta-live-chat.firebasestorage.app",
+            messagingSenderId: "695456991297",
+            appId: "1:695456991297:web:55961023f91b86487d1ec0"
+        };
+
+        const fbApp = initializeApp(firebaseConfig);
+        const auth = getAuth(fbApp);
+        const db = getDatabase(fbApp);
+        const ROOM_ID = "PRO-LIVE-88";
+        let currentUser = null;
+
+        // ============ LOCAL VIDEO CONTROLS ============
         let localStream = null;
         let isVideoActive = true;
         let isAudioActive = true;
-        let currentBackground = 'none';
 
-        // DOM Elements
         const localVideo = document.getElementById('localVideo');
-        const virtualCanvas = document.getElementById('virtualCanvas');
         const micStatusIcon = document.getElementById('micStatusIcon');
         const camBtn = document.getElementById('camBtn');
         const micBtn = document.getElementById('micBtn');
 
-        // Initialize camera on load
         window.addEventListener('DOMContentLoaded', async () => {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 localVideo.srcObject = localStream;
             } catch (err) {
-                console.warn("Webcam access denied or unavailable. Using placeholder simulation.", err);
-                // Fallback simulation or message
+                console.warn("Webcam unavailable:", err);
             }
         });
 
-        // Toggle Video Feed
-        function toggleVideo() {
+        window.toggleVideo = function() {
             if (!localStream) return;
             isVideoActive = !isVideoActive;
-            localStream.getVideoTracks().forEach(track => track.enabled = isVideoActive);
-            camBtn.classList.toggle('bg-red-600/30', !isVideoActive);
-            camBtn.classList.toggle('border-red-500', !isVideoActive);
+            localStream.getVideoTracks().forEach(t => t.enabled = isVideoActive);
             localVideo.style.display = isVideoActive ? 'block' : 'none';
-        }
+        };
 
-        // Toggle Audio Feed
-        function toggleAudio() {
+        window.toggleAudio = function() {
             if (!localStream) return;
             isAudioActive = !isAudioActive;
-            localStream.getAudioTracks().forEach(track => track.enabled = isAudioActive);
-            micBtn.classList.toggle('bg-red-600/30', !isAudioActive);
+            localStream.getAudioTracks().forEach(t => t.enabled = isAudioActive);
             micStatusIcon.className = isAudioActive ? "fa-solid fa-microphone text-emerald-400" : "fa-solid fa-microphone-slash text-red-400";
-        }
+        };
 
-        // Toggle Screen Share
-        async function toggleScreenShare() {
+        window.toggleScreenShare = async function() {
             try {
-                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-                localVideo.srcObject = screenStream;
-                document.getElementById('localStreamLabel').innerText = "Screen Share / Presentation";
-            } catch (err) {
-                console.error("Screen share cancelled or failed", err);
-            }
-        }
+                const s = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                localVideo.srcObject = s;
+                document.getElementById('localStreamLabel').innerText = "Screen Share";
+            } catch (e) { console.error(e); }
+        };
 
-        // Virtual Background Switcher simulation
-        function applyBackground(type) {
-            currentBackground = type;
-            const badge = document.getElementById('activeFilterBadge');
-            badge.innerText = `Filter: ${type.toUpperCase()}`;
-            
-            if (type === 'blur') {
-                localVideo.style.filter = 'blur(8px) contrast(1.1)';
-            } else if (type === 'studio') {
-                localVideo.style.filter = 'sepia(0.3) hue-rotate(180deg) saturate(1.4)';
-            } else {
-                localVideo.style.filter = 'none';
-            }
-        }
+        window.applyBackground = function(type) {
+            document.getElementById('activeFilterBadge').innerText = `Filter: ${type.toUpperCase()}`;
+            if (type === 'blur') localVideo.style.filter = 'blur(8px) contrast(1.1)';
+            else if (type === 'studio') localVideo.style.filter = 'sepia(0.3) hue-rotate(180deg) saturate(1.4)';
+            else localVideo.style.filter = 'none';
+        };
 
-        // Assistant camera connect simulation
-        function connectAssistantCam(slotNum) {
-            const placeholder = document.getElementById(`remotePlaceholder${slotNum}`);
-            const remoteVideo = document.getElementById(`remoteVideo${slotNum}`);
-            placeholder.innerHTML = `<div class="flex flex-col items-center"><i class="fa-solid fa-spinner animate-spin text-2xl text-studio-cyan mb-1"></i><span class="text-[11px] text-gray-300">Connecting WebRTC peer...</span></div>`;
-            
+        window.connectAssistantCam = function(slot) {
+            const ph = document.getElementById(`remotePlaceholder${slot}`);
+            const vid = document.getElementById(`remoteVideo${slot}`);
+            ph.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-2xl text-studio-cyan"></i>`;
             setTimeout(() => {
-                placeholder.style.display = 'none';
-                remoteVideo.classList.remove('hidden');
-                // Link local stream or mock video for demo testing
-                remoteVideo.srcObject = localStream; 
-            }, 1200);
-        }
+                ph.style.display = 'none';
+                vid.classList.remove('hidden');
+                vid.srcObject = localStream;
+            }, 1000);
+        };
 
-        // Assistant Preset Controller Trigger
-        function triggerPreset(presetName) {
-            const statusText = document.getElementById('presetStatusText');
-            statusText.innerText = `Preset applied: "${presetName}" synchronized with all studio cams!`;
-            setTimeout(() => {
-                statusText.innerText = "Assistant synced with Model live feed.";
-            }, 3000);
-        }
+        window.triggerPreset = function(name) {
+            const s = document.getElementById('presetStatusText');
+            s.innerText = `Preset applied: "${name}"`;
+            setTimeout(() => s.innerText = "Assistant synced with Model live feed.", 3000);
+        };
 
-        // TikTok Like Burst Animation Engine
-        function sendLikeBurst() {
-            const container = document.getElementById('floatingReactionsContainer');
-            const heartsCount = 6;
-            const colors = ['#ff0050', '#00f2fe', '#ffd700', '#ff69b4', '#00ffcc'];
+        window.openConfigModal = () => document.getElementById('configModal').classList.remove('hidden');
+        window.closeConfigModal = () => document.getElementById('configModal').classList.add('hidden');
+        window.sendGiftModal = () => { alert("Gift sent! 🎁"); window.sendLikeBurst(); };
 
-            for (let i = 0; i < heartsCount; i++) {
-                const heart = document.createElement('div');
-                heart.className = 'floating-heart';
-                heart.innerHTML = `<i class="fa-solid fa-heart text-2xl" style="color: ${colors[Math.floor(Math.random() * colors.length)]}"></i>`;
-                heart.style.left = `${Math.random() * 80 + 10}%`;
-                heart.style.bottom = '10px';
-                container.appendChild(heart);
+        // ============ FIREBASE AUTH ============
+        signInAnonymously(auth).catch(err => console.error("Auth error:", err));
 
-                setTimeout(() => {
-                    heart.remove();
-                }, 3000);
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = {
+                    uid: user.uid,
+                    name: "@user_" + user.uid.slice(0, 5),
+                    avatar: "https://placehold.co/24x24/111827/ffffff?text=" + user.uid.charAt(0).toUpperCase()
+                };
+                document.getElementById('userNameDisplay').innerText = currentUser.name;
+                document.getElementById('userAvatar').src = currentUser.avatar.replace('24x24', '32x32');
+                initPresence();
+                loadMessages();
+                loadLikes();
+                console.log("🔥 Firebase подключён. Room:", ROOM_ID);
             }
+        });
+
+        // ============ PRESENCE (viewer count) ============
+        function initPresence() {
+            const myRef = ref(db, `rooms/${ROOM_ID}/viewers/${currentUser.uid}`);
+            set(myRef, { online: true, ts: serverTimestamp() });
+            onDisconnect(myRef).remove();
+
+            onValue(ref(db, `rooms/${ROOM_ID}/viewers`), (snap) => {
+                const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+                document.getElementById('viewerCount').innerHTML = `<i class="fa-solid fa-users mr-1"></i> ${count} Watching`;
+            });
         }
 
-        // Chat Message Submission Handler
-        function handleSendMessage(event) {
+        // ============ MESSAGES ============
+        const chatMessages = document.getElementById('chatMessages');
+
+        function loadMessages() {
+            const q = query(ref(db, `rooms/${ROOM_ID}/messages`), limitToLast(100));
+            onValue(q, (snap) => {
+                chatMessages.querySelectorAll('[data-msg]').forEach(el => el.remove());
+                const data = snap.val();
+                if (!data) return;
+                Object.entries(data)
+                    .sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0))
+                    .forEach(([id, msg]) => renderMessage(id, msg));
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+
+        function renderMessage(id, msg) {
+            const isSelf = currentUser && msg.uid === currentUser.uid;
+            const div = document.createElement('div');
+            div.dataset.msg = id;
+            div.className = 'flex items-start gap-2 p-2 rounded-xl border ' +
+                (isSelf ? 'bg-studio-accent/10 border-studio-accent/40' : 'bg-studio-700/30 border-studio-700/50');
+            div.innerHTML = `
+                <img src="${msg.avatar}" class="w-6 h-6 rounded-full" alt="avatar">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="font-bold ${isSelf ? 'text-studio-accent' : 'text-studio-cyan'}">${escapeHtml(msg.name)}</span>
+                        ${isSelf ? '<span class="bg-studio-accent text-[9px] px-1.5 rounded text-white font-semibold">YOU</span>' : ''}
+                    </div>
+                    <p class="text-gray-200 mt-0.5 break-words">${escapeHtml(msg.text)}</p>
+                </div>
+            `;
+            chatMessages.appendChild(div);
+        }
+
+        window.handleSendMessage = function(event) {
             event.preventDefault();
+            if (!currentUser) { alert("Подключение... подожди секунду."); return; }
             const input = document.getElementById('chatInput');
             const text = input.value.trim();
             if (!text) return;
-
-            const chatMessages = document.getElementById('chatMessages');
-            const msgDiv = document.createElement('div');
-            msgDiv.className = 'flex items-start gap-2 bg-studio-700/30 p-2 rounded-xl border border-studio-700/50 animate-fadeIn';
-            msgDiv.innerHTML = `
-                <img src="https://placehold.co/24x24/111827/ffffff?text=U" class="w-6 h-6 rounded-full" alt="avatar">
-                <div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="font-bold text-studio-cyan">@you</span>
-                        <span class="bg-studio-600 text-[9px] px-1.5 rounded text-white font-semibold">VIEWER</span>
-                    </div>
-                    <p class="text-gray-200 mt-0.5">${escapeHtml(text)}</p>
-                </div>
-            `;
-            chatMessages.appendChild(msgDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
+            push(ref(db, `rooms/${ROOM_ID}/messages`), {
+                uid: currentUser.uid,
+                name: currentUser.name,
+                avatar: currentUser.avatar,
+                text: text.slice(0, 300),
+                ts: serverTimestamp()
+            }).catch(err => console.error("Send error:", err));
             input.value = '';
+        };
 
-            // Random automatic viewer reaction or simulated chat reply
-            if (Math.random() > 0.5) {
-                sendLikeBurst();
+        // ============ LIKES ============
+        function loadLikes() {
+            const q = query(ref(db, `rooms/${ROOM_ID}/likes`), limitToLast(1));
+            onValue(q, (snap) => {
+                const data = snap.val();
+                if (!data) return;
+                const [id, like] = Object.entries(data)[0];
+                if (currentUser && like.uid !== currentUser.uid) {
+                    if (Date.now() - (like.ts || 0) < 3000) animateLikeBurst();
+                }
+                setTimeout(() => remove(ref(db, `rooms/${ROOM_ID}/likes/${id}`)).catch(() => {}), 6000);
+            });
+        }
+
+        window.sendLikeBurst = function() {
+            if (!currentUser) return;
+            animateLikeBurst();
+            push(ref(db, `rooms/${ROOM_ID}/likes`), {
+                uid: currentUser.uid,
+                ts: Date.now()
+            }).catch(err => console.error("Like error:", err));
+        };
+
+        function animateLikeBurst() {
+            const container = document.getElementById('floatingReactionsContainer');
+            const colors = ['#ff0050', '#00f2fe', '#ffd700', '#ff69b4', '#00ffcc'];
+            for (let i = 0; i < 6; i++) {
+                const h = document.createElement('div');
+                h.className = 'floating-heart';
+                h.innerHTML = `<i class="fa-solid fa-heart text-2xl" style="color:${colors[Math.floor(Math.random() * colors.length)]}"></i>`;
+                h.style.left = `${Math.random() * 80 + 10}%`;
+                h.style.bottom = '10px';
+                container.appendChild(h);
+                setTimeout(() => h.remove(), 3000);
             }
         }
 
+        // ============ UTILS ============
         function escapeHtml(str) {
-            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        // Modal Controls
-        function openConfigModal() {
-            document.getElementById('configModal').classList.remove('hidden');
-        }
-        function closeConfigModal() {
-            document.getElementById('configModal').classList.add('hidden');
-        }
-        function saveConfiguration() {
-            alert("Firebase and Render configuration successfully saved! Ready for GitHub & Vercel deployment.");
-            closeConfigModal();
-        }
-
-        function sendGiftModal() {
-            alert("Gift sent successfully! Added to live stream revenue ticker.");
-            sendLikeBurst();
+            return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
     </script>
 </body>
