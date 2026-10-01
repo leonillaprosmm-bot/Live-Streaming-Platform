@@ -110,11 +110,9 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:clamp(14px,2vw,20
 .sand-link:hover::after{color:#fff;background:rgba(255,51,102,.8)}
 #sandCanvas{display:block;width:100%;height:clamp(200px,40vw,340px);background:radial-gradient(circle at top,#0e1220,#050810);border-radius:20px;border:1px solid rgba(255,255,255,.06)}
 footer{padding:clamp(30px,6vw,60px) clamp(18px,4vw,48px);border-top:1px solid rgba(255,255,255,.05);text-align:center;position:relative;z-index:2}
-footer .f-links{display:flex;gap:clamp(16px,3vw,32px);justify-content:center;flex-wrap:wrap;margin-bottom:20px}
-footer .f-links a{color:#888;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12px);letter-spacing:2px;text-transform:uppercase;transition:color .2s}
-footer .f-links a:hover{color:#ff3366}
-footer .f-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:#444;letter-spacing:1px}
-footer .f-copy a{color:#00f2fe;text-decoration:none}
+footer .f-copy{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.4vw,13px);color:#888;letter-spacing:2px}
+footer .f-copy a{color:#00f2fe;text-decoration:none;font-weight:700;letter-spacing:2px}
+footer .f-copy a:hover{color:#ff3366}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}
 .modal-bg.show{display:flex}
 .modal{background:#111827;border:1px solid rgba(255,51,102,.3);border-radius:20px;padding:28px;max-width:380px;width:100%;position:relative}
@@ -204,21 +202,15 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
   </section>
 
   <footer>
-    <div class="f-links">
-      <a href="#feed">Лента</a>
-      <a href="live.html">Эфир</a>
-      <a href="https://metaimperiya.com/" target="_blank">metaimperiya.com</a>
-    </div>
     <div class="f-copy">© 2026 <a href="https://metaimperiya.com/" target="_blank">METAIMPERIYA — Social Platform</a></div>
   </footer>
 </div>
 
-<!-- МОДАЛКА УДАЛЕНИЯ -->
 <div id="deleteModal" class="modal-bg">
   <div class="modal">
     <button class="modal-close" onclick="closeDeleteModal()">✕</button>
     <h3>🗑 УДАЛЕНИЕ ПОСТА</h3>
-    <p>Введите пароль администратора для подтверждения удаления</p>
+    <p>Введите пароль администратора</p>
     <input id="deletePasswordInput" type="password" placeholder="Пароль админа" onkeydown="if(event.key==='Enter')confirmDelete()">
     <div class="modal-buttons">
       <button class="btn-cancel" onclick="closeDeleteModal()">Отмена</button>
@@ -227,19 +219,15 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
   </div>
 </div>
 
-<!-- ЗАГРУЗКА КАРТИНКИ -->
 <div id="loadingOverlay" class="loading-overlay">
   <div class="spinner"></div>
-  <div class="loading-text">ЗАГРУЗКА КАРТИНКИ...</div>
+  <div class="loading-text">ЗАГРУЗКА...</div>
 </div>
 
 <script type="module">
-// ============================================================
-// FIREBASE
-// ============================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { getDatabase, ref, push, onValue, remove, serverTimestamp, query, limitToLast, set } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove, query, limitToLast, set } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyB0G2ZiFEwSr3472_9SsLJUMs6RORmLFWs",
@@ -258,26 +246,20 @@ let currentUser = null;
 
 signInAnonymously(auth).catch(err => console.error("Auth error:", err));
 
-// ============================================================
-// ЛЕНТА ПОСТОВ ЧЕРЕЗ FIREBASE
-// ============================================================
 const ADMIN_PASSWORD = 'admin123';
 const POSTS_PATH = 'posts';
 let userPosts = [];
 let deletePostId = null;
 
 window.publishPost = function() {
-  if (!currentUser) { alert('Подключение... подожди секунду'); return; }
-
+  if (!currentUser) { alert('Подключение... подожди'); return; }
   const name = document.getElementById('newPostName').value.trim();
   const text = document.getElementById('newPostText').value.trim();
   const fileInput = document.getElementById('newPostFile');
   const file = fileInput.files[0];
-
-  if (!name) { alert('Введи своё имя'); return; }
+  if (!name) { alert('Введи имя'); return; }
   if (!text && !file) { alert('Напиши текст или прикрепи картинку'); return; }
 
-  // Если есть файл — сначала сжимаем и конвертируем в base64
   if (file) {
     document.getElementById('loadingOverlay').classList.add('show');
     const reader = new FileReader();
@@ -303,56 +285,31 @@ window.publishPost = function() {
 
 function savePostToFirebase(name, text, imageBase64) {
   const newPostRef = push(ref(db, POSTS_PATH));
-  set(newPostRef, {
-    name: name,
-    text: text,
-    image: imageBase64,
-    ts: Date.now()
-  }).then(() => {
-    document.getElementById('loadingOverlay').classList.remove('show');
-    document.getElementById('newPostName').value = '';
-    document.getElementById('newPostText').value = '';
-    document.getElementById('newPostFile').value = '';
-    document.getElementById('filePreview').classList.remove('show');
-    document.getElementById('filePreview').src = '';
-    const label = document.getElementById('fileLabel');
-    label.classList.remove('has-file');
-    label.innerHTML = '<input id="newPostFile" type="file" accept="image/*"><i class="fas fa-image"></i> ВЫБРАТЬ КАРТИНКУ (необязательно)';
-    attachFileHandler();
-  }).catch(err => {
-    document.getElementById('loadingOverlay').classList.remove('show');
-    alert('Ошибка: ' + err.message);
-  });
+  set(newPostRef, { name: name, text: text, image: imageBase64, ts: Date.now() })
+    .then(() => {
+      document.getElementById('loadingOverlay').classList.remove('show');
+      document.getElementById('newPostName').value = '';
+      document.getElementById('newPostText').value = '';
+      document.getElementById('newPostFile').value = '';
+      document.getElementById('filePreview').classList.remove('show');
+      document.getElementById('filePreview').src = '';
+      const label = document.getElementById('fileLabel');
+      label.classList.remove('has-file');
+      label.innerHTML = '<input id="newPostFile" type="file" accept="image/*"><i class="fas fa-image"></i> ВЫБРАТЬ КАРТИНКУ (необязательно)';
+      attachFileHandler();
+    })
+    .catch(err => {
+      document.getElementById('loadingOverlay').classList.remove('show');
+      alert('❌ Ошибка: ' + err.message + '\n\nПроверь правила Firebase: /posts должен разрешать запись.');
+    });
 }
 
-// Загрузка постов из Firebase
 function loadPosts() {
   const q = query(ref(db, POSTS_PATH), limitToLast(100));
   onValue(q, (snap) => {
     const data = snap.val();
-    if (!data) {
-      // Пустая база — создаём демо-посты
-      if (!window._demoCreated) {
-        window._demoCreated = true;
-        push(ref(db, POSTS_PATH), {
-          name: 'METAIMPERIYA',
-          text: 'Запуск прямого эфира — уже сегодня в 20:00. Поговорим про SMM-тренды, ответим на вопросы и покажем живую панель аналитики.',
-          image: '',
-          ts: Date.now() - 120000
-        });
-        push(ref(db, POSTS_PATH), {
-          name: 'METAIMPERIYA',
-          text: 'Кейс: за 2 месяца вывели бренд одежды в топ-10 поиска. Охваты выросли в x4.2, стоимость подписки снизилась на 67%.',
-          image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=450&fit=crop',
-          ts: Date.now() - 14400000
-        });
-      }
-      return;
-    }
-
-    userPosts = Object.entries(data).map(([id, post]) => ({ id, ...post }))
-      .sort((a, b) => (b.ts || 0) - (a.ts || 0));
-
+    if (!data) return;
+    userPosts = Object.entries(data).map(([id, post]) => ({ id, ...post })).sort((a, b) => (b.ts || 0) - (a.ts || 0));
     renderAllPosts();
   });
 }
@@ -360,12 +317,8 @@ function loadPosts() {
 function renderAllPosts() {
   const container = document.getElementById('postsContainer');
   container.innerHTML = '';
-  userPosts.forEach(post => {
-    const el = renderPost(post);
-    container.appendChild(el);
-  });
-  const count = userPosts.length;
-  document.getElementById('feedCount').textContent = String(count).padStart(2, '0') + ' POSTS';
+  userPosts.forEach(post => container.appendChild(renderPost(post)));
+  document.getElementById('feedCount').textContent = String(userPosts.length).padStart(2, '0') + ' POSTS';
 }
 
 function timeAgo(ts) {
@@ -386,49 +339,15 @@ function renderPost(post) {
   el.dataset.id = post.id;
   const initial = (post.name || 'U').charAt(0).toUpperCase();
   let imgHtml = '';
-  if (post.image) {
-    imgHtml = '<img class="post-img" src="' + post.image + '" alt="post" onerror="this.style.display=\'none\'">';
-  }
-  el.innerHTML = `
-    <div class="post-head">
-      <div class="post-avatar">${initial}</div>
-      <div class="post-meta">
-        <div class="post-author">${escapeHtml(post.name)}</div>
-        <div class="post-time">${timeAgo(post.ts)}</div>
-      </div>
-      <div class="post-menu">
-        <button class="post-menu-btn" onclick="togglePostMenu('${post.id}', event)">⋮</button>
-        <div class="post-menu-dropdown" id="menu-${post.id}">
-          <button onclick="openDeleteModal('${post.id}')"><i class="fas fa-trash"></i> Удалить пост</button>
-        </div>
-      </div>
-    </div>
-    <div class="post-body"></div>
-    ${imgHtml}
-    <div class="post-actions">
-      <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">0</span></button>
-      <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
-      <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
-    </div>
-    <div class="comments">
-      <form class="comment-form" onsubmit="addComment(event, this)">
-        <input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200">
-        <button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button>
-      </form>
-    </div>
-  `;
+  if (post.image) imgHtml = '<img class="post-img" src="' + post.image + '" alt="post">';
+  el.innerHTML = '<div class="post-head"><div class="post-avatar">' + initial + '</div><div class="post-meta"><div class="post-author">' + escapeHtml(post.name) + '</div><div class="post-time">' + timeAgo(post.ts) + '</div></div><div class="post-menu"><button class="post-menu-btn" onclick="togglePostMenu(\'' + post.id + '\', event)">⋮</button><div class="post-menu-dropdown" id="menu-' + post.id + '"><button onclick="openDeleteModal(\'' + post.id + '\')"><i class="fas fa-trash"></i> Удалить пост</button></div></div></div><div class="post-body"></div>' + imgHtml + '<div class="post-actions"><button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">0</span></button><button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button><button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button></div><div class="comments"><form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form></div>';
   el.querySelector('.post-body').textContent = post.text;
   return el;
 }
 
-// ============================================================
-// МЕНЮ ПОСТА (три точки)
-// ============================================================
 window.togglePostMenu = function(postId, event) {
   event.stopPropagation();
-  document.querySelectorAll('.post-menu-dropdown').forEach(m => {
-    if (m.id !== 'menu-' + postId) m.classList.remove('show');
-  });
+  document.querySelectorAll('.post-menu-dropdown').forEach(m => { if (m.id !== 'menu-' + postId) m.classList.remove('show'); });
   const menu = document.getElementById('menu-' + postId);
   if (menu) menu.classList.toggle('show');
 };
@@ -437,9 +356,6 @@ document.addEventListener('click', function() {
   document.querySelectorAll('.post-menu-dropdown').forEach(m => m.classList.remove('show'));
 });
 
-// ============================================================
-// УДАЛЕНИЕ С ПАРОЛЕМ
-// ============================================================
 window.openDeleteModal = function(postId) {
   deletePostId = postId;
   document.getElementById('deletePasswordInput').value = '';
@@ -454,16 +370,9 @@ window.closeDeleteModal = function() {
 
 window.confirmDelete = function() {
   const pass = document.getElementById('deletePasswordInput').value;
-  if (pass !== ADMIN_PASSWORD) {
-    alert('❌ Неверный пароль');
-    return;
-  }
+  if (pass !== ADMIN_PASSWORD) { alert('❌ Неверный пароль'); return; }
   if (deletePostId) {
-    remove(ref(db, POSTS_PATH + '/' + deletePostId)).then(() => {
-      closeDeleteModal();
-    }).catch(err => {
-      alert('Ошибка удаления: ' + err.message);
-    });
+    remove(ref(db, POSTS_PATH + '/' + deletePostId)).then(() => closeDeleteModal()).catch(err => alert('Ошибка: ' + err.message));
   }
 };
 
@@ -471,9 +380,6 @@ document.getElementById('deleteModal').addEventListener('click', function(e) {
   if (e.target === this) closeDeleteModal();
 });
 
-// ============================================================
-// ЛАЙКИ / КОММЕНТЫ / ШЕРИНГ
-// ============================================================
 document.addEventListener('click', function(e) {
   const likeBtn = e.target.closest('.like-btn');
   if (likeBtn) {
@@ -486,17 +392,11 @@ document.addEventListener('click', function(e) {
     return;
   }
   const toggleBtn = e.target.closest('.comment-toggle');
-  if (toggleBtn) {
-    toggleBtn.closest('.post').querySelector('.comments').classList.toggle('show');
-    return;
-  }
+  if (toggleBtn) { toggleBtn.closest('.post').querySelector('.comments').classList.toggle('show'); return; }
   const shareBtn = e.target.closest('.share-btn');
   if (shareBtn) {
-    if (navigator.share) {
-      navigator.share({ title: 'METAIMPERIYA', url: location.href }).catch(() => {});
-    } else {
-      navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!')).catch(() => {});
-    }
+    if (navigator.share) navigator.share({ title: 'METAIMPERIYA', url: location.href }).catch(() => {});
+    else navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!')).catch(() => {});
   }
 });
 
@@ -519,9 +419,6 @@ window.addComment = function(e, form) {
   list.classList.add('show');
 };
 
-// ============================================================
-// ФАЙЛ КАРТИНКИ
-// ============================================================
 function attachFileHandler() {
   const fileInput = document.getElementById('newPostFile');
   const fileLabel = document.getElementById('fileLabel');
@@ -534,18 +431,12 @@ function attachFileHandler() {
       fileLabel.innerHTML = '<i class="fas fa-check"></i> ' + escapeHtml(file.name) + ' <span style="color:#666;font-size:9px">(нажми чтобы изменить)</span><input id="newPostFile" type="file" accept="image/*">';
       attachFileHandler();
       const reader = new FileReader();
-      reader.onload = function(e) {
-        filePreview.src = e.target.result;
-        filePreview.classList.add('show');
-      };
+      reader.onload = function(e) { filePreview.src = e.target.result; filePreview.classList.add('show'); };
       reader.readAsDataURL(file);
     }
   });
 }
 
-// ============================================================
-// ИНИЦИАЛИЗАЦИЯ
-// ============================================================
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
@@ -556,7 +447,6 @@ onAuthStateChanged(auth, (user) => {
 });
 </script>
 
-<!-- Aurora + Sand -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script id="vs" type="x-shader/x-vertex">
 varying vec2 vUv;
