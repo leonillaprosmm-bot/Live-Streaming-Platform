@@ -17,7 +17,6 @@ html,body{background:#050810;font-family:'Inter',sans-serif;color:#e8e8e8;overfl
 #intro{position:fixed;inset:0;background:#050810;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
 #intro.hide{opacity:0;pointer-events:none}
 .intro-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(24px,7vw,64px);font-weight:700;letter-spacing:6px;color:#fff}
-.intro-logo span{color:#ff3366}
 .intro-sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:4px;color:#666;margin-top:14px}
 .intro-bar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#ff3366,#00f2fe);width:0;animation:bar 1.8s ease-out forwards}
 @keyframes bar{to{width:100%}}
@@ -32,7 +31,6 @@ header{
 }
 .h-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.6vw,15px);font-weight:700;letter-spacing:4px;color:#fff;display:flex;align-items:center;gap:10px}
 .h-logo::before{content:"";width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#ff3366,#00f2fe)}
-.h-logo span{color:#ff3366}
 .h-menu{display:flex;gap:clamp(14px,2.5vw,32px);align-items:center}
 .h-menu a{color:#888;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12px);letter-spacing:2px;text-transform:uppercase;transition:color .25s;position:relative;padding:6px 0}
 .h-menu a::after{content:"";position:absolute;bottom:0;left:0;width:0;height:1px;background:#ff3366;transition:width .25s}
@@ -161,7 +159,6 @@ header{
 /* ФУТЕР */
 footer{padding:clamp(40px,8vw,80px) clamp(18px,4vw,48px);border-top:1px solid rgba(255,255,255,.05);text-align:center;position:relative;z-index:2}
 footer .f-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(14px,2vw,18px);font-weight:700;letter-spacing:6px;color:#fff;margin-bottom:20px}
-footer .f-logo span{color:#ff3366}
 footer .f-links{display:flex;gap:clamp(16px,3vw,32px);justify-content:center;flex-wrap:wrap;margin-bottom:24px}
 footer .f-links a{color:#888;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12px);letter-spacing:2px;text-transform:uppercase;transition:color .2s}
 footer .f-links a:hover{color:#ff3366}
@@ -172,7 +169,7 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
 <body>
 
 <div id="intro">
-  <div class="intro-logo">META<span>IMPERIYA</span></div>
+  <div class="intro-logo">METAIMPERIYA</div>
   <div class="intro-sub">SOCIAL PLATFORM</div>
   <div class="intro-bar"></div>
 </div>
@@ -181,7 +178,7 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
 
 <div class="wrap">
   <header>
-    <div class="h-logo">META<span>IMPERIYA</span></div>
+    <div class="h-logo">METAIMPERIYA</div>
     <div class="h-menu">
       <a href="#feed">Лента</a>
       <a href="#showcase">Шоу</a>
@@ -189,7 +186,6 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
     </div>
   </header>
 
-  <!-- ГЕРОЙ С АНИМАЦИЕЙ ВМЕСТО ЗАГОЛОВКА -->
   <section class="hero">
     <div class="hero-text-mask" id="heroTextMask"></div>
     <div class="hero-overlay"></div>
@@ -274,7 +270,7 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
   </section>
 
   <footer>
-    <div class="f-logo">META<span>IMPERIYA</span></div>
+    <div class="f-logo">METAIMPERIYA</div>
     <div class="f-links">
       <a href="#feed">Лента</a>
       <a href="live.html">Эфир</a>
@@ -339,7 +335,6 @@ gl_FragColor=vec4(finalColor,1.0);
 }
 </script>
 <script>
-// Заполняем hero-text-mask текстом (латиница для эффекта гифки)
 const textSample = "METAIMPERIYA SOCIAL PLATFORM CREATE CONTENT STRATEGY LIVE SMM MARKETING BRAND DESIGN PROMOTION GROWTH ANALYTICS COMMUNITY TARGETING EFFECTIVE AMAZING POWERFUL CREATIVE ";
 const heroMask = document.getElementById('heroTextMask');
 let fullText = '';
@@ -348,10 +343,8 @@ const p = document.createElement('p');
 p.textContent = fullText;
 heroMask.appendChild(p);
 
-// Заставка
 setTimeout(()=>{document.getElementById('intro').classList.add('hide');setTimeout(()=>document.getElementById('intro').style.display='none',900);},1900);
 
-// AURORA
 const ac=document.getElementById('aurora');
 const scene=new THREE.Scene();
 const camera=new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
@@ -363,9 +356,7 @@ const material=new THREE.ShaderMaterial({vertexShader:document.getElementById('v
 const mesh=new THREE.Mesh(geometry,material);scene.add(mesh);camera.position.z=1;
 function animate(t){requestAnimationFrame(animate);uniforms.time.value=t*0.001;renderer.render(scene,camera);}
 resize();window.addEventListener('resize',resize);animate();
-</script>
-<script>
-// ПЕСОЧНАЯ АНИМАЦИЯ
+
 const sandCanvas=document.getElementById('sandCanvas');
 const sctx=sandCanvas.getContext('2d');
 let sw,sh,sdpr=Math.min(window.devicePixelRatio||1,2);
@@ -390,7 +381,6 @@ function draw(){sctx.clearRect(0,0,sw,sh);sctx.fillStyle='rgb(236,204,116)';cons
 function tick(now){const dt=Math.min((now-lastTime)/1000,0.033);lastTime=now;update(dt);updateFall(dt);if(phase!=='falling'){for(let i=0;i<3;i++)settlePile();}draw();requestAnimationFrame(tick);}
 sandResize();window.addEventListener('resize',sandResize);sandCanvas.addEventListener('click',resetSand);sandCanvas.addEventListener('touchstart',(e)=>{e.preventDefault();resetSand();},{passive:false});requestAnimationFrame(tick);
 
-// Лайки, комменты, шеринг
 document.querySelectorAll('.like-btn').forEach(btn=>{btn.addEventListener('click',()=>{const cnt=btn.querySelector('.like-count');const liked=btn.classList.toggle('liked');const icon=btn.querySelector('i');icon.className=liked?'fas fa-heart':'far fa-heart';let n=parseInt(cnt.textContent);cnt.textContent=liked?n+1:n-1;});});
 document.querySelectorAll('.comment-toggle').forEach(btn=>{btn.addEventListener('click',()=>{btn.closest('.post').querySelector('.comments').classList.toggle('show');});});
 function addComment(e,form){e.preventDefault();const input=form.querySelector('.comment-input');const text=input.value.trim();if(!text)return;const post=form.closest('.post');const list=post.querySelector('.comments');const name='@guest_'+Math.floor(Math.random()*900+100);const div=document.createElement('div');div.className='comment';div.innerHTML='<div class="comment-avatar">'+name.charAt(1).toUpperCase()+'</div><div class="comment-body"><div class="comment-author">'+name+'</div><div class="comment-text"></div></div>';div.querySelector('.comment-text').textContent=text;list.insertBefore(div,form);const cnt=post.querySelector('.comment-count');cnt.textContent=parseInt(cnt.textContent)+1;input.value='';list.classList.add('show');}
