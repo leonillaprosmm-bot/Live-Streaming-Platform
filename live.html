@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>METAIMPERIYA — Прямой эфир</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; margin: 0; background: #0b0f19; color: #eee; overflow-x: hidden; }
+        .screen { display: none; }
+        .screen.active { display: flex; }
+        .guest-tile { position: relative; background: #000; border-radius: 12px; overflow: hidden; aspect-ratio: 16/9; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+        .guest-tile:hover { border-color: #00f2fe; }
+        .guest-tile.on-stage { border-color: #ff0050; box-shadow: 0 0 20px rgba(255,0,80,0.5); }
+        .guest-tile video, .guest-tile canvas { width: 100%; height: 100%; object-fit: cover; }
+        .bg-thumb { width: 100%; aspect-ratio: 16/9; border-radius: 6px; cursor: pointer; border: 2px solid transparent; object-fit: cover; }
+        .bg-thumb:hover { border-color: #00f2fe; }
+        .bg-thumb.active { border-color: #ff0050; }
+        input[type="range"] { -webkit-appearance: none; height: 4px; background: #374151; border-radius: 2px; outline: none; width: 100%; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: #00f2fe; cursor: pointer; }
+        .tile-menu { display: none; position: absolute; top: 4px; right: 4px; z-index: 10; }
+        .guest-tile:hover .tile-menu { display: block; }
+        .main-grid { display: grid; grid-template-columns: 1fr 340px; gap: 12px; padding: 12px; overflow: hidden; }
+        @media (max-width: 1024px) {
+            .main-grid { grid-template-columns: 1fr; padding: 8px; gap: 8px; }
+            .studio-panel, .chat-panel { max-height: 400px !important; }
+            .header-wrap { flex-wrap: wrap; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="screen-welcome" class="screen active min-h-screen flex-col items-center justify-center p-4">
+    <div style="max-width:420px; width:100%;">
+        <div style="text-align:center; margin-bottom:32px;">
+            <a href="index.html" style="display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; border-radius:16px; background:linear-gradient(90deg,#ff0050,#00f2fe); margin-bottom:16px; text-decoration:none;">
+                <i class="fa-solid fa-video" style="font-size:24px; color:white;"></i>
+            </a>
+            <h1 style="font-size:24px; font-weight:bold; color:white; margin:0;">METAIMPERIYA LIVE</h1>
+            <p style="color:#999; font-size:13px; margin-top:4px;">Прямой эфир</p>
+        </div>
+        <div style="background:#111827; border:1px solid #1f2937; border-radius:16px; padding:24px;">
+            <label style="display:block; font-size:11px; color:#999; margin-bottom:6px;">Ваше имя</label>
+            <input id="inputName" type="text" placeholder="Например: Иван" maxlength="30"
+                style="width:100%; background:#0b0f19; border:1px solid #1f2937; border-radius:10px; padding:12px; color:white; font-size:14px; margin-bottom:14px;">
+            <label style="display:block; font-size:11px; color:#999; margin-bottom:6px;">Пароль ведущего (гости — пусто)</label>
+            <input id="inputHostKey" type="password" placeholder="admin123"
+                style="width:100%; background:#0b0f19; border:1px solid #1f2937; border-radius:10px; padding:12px; color:white; font-size:14px; margin-bottom:18px;">
+            <button onclick="enterStream()"
+                style="width:100%; background:linear-gradient(90deg,#ff0050,#e00045); color:white; border:none; padding:14px; border-radius:10px; font-weight:bold; font-size:14px; cursor:pointer;">
+                <i class="fa-solid fa-arrow-right"></i> Войти в эфир
+            </button>
+            <a href="index.html" style="display:block; text-align:center; margin-top:14px; color:#666; font-size:12px; text-decoration:none;">← На главную</a>
+        </div>
+    </div>
+</div>
+
+<div id="screen-room" class="screen min-h-screen flex-col">
+    <header class="header-wrap" style="background:#111827; border-bottom:1px solid #1f2937; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <a href="index.html" style="background:linear-gradient(90deg,#ff0050,#00f2fe); padding:8px; border-radius:10px; text-decoration:none;">
+                <i class="fa-solid fa-video" style="color:white;"></i>
+            </a>
+            <div>
+                <h1 style="margin:0; font-size:14px; color:white; font-weight:bold;">Прямой эфир <span style="background:#dc2626; font-size:10px; padding:2px 8px; border-radius:10px; color:white;">● LIVE</span></h1>
+                <p id="roomSubtitle" style="margin:0; font-size:10px; color:#999;">—</p>
+            </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button onclick="toggleOrientation()" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px 14px; border-radius:10px; font-size:11px; cursor:pointer;">
+                <i id="orientIcon" class="fa-solid fa-mobile-screen" style="color:#00f2fe;"></i> <span id="orientLabel">Горизонт</span>
+            </button>
+            <button onclick="copyInviteLink()" style="background:linear-gradient(90deg,#00f2fe,#3b82f6); color:white; border:none; padding:8px 14px; border-radius:10px; font-size:11px; font-weight:bold; cursor:pointer;">
+                <i class="fa-solid fa-link"></i> Ссылка
+            </button>
+            <button onclick="leaveRoom()" style="background:rgba(220,38,38,0.2); border:1px solid rgba(220,38,38,0.4); color:#fca5a5; padding:8px 14px; border-radius:10px; font-size:11px; cursor:pointer;">
+                <i class="fa-solid fa-right-from-bracket"></i> Выйти
+            </button>
+        </div>
+    </header>
+
+    <main class="main-grid" style="flex:1;">
+        <div style="display:flex; flex-direction:column; gap:12px; overflow:hidden;">
+            <div id="stageWrapper" style="position:relative; width:100%; aspect-ratio:16/9; background:black; border-radius:16px; overflow:hidden; margin:0 auto; max-width:100%; transition:all 0.3s;">
+                <div id="mainVideoBox" style="width:100%; height:100%; position:relative; display:flex; align-items:center; justify-content:center;">
+                    <img id="stageBgImage" src="https://placehold.co/1280x720/0b0f19/00f2fe?text=METAIMPERIYA+LIVE&font=montserrat" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <iframe id="stageIframe" style="display:none; width:100%; height:100%; border:none; position:absolute; top:0; left:0; z-index:4;"></iframe>
+                <div style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.7); padding:6px 10px; border-radius:8px; font-size:11px; color:white; z-index:5;">
+                    <i id="mainMicIcon" class="fa-solid fa-microphone" style="color:#34d399;"></i>
+                    <span id="mainNameLabel">Сцена свободна</span>
+                </div>
+                <button id="clearStageBtn" onclick="clearStage()" style="display:none; position:absolute; top:10px; right:10px; background:#dc2626; color:white; border:none; padding:6px 10px; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer; z-index:6;">
+                    <i class="fa-solid fa-xmark"></i> Убрать со сцены
+                </button>
+            </div>
+
+            <button id="returnSelfBtn" onclick="returnSelfToStage()" style="display:none; background:linear-gradient(90deg,#10b981,#059669); color:white; border:none; padding:12px; border-radius:12px; font-size:13px; font-weight:bold; cursor:pointer; width:100%;">
+                <i class="fa-solid fa-arrow-up"></i> Вернуть себя на сцену
+            </button>
+
+            <div>
+                <h3 style="font-size:11px; color:#999; text-transform:uppercase; margin:0 0 8px 0;">
+                    <i class="fa-solid fa-users"></i> Участники (<span id="guestsCount">0</span>)
+                </h3>
+                <div id="guestGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px; max-height:220px; overflow-y:auto;">
+                    <p id="noGuestsHint" style="color:#666; font-size:11px; text-align:center; grid-column:1/-1; padding:16px;">Пока никого</p>
+                </div>
+            </div>
+
+            <div style="background:#111827; border:1px solid #1f2937; border-radius:14px; padding:12px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <button id="roomCamBtn" onclick="toggleRoomCam()" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px 12px; border-radius:10px; font-size:11px; cursor:pointer;">
+                        <i id="roomCamIcon" class="fa-solid fa-video" style="color:#00f2fe;"></i> Камера
+                    </button>
+                    <button id="roomMicBtn" onclick="toggleRoomMic()" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px 12px; border-radius:10px; font-size:11px; cursor:pointer;">
+                        <i id="roomMicIcon" class="fa-solid fa-microphone" style="color:#34d399;"></i> Микрофон
+                    </button>
+                    <button onclick="toggleScreenShare()" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px 12px; border-radius:10px; font-size:11px; cursor:pointer;">
+                        <i class="fa-solid fa-desktop" style="color:#a78bfa;"></i> <span id="shareScreenLabel">Экран</span>
+                    </button>
+                    <button id="requestStageBtn" onclick="requestStage()" style="display:none; background:linear-gradient(90deg,#f59e0b,#ea580c); color:white; border:none; padding:8px 12px; border-radius:10px; font-size:11px; font-weight:bold; cursor:pointer;">
+                        <i class="fa-solid fa-hand"></i> <span id="requestStageLabel">Хочу в эфир</span>
+                    </button>
+                </div>
+                <button onclick="sendLikeBurst()" style="background:linear-gradient(90deg,#ff0050,#ec4899); color:white; border:none; padding:8px 14px; border-radius:10px; font-size:11px; font-weight:bold; cursor:pointer;">
+                    <i class="fa-solid fa-heart"></i> Лайк
+                </button>
+            </div>
+        </div>
+
+        <div id="studioPanel" class="studio-panel" style="background:#111827; border:1px solid #1f2937; border-radius:14px; padding:14px; overflow-y:auto; max-height:calc(100vh - 100px); display:none;">
+            <h2 style="margin:0 0 14px 0; font-size:14px; color:white;"><i class="fa-solid fa-wand-magic-sparkles" style="color:#ff0050;"></i> Студия</h2>
+
+            <h3 style="font-size:11px; color:#999; margin:0 0 8px 0;">🌐 Сайт в эфире</h3>
+            <input id="iframeUrl" type="text" placeholder="https://example.com"
+                style="width:100%; background:#0b0f19; border:1px solid #1f2937; border-radius:6px; padding:8px; color:white; font-size:11px; margin-bottom:6px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:16px;">
+                <button onclick="showIframe()" style="background:#10b981; border:none; color:white; padding:8px; border-radius:6px; font-size:10px; font-weight:bold; cursor:pointer;">Показать сайт</button>
+                <button onclick="hideIframe()" style="background:#374151; border:none; color:white; padding:8px; border-radius:6px; font-size:10px; cursor:pointer;">Скрыть</button>
+            </div>
+            <p style="font-size:9px; color:#666; margin:0 0 16px 0;">⚠ Google, YouTube, Figma — да. ВК, Telegram — нет.</p>
+
+            <h3 style="font-size:11px; color:#999; margin:0 0 8px 0;">Фон</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:10px;">
+                <button onclick="studioSetBg('none')" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px; border-radius:6px; font-size:10px; cursor:pointer;">Ориг</button>
+                <button onclick="studioSetBg('blur')" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px; border-radius:6px; font-size:10px; cursor:pointer;">Блюр</button>
+                <button onclick="studioSetBg('green')" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px; border-radius:6px; font-size:10px; cursor:pointer;">Зелёный</button>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:16px;">
+                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                <img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                <img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+                <img src="https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
+            </div>
+
+            <h3 style="font-size:11px; color:#999; margin:0 0 8px 0;">Эффект</h3>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:16px;">
+                <button onclick="studioSetEffect('original')" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px; border-radius:6px; font-size:10px; cursor:pointer;">Ориг</button>
+                <button onclick="studioSetEffect('vhs')" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px; border-radius:6px; font-size:10px; cursor:pointer;">VHS</button>
+                <button onclick="studioSetEffect('invert')" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px; border-radius:6px; font-size:10px; cursor:pointer;">Инверт</button>
+                <button onclick="studioSetEffect('sepia')" style="background:#1f2937; border:1px solid #374151; color:white; padding:8px; border-radius:6px; font-size:10px; cursor:pointer;">Сепия</button>
+            </div>
+
+            <h3 style="font-size:11px; color:#999; margin:0 0 8px 0;">Текст</h3>
+            <input id="studioText" type="text" placeholder="Текст..." maxlength="40" oninput="studioSetText()"
+                style="width:100%; background:#0b0f19; border:1px solid #1f2937; border-radius:6px; padding:8px; color:white; font-size:11px; margin-bottom:8px;">
+            <div style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
+                <input id="studioTextColor" type="color" value="#ff3366" onchange="studioSetText()" style="width:32px; height:28px; border:none; border-radius:6px; cursor:pointer;">
+                <input id="studioTextSize" type="range" min="20" max="180" value="80" oninput="studioSetTextSize()">
+            </div>
+
+            <h3 style="font-size:11px; color:#999; margin:0 0 8px 0;">Масштаб видео</h3>
+            <input id="studioVideoScale" type="range" min="50" max="200" value="100" oninput="studioSetVideoScale()">
+        </div>
+
+        <div id="chatPanel" class="chat-panel" style="background:#111827; border:1px solid #1f2937; border-radius:14px; padding:0; display:flex; flex-direction:column; overflow:hidden; max-height:calc(100vh - 100px);">
+            <div style="padding:12px; border-bottom:1px solid #1f2937;">
+                <h2 style="margin:0; font-size:14px; color:white;"><i class="fa-solid fa-comments" style="color:#ff0050;"></i> Чат</h2>
+            </div>
+            <div id="chatMessages" style="flex:1; padding:12px; overflow-y:auto; font-size:12px; min-height:200px;"></div>
+            <form onsubmit="handleSendMessage(event)" style="padding:12px; border-top:1px solid #1f2937; display:flex; gap:6px;">
+                <input id="chatInput" type="text" placeholder="Написать..." maxlength="300"
+                    style="flex:1; background:#0b0f19; border:1px solid #1f2937; border-radius:10px; padding:8px; color:white; font-size:12px;">
+                <button type="submit" style="background:#ff0050; border:none; color:white; padding:8px 12px; border-radius:10px; cursor:pointer;">
+                    <i class="fa-solid fa-paper-plane"></i>
+                </button>
+            </form>
+        </div>
+    </main>
+</div>
+
+<button id="openStudioBtn" onclick="toggleStudio()" style="display:none; position:fixed; bottom:90px; right:24px; background:linear-gradient(90deg,#ff0050,#ec4899); color:white; border:none; padding:12px 20px; border-radius:30px; font-weight:bold; font-size:13px; cursor:pointer; box-shadow:0 4px 20px rgba(255,0,80,0.5); z-index:50;">
+    <i class="fa-solid fa-wand-magic-sparkles"></i> Студия
+</button>
+
+<script type="module">
+    import { Room, RoomEvent, Track } from 'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.esm.mjs';
+    import { Studio } from './studio.js';
+
+    const TOKEN_SERVER_URL = "https://prostream-signaling.onrender.com";
+    const FIXED_ROOM = "main-studio";
+    const HOST_PASSWORD = "admin123";
+
+    window.appState = {
+        name: '', isHost: false, room: null, studio: null,
+        isRoomCamOn: false, isRoomMicOn: true,
+        stageIdentity: null, studioTrack: null,
+        screenShareTrack: null, orientation: 'horizontal',
+        iframeActive: false, selfOnStage: false,
+        remoteStreams: {}
+    };
+
+    window.studioCanvas = document.createElement('canvas');
+    window.studioCanvas.width = 1920;
+    window.studioCanvas.height = 1080;
+    window.studioCanvas.style.display = 'none';
+    document.body.appendChild(window.studioCanvas);
+
+    window.showScreen = function(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    };
+
+    window.toggleStudio = function() {
+        const panel = document.getElementById('studioPanel');
+        const chatPanel = document.getElementById('chatPanel');
+        const btn = document.getElementById('openStudioBtn');
+        if (panel.style.display === 'none' || !panel.style.display) {
+            panel.style.display = 'block';
+            chatPanel.style.display = 'none';
+            btn.style.display = 'none';
+        } else {
+            panel.style.display = 'none';
+            chatPanel.style.display = 'flex';
+            btn.style.display = 'block';
+        }
+    };
+
+    window.enterStream = async function() {
+        const name = document.getElementById('inputName').value.trim();
+        const hostKey = document.getElementById('inputHostKey').value;
+        if (!name) { alert('Введите ваше имя'); return; }
+        const isHost = (hostKey === HOST_PASSWORD);
+        window.appState.name = name;
+        window.appState.isHost = isHost;
+
+        showScreen('screen-room');
+        document.getElementById('roomSubtitle').innerText = (isHost ? '👑 Ведущий: ' : '👤 Гость: ') + name;
+
+        if (isHost) {
+            document.getElementById('openStudioBtn').style.display = 'block';
+        } else {
+            document.getElementById('requestStageBtn').style.display = 'inline-block';
+        }
+
+        await connectToLiveKit(isHost);
+    };
+
+    async function connectToLiveKit(isHost) {
+        try {
+            const res = await fetch(`${TOKEN_SERVER_URL}/token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ roomName: FIXED_ROOM, participantName: window.appState.name })
+            });
+            if (!res.ok) throw new Error('Не удалось получить токен');
+            const { token, url } = await res.json();
+
+            const room = new Room({ adaptiveStream: true, dynacast: true });
+            window.appState.room = room;
+
+            room
+                .on(RoomEvent.ParticipantConnected, (p) => renderGuestTile(p.identity, false))
+                .on(RoomEvent.ParticipantDisconnected, (p) => {
+                    removeGuestTile(p.identity);
+                    delete window.appState.remoteStreams[p.identity];
+                    if (window.appState.stageIdentity === p.identity) clearStage();
+                })
+                .on(RoomEvent.TrackSubscribed, (track, pub, participant) => attachRemoteTrack(track, participant))
+                .on(RoomEvent.TrackUnsubscribed, (track, pub, participant) => {
+                    if (track.kind === Track.Kind.Video) {
+                        const c = document.getElementById('guest-video-' + participant.identity);
+                        if (c) c.innerHTML = '<i class="fa-solid fa-user" style="color:#555; font-size:24px;"></i>';
+                    }
+                })
+                .on(RoomEvent.LocalTrackPublished, (publication) => {
+                    if (publication.track) attachLocalTrack(publication.track);
+                })
+                .on(RoomEvent.DataReceived, (payload, participant) => {
+                    try {
+                        const data = JSON.parse(new TextDecoder().decode(payload));
+                        handleDataMessage(data, participant);
+                    } catch (e) {}
+                });
+
+            await room.connect(url, token);
+            console.log('✅ Подключен как', isHost ? 'ВЕДУЩИЙ' : 'ГОСТЬ');
+
+            if (isHost) {
+                await startHostStudio();
+            } else {
+                await room.localParticipant.setMicrophoneEnabled(false);
+                await room.localParticipant.setCameraEnabled(false);
+                window.appState.isRoomMicOn = false;
+                window.appState.isRoomCamOn = false;
+            }
+            updateRoomIcons();
+
+            room.remoteParticipants.forEach((p) => {
+                renderGuestTile(p.identity, false);
+                p.trackPublications.forEach((pub) => {
+                    if (pub.track && pub.isSubscribed) attachRemoteTrack(pub.track, p);
+                });
+            });
+            room.localParticipant.trackPublications.forEach((pub) => {
+                if (pub.track) attachLocalTrack(pub.track);
+            });
+        } catch (err) {
+            console.error('❌ Ошибка:', err);
+            alert('Ошибка подключения: ' + err.message);
+        }
+    }
+
+    async function startHostStudio() {
+        const room = window.appState.room;
+        const studio = new Studio(window.studioCanvas);
+        window.appState.studio = studio;
+
+        const outputStream = await studio.start();
+        const videoTrack = outputStream.getVideoTracks()[0];
+        const audioTrack = outputStream.getAudioTracks()[0];
+
+        await room.localParticipant.publishTrack(videoTrack, { name: 'studio-video', source: Track.Source.Camera });
+        window.appState.studioTrack = videoTrack;
+
+        if (audioTrack) {
+            await room.localParticipant.publishTrack(audioTrack, { name: 'studio-audio', source: Track.Source.Microphone });
+        }
+
+        window.appState.isRoomCamOn = true;
+        window.appState.isRoomMicOn = true;
+        updateRoomIcons();
+
+        renderGuestTile(window.appState.name, true);
+        const c = document.getElementById('guest-video-' + window.appState.name);
+        c.innerHTML = '';
+        window.studioCanvas.style.display = 'block';
+        window.studioCanvas.style.width = '100%';
+        window.studioCanvas.style.height = '100%';
+        window.studioCanvas.style.objectFit = 'cover';
+        c.appendChild(window.studioCanvas);
+
+        setTimeout(() => {
+            putOnStage(window.appState.name);
+            window.appState.selfOnStage = true;
+        }, 1000);
+    }
+
+    function renderGuestTile(identity, isLocal) {
+        if (document.getElementById('guest-tile-' + identity)) return;
+        const hint = document.getElementById('noGuestsHint');
+        if (hint) hint.style.display = 'none';
+
+        const tile = document.createElement('div');
+        tile.id = 'guest-tile-' + identity;
+        tile.className = 'guest-tile';
+        tile.onclick = () => { if (window.appState.isHost) putOnStage(identity); };
+        tile.innerHTML = `
+            <div id="guest-video-${identity}" style="width:100%; height:100%; background:#111827; display:flex; align-items:center; justify-content:center;">
+                <i class="fa-solid fa-user" style="color:#555; font-size:24px;"></i>
+            </div>
+            <div style="position:absolute; bottom:4px; left:4px; background:rgba(0,0,0,0.7); padding:2px 6px; border-radius:4px; font-size:10px; color:white; z-index:2;">
+                ${isLocal ? 'Вы' : escapeHtml(identity)}
+            </div>
+            ${window.appState.isHost && !isLocal ? `
+            <div class="tile-menu">
+                <button onclick="event.stopPropagation(); putOnStage('${escapeHtml(identity).replace(/'/g, '&#39;')}')" style="background:#f59e0b; color:black; border:none; padding:4px 8px; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer;">
+                    <i class="fa-solid fa-arrow-up"></i> На сцену
+                </button>
+            </div>` : ''}
+        `;
+        document.getElementById('guestGrid').appendChild(tile);
+        updateGuestsCount();
+    }
+
+    function removeGuestTile(identity) {
+        const tile = document.getElementById('guest-tile-' + identity);
+        if (tile) tile.remove();
+        updateGuestsCount();
+        if (document.querySelectorAll('.guest-tile').length === 0) {
+            const hint = document.getElementById('noGuestsHint');
+            if (hint) hint.style.display = 'block';
+        }
+    }
+
+    function updateGuestsCount() {
+        document.getElementById('guestsCount').innerText = document.querySelectorAll('.guest-tile').length;
+    }
+
+    function attachLocalTrack(track) {
+        if (window.appState.isHost) return;
+        if (track.kind === Track.Kind.Video) {
+            renderGuestTile(window.appState.name, true);
+            const c = document.getElementById('guest-video-' + window.appState.name);
+            c.innerHTML = '';
+            const v = track.attach();
+            v.style = 'width:100%; height:100%; object-fit:cover; transform:scaleX(-1);';
+            c.appendChild(v);
+        }
+    }
+
+    function attachRemoteTrack(track, participant) {
+        if (track.kind === Track.Kind.Video) {
+            let stream = window.appState.remoteStreams[participant.identity];
+            if (!stream) {
+                stream = new MediaStream();
+                window.appState.remoteStreams[participant.identity] = stream;
+            }
+            stream.addTrack(track.mediaStreamTrack);
+            renderGuestTile(participant.identity, false);
+            const c = document.getElementById('guest-video-' + participant.identity);
+            c.innerHTML = '';
+            const v = track.attach();
+            v.style = 'width:100%; height:100%; object-fit:cover;';
+            c.appendChild(v);
+        } else if (track.kind === Track.Kind.Audio) {
+            const a = track.attach();
+            a.autoplay = true;
+            document.body.appendChild(a);
+        }
+    }
+
+    window.putOnStage = function(identity) {
+        const box = document.getElementById('mainVideoBox');
+        box.querySelectorAll('video, canvas').forEach(v => v.remove());
+        document.getElementById('stageBgImage').style.display = 'none';
+        document.getElementById('stageIframe').style.display = 'none';
+        window.appState.iframeActive = false;
+
+        const c = document.getElementById('guest-video-' + identity);
+        if (!c) return;
+
+        const v = c.querySelector('video');
+        const cv = c.querySelector('canvas');
+
+        if (!v && !cv) {
+            document.getElementById('mainNameLabel').innerText = 'Ожидание видео...';
+            setTimeout(() => putOnStage(identity), 1500);
+            return;
+        }
+
+        if (cv) {
+            box.appendChild(cv);
+            cv.style.position = 'absolute';
+            cv.style.top = '0';
+            cv.style.left = '0';
+            cv.style.width = '100%';
+            cv.style.height = '100%';
+            cv.style.objectFit = 'cover';
+        } else if (v) {
+            const clone = v.cloneNode(true);
+            clone.style = 'width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0;';
+            clone.autoplay = true;
+            clone.playsInline = true;
+            clone.muted = false;
+            if (identity === window.appState.name) clone.style.transform = 'scaleX(-1)';
+            if (v.srcObject) clone.srcObject = v.srcObject;
+            box.appendChild(clone);
+        }
+
+        window.appState.stageIdentity = identity;
+        window.appState.selfOnStage = (identity === window.appState.name);
+        document.getElementById('mainNameLabel').innerText = identity === window.appState.name ? identity + ' (Вы)' : identity;
+        document.getElementById('clearStageBtn').style.display = 'block';
+        document.getElementById('returnSelfBtn').style.display = 'none';
+
+        document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
+        const tile = document.getElementById('guest-tile-' + identity);
+        if (tile) tile.classList.add('on-stage');
+
+        if (window.appState.isHost && window.appState.room) {
+            const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-show', identity: identity }));
+            window.appState.room.localParticipant.publishData(payload, { reliable: true });
+        }
+    };
+
+    window.clearStage = function() {
+        const box = document.getElementById('mainVideoBox');
+        box.querySelectorAll('video, canvas').forEach(v => v.remove());
+        document.getElementById('stageBgImage').style.display = 'block';
+        document.getElementById('stageIframe').style.display = 'none';
+        window.appState.iframeActive = false;
+        document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
+        document.getElementById('clearStageBtn').style.display = 'none';
+        window.appState.stageIdentity = null;
+        window.appState.selfOnStage = false;
+        document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
+
+        if (window.appState.isHost && window.appState.room) {
+            const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-clear' }));
+            window.appState.room.localParticipant.publishData(payload, { reliable: true });
+            document.getElementById('returnSelfBtn').style.display = 'block';
+        }
+    };
+
+    window.returnSelfToStage = function() {
+        document.getElementById('returnSelfBtn').style.display = 'none';
+        putOnStage(window.appState.name);
+    };
+
+    function clearStageLocal() {
+        const box = document.getElementById('mainVideoBox');
+        box.querySelectorAll('video, canvas').forEach(v => v.remove());
+        document.getElementById('stageBgImage').style.display = 'block';
+        document.getElementById('stageIframe').style.display = 'none';
+        window.appState.iframeActive = false;
+        document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
+        document.getElementById('clearStageBtn').style.display = 'none';
+        window.appState.stageIdentity = null;
+        window.appState.selfOnStage = false;
+        document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
+    }
+
+    window.showIframe = function() {
+        const url = document.getElementById('iframeUrl').value.trim();
+        if (!url) { alert('Вставь ссылку'); return; }
+        let finalUrl = url.startsWith('http') ? url : 'https://' + url;
+
+        const box = document.getElementById('mainVideoBox');
+        box.querySelectorAll('video, canvas').forEach(v => v.remove());
+        document.getElementById('stageBgImage').style.display = 'none';
+
+        const iframe = document.getElementById('stageIframe');
+        iframe.src = finalUrl;
+        iframe.style.display = 'block';
+        window.appState.iframeActive = true;
+        window.appState.stageIdentity = null;
+        document.getElementById('mainNameLabel').innerText = '🌐 ' + finalUrl;
+        document.getElementById('clearStageBtn').style.display = 'block';
+        document.getElementById('returnSelfBtn').style.display = 'none';
+
+        if (window.appState.isHost && window.appState.room) {
+            const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-iframe', url: finalUrl }));
+            window.appState.room.localParticipant.publishData(payload, { reliable: true });
+        }
+    };
+
+    window.hideIframe = function() {
+        const iframe = document.getElementById('stageIframe');
+        iframe.style.display = 'none';
+        iframe.src = '';
+        window.appState.iframeActive = false;
+        document.getElementById('stageBgImage').style.display = 'block';
+        document.getElementById('clearStageBtn').style.display = 'none';
+        document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
+
+        if (window.appState.isHost && window.appState.room) {
+            const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-clear' }));
+            window.appState.room.localParticipant.publishData(payload, { reliable: true });
+        }
+        if (window.appState.isHost) setTimeout(() => putOnStage(window.appState.name), 300);
+    };
+
+    function showIframeLocal(url) {
+        const iframe = document.getElementById('stageIframe');
+        const box = document.getElementById('mainVideoBox');
+        box.querySelectorAll('video, canvas').forEach(v => v.remove());
+        document.getElementById('stageBgImage').style.display = 'none';
+        iframe.src = url;
+        iframe.style.display = 'block';
+        window.appState.iframeActive = true;
+        document.getElementById('mainNameLabel').innerText = '🌐 ' + url;
+        document.getElementById('clearStageBtn').style.display = 'block';
+    }
+
+    function handleDataMessage(data, participant) {
+        if (data.type === 'stage-request') {
+            if (window.appState.isHost) showRequestCard(data.name, participant.identity);
+        } else if (data.type === 'stage-approved') {
+            if (!window.appState.isHost) enableCamThenGoOnStage();
+        } else if (data.type === 'stage-denied') {
+            if (!window.appState.isHost) resetRequestButton();
+        } else if (data.type === 'stage-show') {
+            if (data.identity) setTimeout(() => putOnStage(data.identity), 500);
+        } else if (data.type === 'stage-clear') {
+            clearStageLocal();
+            if (window.appState.isHost && window.appState.name) {
+                setTimeout(() => putOnStage(window.appState.name), 500);
+            }
+        } else if (data.type === 'stage-iframe') {
+            if (data.url) showIframeLocal(data.url);
+        }
+    }
+
+    async function enableCamThenGoOnStage() {
+        const room = window.appState.room;
+        if (!room) return;
+        try {
+            if (!window.appState.isRoomCamOn) { await room.localParticipant.setCameraEnabled(true); window.appState.isRoomCamOn = true; }
+            if (!window.appState.isRoomMicOn) { await room.localParticipant.setMicrophoneEnabled(true); window.appState.isRoomMicOn = true; }
+            updateRoomIcons();
+        } catch (err) { console.error(err); }
+    }
+
+    function resetRequestButton() {
+        const btn = document.getElementById('requestStageBtn');
+        const label = document.getElementById('requestStageLabel');
+        if (btn && label) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; label.innerText = 'Хочу в эфир'; }
+    }
+
+    window.requestStage = function() {
+        if (!window.appState.room || window.appState.isHost) return;
+        const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-request', name: window.appState.name }));
+        window.appState.room.localParticipant.publishData(payload, { reliable: true });
+        document.getElementById('requestStageLabel').innerText = 'Запрос отправлен';
+        document.getElementById('requestStageBtn').style.opacity = '0.5';
+        document.getElementById('requestStageBtn').style.pointerEvents = 'none';
+    };
+
+    function showRequestCard(name, identity) {
+        const card = document.createElement('div');
+        card.style = 'position:fixed; top:80px; right:16px; background:#111827; border:2px solid #f59e0b; border-radius:12px; padding:16px; box-shadow:0 8px 32px rgba(0,0,0,0.6); z-index:100; min-width:280px;';
+        card.innerHTML = `
+            <p style="margin:0 0 12px 0; color:white; font-weight:bold;">${escapeHtml(name)} хочет в эфир</p>
+            <div style="display:flex; gap:8px;">
+                <button onclick="approveRequest('${escapeHtml(identity).replace(/'/g, '&#39;')}', this)" style="flex:1; background:#10b981; border:none; color:white; padding:8px; border-radius:8px; font-weight:bold; cursor:pointer;">Одобрить</button>
+                <button onclick="denyRequest('${escapeHtml(identity).replace(/'/g, '&#39;')}', this)" style="flex:1; background:#374151; border:none; color:#ccc; padding:8px; border-radius:8px; cursor:pointer;">Отклонить</button>
+            </div>
+        `;
+        document.body.appendChild(card);
+        setTimeout(() => { if (card.parentNode) card.remove(); }, 45000);
+    }
+
+    window.approveRequest = function(identity, btn) {
+        const room = window.appState.room;
+        const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-approved', identity: identity }));
+        room.localParticipant.publishData(payload, { reliable: true });
+        setTimeout(() => putOnStage(identity), 1500);
+        btn.closest('div').parentNode.remove();
+    };
+
+    window.denyRequest = function(identity, btn) {
+        const room = window.appState.room;
+        const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-denied' }));
+        room.localParticipant.publishData(payload, { reliable: true });
+        btn.closest('div').parentNode.remove();
+    };
+
+    window.studioSetBg = function(type, imageUrl, el) {
+        if (!window.appState.studio) return;
+        window.appState.studio.setBackground(type, imageUrl);
+        document.querySelectorAll('.bg-thumb').forEach(t => t.classList.remove('active'));
+        if (el) el.classList.add('active');
+    };
+    window.studioSetEffect = function(effect) {
+        if (!window.appState.studio) return;
+        window.appState.studio.setVideoEffect(effect);
+    };
+    window.studioSetText = function() {
+        if (!window.appState.studio) return;
+        window.appState.studio.setText(document.getElementById('studioText').value, document.getElementById('studioTextColor').value);
+    };
+    window.studioSetTextSize = function() {
+        if (!window.appState.studio) return;
+        window.appState.studio.setTextSize(parseInt(document.getElementById('studioTextSize').value));
+    };
+    window.studioSetVideoScale = function() {
+        if (!window.appState.studio) return;
+        window.appState.studio.setVideoScale(parseInt(document.getElementById('studioVideoScale').value) / 100);
+    };
+
+    window.toggleOrientation = function() {
+        const wrapper = document.getElementById('stageWrapper');
+        const icon = document.getElementById('orientIcon');
+        const label = document.getElementById('orientLabel');
+        const studio = window.appState.studio;
+
+        if (window.appState.orientation === 'horizontal') {
+            window.appState.orientation = 'vertical';
+            wrapper.style.aspectRatio = '9/16';
+            wrapper.style.maxWidth = '420px';
+            icon.className = 'fa-solid fa-desktop';
+            label.innerText = 'Вертикал';
+            if (studio) studio.setOrientation('vertical');
+        } else {
+            window.appState.orientation = 'horizontal';
+            wrapper.style.aspectRatio = '16/9';
+            wrapper.style.maxWidth = '100%';
+            icon.className = 'fa-solid fa-mobile-screen';
+            label.innerText = 'Горизонт';
+            if (studio) studio.setOrientation('horizontal');
+        }
+    };
+
+    window.toggleRoomMic = async function() {
+        if (!window.appState.room) return;
+        const s = !window.appState.isRoomMicOn;
+        await window.appState.room.localParticipant.setMicrophoneEnabled(s);
+        window.appState.isRoomMicOn = s;
+        if (window.appState.studio) window.appState.studio.setMicEnabled(s);
+        updateRoomIcons();
+    };
+
+    window.toggleRoomCam = async function() {
+        if (!window.appState.room) return;
+        const s = !window.appState.isRoomCamOn;
+        if (window.appState.isHost && window.appState.studioTrack) {
+            window.appState.studioTrack.enabled = s;
+        } else {
+            await window.appState.room.localParticipant.setCameraEnabled(s);
+        }
+        window.appState.isRoomCamOn = s;
+        updateRoomIcons();
+    };
+
+    window.toggleScreenShare = async function() {
+        if (!window.appState.room) return;
+        try {
+            const room = window.appState.room;
+            if (window.appState.screenShareTrack) {
+                await room.localParticipant.unpublishTrack(window.appState.screenShareTrack);
+                window.appState.screenShareTrack.stop();
+                window.appState.screenShareTrack = null;
+                document.getElementById('shareScreenLabel').innerText = 'Экран';
+            } else {
+                const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+                const screenTrack = screenStream.getVideoTracks()[0];
+                window.appState.screenShareTrack = screenTrack;
+                await room.localParticipant.publishTrack(screenTrack, { name: 'screen-share', source: Track.Source.ScreenShare });
+                document.getElementById('shareScreenLabel').innerText = 'Стоп';
+                screenTrack.onended = () => { if (window.appState.screenShareTrack) window.toggleScreenShare(); };
+            }
+        } catch (err) { console.error(err); alert('Screen share не удалось: ' + err.message); }
+    };
+
+    function updateRoomIcons() {
+        document.getElementById('roomCamIcon').style.color = window.appState.isRoomCamOn ? '#00f2fe' : '#ef4444';
+        document.getElementById('roomCamIcon').className = window.appState.isRoomCamOn ? 'fa-solid fa-video' : 'fa-solid fa-video-slash';
+        document.getElementById('roomMicIcon').style.color = window.appState.isRoomMicOn ? '#34d399' : '#ef4444';
+        document.getElementById('roomMicIcon').className = window.appState.isRoomMicOn ? 'fa-solid fa-microphone' : 'fa-solid fa-microphone-slash';
+    }
+
+    window.leaveRoom = function() {
+        if (window.appState.studio) window.appState.studio.stop();
+        if (window.appState.room) { window.appState.room.disconnect(); window.appState.room = null; }
+        location.reload();
+    };
+
+    window.copyInviteLink = function() {
+        navigator.clipboard.writeText(window.location.origin + window.location.pathname)
+            .then(() => alert('✅ Ссылка скопирована!'))
+            .catch(() => prompt('Скопируйте:', window.location.origin));
+    };
+
+    window.escapeHtml = function(str) {
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    };
+</script>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, serverTimestamp, query, limitToLast } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyB0G2ZiFEwSr3472_9SsLJUMs6RORmLFWs",
+        authDomain: "meta-live-chat.firebaseapp.com",
+        databaseURL: "https://meta-live-chat-default-rtdb.firebaseio.com",
+        projectId: "meta-live-chat",
+        storageBucket: "meta-live-chat.firebasestorage.app",
+        messagingSenderId: "695456991297",
+        appId: "1:695456991297:web:55961023f91b86487d1ec0"
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const auth = getAuth(fbApp);
+    const db = getDatabase(fbApp);
+    const FIXED_ROOM = "main-studio";
+    let currentUser = null;
+
+    signInAnonymously(auth).catch(err => console.error(err));
+
+    onAuthStateChanged(auth, (user) => {
+        if (user) {
+            currentUser = {
+                uid: user.uid,
+                name: window.appState.name || ("@user_" + user.uid.slice(0, 5)),
+                avatar: "https://placehold.co/24x24/111827/ffffff?text=" + user.uid.charAt(0).toUpperCase()
+            };
+            console.log("🔥 Firebase OK");
+            loadMessages();
+        }
+    });
+
+    const chatMessages = document.getElementById('chatMessages');
+
+    function loadMessages() {
+        const q = query(ref(db, `rooms/${FIXED_ROOM}/messages`), limitToLast(100));
+        onValue(q, (snap) => {
+            chatMessages.querySelectorAll('[data-msg]').forEach(el => el.remove());
+            const data = snap.val();
+            if (!data) return;
+            Object.entries(data).sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0)).forEach(([id, msg]) => {
+                const isSelf = currentUser && msg.uid === currentUser.uid;
+                const div = document.createElement('div');
+                div.dataset.msg = id;
+                div.style = 'padding:8px; margin-bottom:6px; border-radius:8px; background:' + (isSelf ? 'rgba(255,0,80,0.1)' : 'rgba(55,65,81,0.3)') + ';';
+                div.innerHTML = `<strong style="color:${isSelf ? '#ff0050' : '#00f2fe'};">${escapeHtml(msg.name)}</strong><br>${escapeHtml(msg.text)}`;
+                chatMessages.appendChild(div);
+            });
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+    }
+
+    window.handleSendMessage = function(event) {
+        event.preventDefault();
+        if (!currentUser) return;
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+        push(ref(db, `rooms/${FIXED_ROOM}/messages`), {
+            uid: currentUser.uid,
+            name: window.appState.name || currentUser.name,
+            avatar: currentUser.avatar,
+            text: text.slice(0, 300),
+            ts: serverTimestamp()
+        });
+        input.value = '';
+    };
+
+    window.escapeHtml = function(str) {
+        return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    };
+</script>
+
+</body>
+</html>
