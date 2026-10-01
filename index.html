@@ -2,106 +2,128 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>METAIMPERIYA — SMM-агентство</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{min-height:100%;background:#00020a;font-family:system-ui,-apple-system,sans-serif;color:#fff;overflow-x:hidden}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;background:#050810;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff;overflow-x:hidden}
+
+/* ЗАСТАВКА */
+#intro{position:fixed;inset:0;background:#00020a;z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity 1s}
+#intro.hide{opacity:0;pointer-events:none}
+#intro .logo-intro{font-size:clamp(28px,8vw,72px);font-weight:900;letter-spacing:clamp(3px,1vw,10px);background:linear-gradient(90deg,#00f2fe,#ff0050);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:introPulse 2s ease-in-out infinite}
+@keyframes introPulse{0%,100%{opacity:.6;transform:scale(.98)}50%{opacity:1;transform:scale(1.02)}}
+#intro .progress{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#00f2fe,#ff0050);width:0;animation:progress 2s ease-in-out forwards}
+@keyframes progress{0%{width:0}100%{width:100%}}
+
+/* ФОН AURORA */
 #aurora{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}
 .wrap{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column}
-nav{padding:20px 40px;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(10px);background:rgba(0,2,10,.6);border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:10}
-nav .logo{font-size:20px;font-weight:900;letter-spacing:3px;background:linear-gradient(90deg,#00f2fe,#ff0050);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-nav ul{display:flex;gap:28px;list-style:none}
-nav ul a{color:#aab;text-decoration:none;font-size:14px;font-weight:500;transition:color .2s}
-nav ul a:hover{color:#00f2fe}
-.live-btn{background:linear-gradient(90deg,#ff0050,#e00045);color:#fff;padding:10px 22px;border-radius:30px;text-decoration:none;font-weight:700;font-size:13px;box-shadow:0 4px 20px rgba(255,0,80,.5);transition:transform .2s;display:inline-flex;align-items:center;gap:8px}
+
+/* НАВИГАЦИЯ */
+nav{padding:16px 24px;display:flex;justify-content:space-between;align-items:center;background:rgba(5,8,16,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.06);position:sticky;top:0;z-index:100}
+nav .logo{font-size:clamp(14px,3vw,20px);font-weight:900;letter-spacing:2px;background:linear-gradient(90deg,#00f2fe,#ff0050);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav .menu{display:flex;gap:clamp(14px,3vw,32px);align-items:center}
+nav .menu a{color:#aab;text-decoration:none;font-size:clamp(11px,2vw,14px);font-weight:500;transition:color .2s;white-space:nowrap}
+nav .menu a:hover{color:#00f2fe}
+.live-btn{background:linear-gradient(90deg,#ff0050,#e00045);color:#fff;padding:clamp(8px,1.5vw,11px) clamp(14px,3vw,22px);border-radius:30px;text-decoration:none;font-weight:700;font-size:clamp(10px,1.8vw,13px);box-shadow:0 4px 20px rgba(255,0,80,.5);display:inline-flex;align-items:center;gap:6px;transition:transform .2s;white-space:nowrap}
 .live-btn:hover{transform:scale(1.05)}
-.live-btn .dot{width:8px;height:8px;background:#fff;border-radius:50%;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
-.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:100px 20px 60px}
-.hero h1{font-size:clamp(40px,8vw,96px);font-weight:900;letter-spacing:6px;line-height:1;margin-bottom:24px;text-shadow:0 0 60px rgba(0,242,254,.4)}
-.hero .subtitle{font-size:clamp(16px,2.5vw,22px);color:#aab;max-width:700px;line-height:1.6;margin-bottom:40px}
-.hero .cta{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-.hero .cta a{padding:16px 36px;border-radius:40px;text-decoration:none;font-weight:700;font-size:15px;transition:transform .2s}
-.hero .cta .primary{background:linear-gradient(90deg,#00f2fe,#3b82f6);color:#fff;box-shadow:0 4px 30px rgba(0,242,254,.5)}
-.hero .cta .secondary{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}
-.hero .cta a:hover{transform:scale(1.05)}
-.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;padding:40px;max-width:1200px;margin:0 auto}
-.card{background:rgba(20,25,45,.6);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:32px 28px;transition:transform .3s,border-color .3s}
+.live-btn .dot{width:6px;height:6px;background:#fff;border-radius:50%;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+
+/* ГЕРОЙ */
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:clamp(40px,8vw,100px) 20px clamp(30px,6vw,60px)}
+.hero h1{font-size:clamp(34px,9vw,110px);font-weight:900;letter-spacing:clamp(3px,1.2vw,8px);line-height:1.05;margin-bottom:clamp(14px,3vw,28px);background:linear-gradient(180deg,#fff 30%,#00f2fe 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 80px rgba(0,242,254,.3)}
+.hero .subtitle{font-size:clamp(13px,2.2vw,20px);color:#aab;max-width:min(700px,90vw);line-height:1.6;margin-bottom:clamp(24px,5vw,48px);padding:0 12px}
+.hero .cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding:0 12px}
+.hero .cta a{padding:clamp(12px,2.5vw,16px) clamp(22px,4vw,40px);border-radius:40px;text-decoration:none;font-weight:700;font-size:clamp(12px,2vw,15px);transition:transform .2s;white-space:nowrap}
+.hero .cta .primary{background:linear-gradient(90deg,#00f2fe,#3b82f6);color:#fff;box-shadow:0 6px 40px rgba(0,242,254,.5)}
+.hero .cta .secondary{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(10px)}
+.hero .cta a:hover{transform:translateY(-3px)}
+
+/* КАРТОЧКИ */
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:clamp(12px,2vw,24px);padding:clamp(20px,4vw,60px);max-width:1280px;margin:0 auto}
+.card{background:rgba(15,22,40,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.08);border-radius:clamp(14px,2vw,22px);padding:clamp(20px,4vw,36px) clamp(18px,3vw,32px);transition:transform .3s,border-color .3s;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;top:0;left:0;width:60px;height:60px;background:radial-gradient(circle,rgba(0,242,254,.3),transparent 70%);opacity:0;transition:opacity .4s}
 .card:hover{transform:translateY(-6px);border-color:rgba(0,242,254,.4)}
-.card .icon{font-size:36px;margin-bottom:16px}
-.card h3{font-size:18px;margin-bottom:10px;color:#fff}
-.card p{font-size:14px;color:#889;line-height:1.6}
-footer{padding:40px;text-align:center;border-top:1px solid rgba(255,255,255,.08);margin-top:60px}
-footer a{color:#00f2fe;text-decoration:none;font-weight:700;font-size:16px;letter-spacing:2px;transition:color .2s}
+.card:hover::before{opacity:1}
+.card .icon{font-size:clamp(28px,5vw,40px);margin-bottom:clamp(10px,2vw,18px);display:inline-block}
+.card h3{font-size:clamp(15px,2.4vw,19px);margin-bottom:clamp(6px,1.5vw,12px);color:#fff;font-weight:700}
+.card p{font-size:clamp(12px,1.8vw,14px);color:#889;line-height:1.65}
+
+/* СЕКЦИЯ С ПЕСОЧНОЙ АНИМАЦИЕЙ */
+.sand-section{position:relative;padding:clamp(40px,8vw,100px) 20px;margin-top:clamp(30px,6vw,60px);background:linear-gradient(180deg,transparent,rgba(0,0,0,.5));overflow:hidden}
+.sand-section h2{text-align:center;font-size:clamp(22px,5vw,42px);font-weight:900;letter-spacing:3px;margin-bottom:12px;background:linear-gradient(90deg,#00f2fe,#ff0050);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sand-section p{text-align:center;color:#889;font-size:clamp(12px,2vw,15px);max-width:600px;margin:0 auto clamp(20px,4vw,40px);padding:0 12px}
+#sandCanvas{display:block;width:100%;height:clamp(220px,45vw,360px);background:radial-gradient(circle at top,#12182a,#050810);border-radius:clamp(14px,2.5vw,24px);border:1px solid rgba(255,255,255,.08)}
+
+/* ФУТЕР */
+footer{padding:clamp(28px,5vw,48px) 20px;text-align:center;border-top:1px solid rgba(255,255,255,.06);margin-top:clamp(40px,6vw,80px)}
+footer a{color:#00f2fe;text-decoration:none;font-weight:900;font-size:clamp(15px,2.5vw,20px);letter-spacing:2px;transition:color .2s}
 footer a:hover{color:#ff0050}
-footer p{color:#556;font-size:12px;margin-top:10px}
+footer p{color:#556;font-size:clamp(10px,1.6vw,13px);margin-top:12px}
+footer .socials{display:flex;gap:16px;justify-content:center;margin-top:20px;flex-wrap:wrap}
+footer .socials a{font-size:20px;color:#556;transition:color .2s}
+footer .socials a:hover{color:#00f2fe}
+
 @media(max-width:768px){
-  nav{padding:16px 20px}
-  nav ul{display:none}
-  .hero{padding:60px 20px 40px}
+  nav{padding:12px 14px}
+  nav .menu{gap:10px}
+  nav .menu a:not(.live-btn){display:none}
+  .live-btn{padding:7px 14px;font-size:11px}
 }
 </style>
 </head>
 <body>
+
+<div id="intro">
+  <div class="logo-intro">METAIMPERIYA</div>
+  <div class="progress"></div>
+</div>
 
 <canvas id="aurora"></canvas>
 
 <div class="wrap">
   <nav>
     <div class="logo">METAIMPERIYA</div>
-    <ul>
-      <li><a href="#services">Услуги</a></li>
-      <li><a href="live.html">Трансляция</a></li>
-      <li><a href="#contacts">Контакты</a></li>
-    </ul>
-    <a href="live.html" class="live-btn"><span class="dot"></span> LIVE</a>
+    <div class="menu">
+      <a href="#services">Услуги</a>
+      <a href="#showcase">Шоу</a>
+      <a href="live.html" class="live-btn"><span class="dot"></span>LIVE</a>
+    </div>
   </nav>
 
   <section class="hero">
     <h1>METAIMPERIYA</h1>
-    <p class="subtitle">SMM-агентство полного цикла — продвижение, контент, аналитика и прямые эфиры для вашего бренда</p>
+    <p class="subtitle">SMM-агентство полного цикла. Продвижение, контент, аналитика и прямые эфиры — всё в одном месте</p>
     <div class="cta">
-      <a href="#services" class="primary">Наши услуги →</a>
-      <a href="live.html" class="secondary">🎥 Смотреть эфир</a>
+      <a href="live.html" class="primary">🎥 Прямой эфир</a>
+      <a href="#services" class="secondary">Услуги →</a>
     </div>
   </section>
 
   <section class="features" id="services">
-    <div class="card">
-      <div class="icon">📊</div>
-      <h3>Стратегия и аналитика</h3>
-      <p>Аудит соцсетей, конкурентный анализ, планирование контента и KPI под ваш бизнес</p>
-    </div>
-    <div class="card">
-      <div class="icon">🎨</div>
-      <h3>Контент-маркетинг</h3>
-      <p>Создание визуала, текстов, видео, Reels и Stories — всё под ключ</p>
-    </div>
-    <div class="card">
-      <div class="icon">🚀</div>
-      <h3>Продвижение</h3>
-      <p>Таргет, посевы, работа с блогерами и рост органического охвата</p>
-    </div>
-    <div class="card">
-      <div class="icon">🎥</div>
-      <h3>Прямые эфиры</h3>
-      <p>Проведение онлайн-трансляций, вебинаров и интерактивных шоу</p>
-    </div>
-    <div class="card">
-      <div class="icon">📱</div>
-      <h3>SMM-панель</h3>
-      <p>Управление всеми соцсетями в одном окне с отчётами в реальном времени</p>
-    </div>
-    <div class="card">
-      <div class="icon">💬</div>
-      <h3>Комьюнити</h3>
-      <p>Работа с аудиторией, модерация, ответы и построение лояльного сообщества</p>
-    </div>
+    <div class="card"><div class="icon">📊</div><h3>Стратегия</h3><p>Аудит, анализ конкурентов, планирование и KPI под ваш бизнес</p></div>
+    <div class="card"><div class="icon">🎨</div><h3>Контент</h3><p>Визуал, тексты, видео, Reels, Stories — всё под ключ</p></div>
+    <div class="card"><div class="icon">🚀</div><h3>Продвижение</h3><p>Таргет, посевы, блогеры и органический рост охватов</p></div>
+    <div class="card"><div class="icon">🎥</div><h3>Эфиры</h3><p>Онлайн-трансляции, вебинары и интерактивные шоу</p></div>
+    <div class="card"><div class="icon">📱</div><h3>SMM-панель</h3><p>Управление всеми соцсетями в одном окне с отчётами</p></div>
+    <div class="card"><div class="icon">💬</div><h3>Комьюнити</h3><p>Модерация, ответы аудитории, лояльное сообщество</p></div>
   </section>
 
-  <footer id="contacts">
+  <section class="sand-section" id="showcase">
+    <h2>SHOWCASE</h2>
+    <p>Интерактивная заставка — нажми на экран, чтобы песок рассыпался заново</p>
+    <canvas id="sandCanvas"></canvas>
+  </section>
+
+  <footer>
     <a href="https://metaimperiya.com/" target="_blank">METAIMPERIYA — Social Platform</a>
+    <div class="socials">
+      <a href="https://metaimperiya.com/" target="_blank"><i class="fab fa-instagram"></i>IG</a>
+      <a href="https://metaimperiya.com/" target="_blank">TG</a>
+      <a href="https://metaimperiya.com/" target="_blank">VK</a>
+    </div>
     <p>© 2026 METAIMPERIYA. All rights reserved.</p>
   </footer>
 </div>
@@ -161,6 +183,10 @@ gl_FragColor=vec4(finalColor,1.0);
 }
 </script>
 <script>
+// ЗАСТАВКА
+setTimeout(()=>{document.getElementById('intro').classList.add('hide');setTimeout(()=>document.getElementById('intro').style.display='none',1100);},2200);
+
+// AURORA
 const ac=document.getElementById('aurora');
 const scene=new THREE.Scene();
 const camera=new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
@@ -172,6 +198,120 @@ const material=new THREE.ShaderMaterial({vertexShader:document.getElementById('v
 const mesh=new THREE.Mesh(geometry,material);scene.add(mesh);camera.position.z=1;
 function animate(t){requestAnimationFrame(animate);uniforms.time.value=t*0.001;renderer.render(scene,camera);}
 resize();window.addEventListener('resize',resize);animate();
+</script>
+<script>
+// ПЕСОЧНАЯ АНИМАЦИЯ (упрощённая адаптивная версия)
+const sandCanvas=document.getElementById('sandCanvas');
+const sctx=sandCanvas.getContext('2d');
+let sw,sh,sdpr=Math.min(window.devicePixelRatio||1,2);
+let cols,rows,cellSize,fixed,pile,falling=[],reforming=[],phase='codepen',phaseTime=0,lastTime=performance.now();
+const START_TEXT="METAIMPERIYA";
+let codepenCells=[],looseCells=[];
+function sandResize(){
+  const rect=sandCanvas.getBoundingClientRect();
+  sw=rect.width;sh=rect.height;
+  sandCanvas.width=sw*sdpr;sandCanvas.height=sh*sdpr;
+  sctx.setTransform(sdpr,0,0,sdpr,0,0);
+  cellSize=Math.max(2,Math.floor(Math.min(sw,sh)/100));
+  cols=Math.ceil(sw/cellSize);rows=Math.ceil(sh/cellSize);
+  fixed=new Uint8Array(cols*rows);pile=new Uint8Array(cols*rows);
+  codepenCells=[];looseCells=[];falling=[];reforming=[];
+  phase='codepen';phaseTime=0;
+  buildText();
+}
+function idx(c,r){return r*cols+c;}
+function colF(i){return i%cols;} function rowF(i){return Math.floor(i/cols);}
+function pSolid(c,r){if(r>=rows)return true;if(c<0||c>=cols)return true;return pile[idx(c,r)]===1;}
+function setP(c,r){if(c<0||c>=cols||r<0||r>=rows)return;pile[idx(c,r)]=1;}
+function rand(a,b){return a+Math.random()*(b-a);}
+function buildText(){
+  const mc=document.createElement('canvas');const mctx=mc.getContext('2d');
+  mc.width=sw;mc.height=sh;
+  const fs=Math.min(sw*0.14,sh*0.5,90);
+  mctx.fillStyle='#fff';mctx.textAlign='center';mctx.textBaseline='middle';
+  mctx.font=`900 ${fs}px system-ui,sans-serif`;
+  mctx.fillText(START_TEXT,sw/2,sh/2);
+  const data=mctx.getImageData(0,0,sw,sh).data;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const x=Math.floor(c*cellSize+cellSize/2),y=Math.floor(r*cellSize+cellSize/2);
+    const pi=(y*sw+x)*4;
+    if(data[pi+3]>50){const i=idx(c,r);fixed[i]=1;codepenCells.push(i);looseCells.push(i);}
+  }
+  // Перемешать
+  for(let i=looseCells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];}
+}
+function releaseOne(i){
+  const c=colF(i),r=rowF(i);fixed[i]=0;
+  falling.push({x:c*cellSize,y:r*cellSize,vx:rand(-30,30),vy:rand(60,180)});
+}
+function releaseParticles(){
+  if(looseCells.length===0){phase='falling';phaseTime=0;return;}
+  for(let k=0;k<60;k++){
+    if(looseCells.length===0)break;
+    const li=Math.floor(Math.random()*looseCells.length);
+    const ci=looseCells[li];
+    if(fixed[ci]===0){looseCells.splice(li,1);continue;}
+    if(Math.random()<0.04){releaseOne(ci);looseCells.splice(li,1);}
+  }
+}
+function settleP(p){
+  let c=Math.floor(p.x/cellSize),r=Math.floor(p.y/cellSize);
+  c=Math.max(0,Math.min(cols-1,c));r=Math.max(0,Math.min(rows-1,r));
+  if(!pSolid(c,r)){setP(c,r);return;}
+  if(!pSolid(c-1,r)){setP(c-1,r);return;}
+  if(!pSolid(c+1,r)){setP(c+1,r);return;}
+  for(let y=r-1;y>=0;y--){if(!pSolid(c,y)){setP(c,y);return;}}
+}
+function updateFall(dt){
+  for(let i=falling.length-1;i>=0;i--){
+    const p=falling[i];p.vy+=800*dt;p.vx*=0.99;p.vy*=0.99;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    const c=Math.floor(p.x/cellSize),nr=Math.floor((p.y+cellSize)/cellSize);
+    if(p.x<0)p.x=0;if(p.x>sw)p.x=sw-cellSize;
+    if(nr>=rows||pSolid(c,nr)){settleP(p);falling.splice(i,1);}
+  }
+  if(phase==='falling'&&falling.length===0){phase='pile';phaseTime=0;}
+}
+function settlePile(){
+  for(let r=rows-2;r>=0;r--)for(let c=1;c<cols-1;c++){
+    const cur=idx(c,r);if(pile[cur]!==1)continue;
+    if(!pSolid(c,r+1)){pile[idx(c,r+1)]=1;pile[cur]=0;continue;}
+    const pl=Math.random()>0.5;
+    if(pl){if(!pSolid(c-1,r+1)){pile[idx(c-1,r+1)]=1;pile[cur]=0;continue;}if(!pSolid(c+1,r+1)){pile[idx(c+1,r+1)]=1;pile[cur]=0;}}
+    else{if(!pSolid(c+1,r+1)){pile[idx(c+1,r+1)]=1;pile[cur]=0;continue;}if(!pSolid(c-1,r+1)){pile[idx(c-1,r+1)]=1;pile[cur]=0;}}
+  }
+}
+function resetSand(){
+  fixed.fill(0);pile.fill(0);falling=[];reforming=[];
+  looseCells=codepenCells.slice();
+  for(let i=looseCells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];}
+  for(const c of codepenCells)fixed[c]=1;
+  phase='codepen';phaseTime=0;
+}
+function update(dt){
+  phaseTime+=dt;
+  if(phase==='codepen')releaseParticles();
+  if(phase==='pile'&&phaseTime>=1.2){resetSand();}
+}
+function draw(){
+  sctx.clearRect(0,0,sw,sh);
+  sctx.fillStyle='rgb(236,204,116)';
+  const s=cellSize;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(fixed[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);
+  for(const p of falling)sctx.fillRect(p.x,p.y,s,s);
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(pile[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);
+}
+function tick(now){
+  const dt=Math.min((now-lastTime)/1000,0.033);lastTime=now;
+  update(dt);updateFall(dt);
+  if(phase!=='falling'){for(let i=0;i<3;i++)settlePile();}
+  draw();
+  requestAnimationFrame(tick);
+}
+sandResize();
+window.addEventListener('resize',sandResize);
+sandCanvas.addEventListener('click',resetSand);
+sandCanvas.addEventListener('touchstart',(e)=>{e.preventDefault();resetSand();},{passive:false});
+requestAnimationFrame(tick);
 </script>
 </body>
 </html>
