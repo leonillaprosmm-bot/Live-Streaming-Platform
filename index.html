@@ -9,24 +9,15 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{background:#050810;font-family:'Inter',sans-serif;color:#e8e8e8;overflow-x:hidden;min-height:100%}
-
 #aurora{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
 .wrap{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column}
-
 #intro{position:fixed;inset:0;background:#050810;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
 #intro.hide{opacity:0;pointer-events:none}
 .intro-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(24px,7vw,64px);font-weight:700;letter-spacing:6px;color:#fff}
 .intro-sub{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:4px;color:#666;margin-top:14px}
 .intro-bar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#ff3366,#00f2fe);width:0;animation:bar 1.8s ease-out forwards}
 @keyframes bar{to{width:100%}}
-
-header{
-  position:fixed;top:0;left:0;right:0;z-index:100;
-  padding:clamp(14px,2vw,20px) clamp(18px,4vw,48px);
-  display:flex;justify-content:space-between;align-items:center;
-  background:rgba(5,8,16,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-  border-bottom:1px solid rgba(255,255,255,.06);
-}
+header{position:fixed;top:0;left:0;right:0;z-index:100;padding:clamp(14px,2vw,20px) clamp(18px,4vw,48px);display:flex;justify-content:space-between;align-items:center;background:rgba(5,8,16,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,.06)}
 .h-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.6vw,15px);font-weight:700;letter-spacing:4px;color:#fff;display:flex;align-items:center;gap:10px}
 .h-logo::before{content:"";width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#ff3366,#00f2fe)}
 .h-menu{display:flex;gap:clamp(14px,2.5vw,32px);align-items:center}
@@ -37,82 +28,41 @@ header{
 .h-live{color:#ff3366 !important;display:inline-flex;align-items:center;gap:8px}
 .h-live::before{content:"";width:6px;height:6px;background:#ff3366;border-radius:50%;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
-@media(max-width:640px){
-  .h-menu a:not(.h-live){display:none}
-  .h-logo{font-size:12px;letter-spacing:3px}
-}
-
+@media(max-width:640px){.h-menu a:not(.h-live){display:none}.h-logo{font-size:12px;letter-spacing:3px}}
 .hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden;background:#ffee25}
 .hero-text-mask{position:absolute;inset:0;overflow:hidden}
-.hero-text-mask p{
-  position:absolute;
-  top:0;left:0;
-  width:100%;
-  margin:0;
-  padding:0;
-  font-family:'Inter',sans-serif;
-  font-size:13px;
-  line-height:10px;
-  font-weight:900;
-  background:url(https://media.giphy.com/media/41x8G9RQjdKSKbO7it/giphy.webp) no-repeat;
-  background-size:cover;
-  background-position:center;
-  background-attachment:fixed;
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:rgba(255,255,255,0);
-  mix-blend-mode:darken;
-  color:transparent;
-  word-break:break-word;
-  height:100%;
-  overflow:hidden;
-}
-.hero-overlay{
-  position:absolute;
-  inset:0;
-  background:linear-gradient(180deg,rgba(5,8,16,.15) 0%,rgba(5,8,16,0) 40%,rgba(5,8,16,0) 60%,rgba(5,8,16,.9) 100%);
-  pointer-events:none;
-  z-index:3;
-}
-.hero-content{
-  position:relative;
-  z-index:5;
-  text-align:center;
-  padding:clamp(20px,4vw,40px);
-  background:rgba(5,8,16,.75);
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:24px;
-  max-width:min(600px,90vw);
-  pointer-events:auto;
-}
+.hero-text-mask p{position:absolute;top:0;left:0;width:100%;margin:0;padding:0;font-family:'Inter',sans-serif;font-size:13px;line-height:10px;font-weight:900;background:url(https://media.giphy.com/media/41x8G9RQjdKSKbO7it/giphy.webp) no-repeat;background-size:cover;background-position:center;background-attachment:fixed;-webkit-background-clip:text;-webkit-text-fill-color:rgba(255,255,255,0);mix-blend-mode:darken;color:transparent;word-break:break-word;height:100%;overflow:hidden}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,8,16,.15) 0%,rgba(5,8,16,0) 40%,rgba(5,8,16,0) 60%,rgba(5,8,16,.9) 100%);pointer-events:none;z-index:3}
+.hero-content{position:relative;z-index:5;text-align:center;padding:clamp(20px,4vw,40px);background:rgba(5,8,16,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.1);border-radius:24px;max-width:min(600px,90vw);pointer-events:auto}
 .hero-tag{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.4vw,12px);letter-spacing:6px;color:#888;margin-bottom:16px;text-transform:uppercase}
 .hero-desc{font-size:clamp(13px,1.8vw,16px);color:#ccc;line-height:1.7;font-weight:400}
 .hero-cta{margin-top:24px}
-.hero-cta a{
-  display:inline-block;
-  padding:14px 32px;
-  background:linear-gradient(90deg,#ff3366,#e00045);
-  color:#fff;
-  text-decoration:none;
-  border-radius:40px;
-  font-weight:700;
-  font-size:14px;
-  transition:transform .2s,box-shadow .2s;
-  box-shadow:0 6px 30px rgba(255,51,102,.5);
-}
+.hero-cta a{display:inline-block;padding:14px 32px;background:linear-gradient(90deg,#ff3366,#e00045);color:#fff;text-decoration:none;border-radius:40px;font-weight:700;font-size:14px;transition:transform .2s,box-shadow .2s;box-shadow:0 6px 30px rgba(255,51,102,.5)}
 .hero-cta a:hover{transform:translateY(-3px);box-shadow:0 10px 40px rgba(255,51,102,.7)}
-
 .marquee{position:relative;overflow:hidden;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding:clamp(12px,2vw,20px) 0;background:rgba(5,8,16,.6);backdrop-filter:blur(10px)}
 .marquee-inner{display:flex;gap:40px;animation:marquee 30s linear infinite;font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:4px;color:#666;white-space:nowrap}
 .marquee-inner span{color:#ff3366}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-
 .feed{max-width:820px;margin:0 auto;padding:clamp(40px,8vw,100px) clamp(18px,4vw,48px)}
+
+/* ФОРМА СОЗДАНИЯ ПОСТА */
+.create-post{background:rgba(14,16,22,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,51,102,.3);border-radius:20px;padding:clamp(20px,3vw,28px);margin-bottom:clamp(24px,4vw,40px);position:relative;overflow:hidden}
+.create-post::before{content:"";position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,#ff3366,#00f2fe)}
+.create-post h3{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:4px;color:#ff3366;text-transform:uppercase;margin-bottom:16px}
+.create-post input,.create-post textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:10px;resize:vertical}
+.create-post input:focus,.create-post textarea:focus{border-color:#ff3366}
+.create-post textarea{min-height:80px;line-height:1.5}
+.create-post input::placeholder,.create-post textarea::placeholder{color:#666}
+.create-post-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.create-post button{background:linear-gradient(90deg,#ff3366,#e00045);border:none;color:#fff;padding:12px 28px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;transition:transform .2s,box-shadow .2s;flex-shrink:0;font-family:inherit}
+.create-post button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,51,102,.5)}
+.create-post .hint{font-family:'JetBrains Mono',monospace;font-size:10px;color:#666;letter-spacing:1px;margin-left:auto}
+@media(max-width:480px){.create-post .hint{margin-left:0;width:100%}}
+
 .feed-title{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:6px;color:#888;text-transform:uppercase;margin-bottom:clamp(24px,5vw,48px);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:16px}
 .feed-title span:last-child{color:#ff3366}
-
-.post{background:rgba(14,16,22,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:clamp(20px,3vw,28px);margin-bottom:clamp(20px,3vw,28px);transition:border-color .3s,transform .3s;position:relative;overflow:hidden}
+.post{background:rgba(14,16,22,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:clamp(20px,3vw,28px);margin-bottom:clamp(20px,3vw,28px);transition:border-color .3s,transform .3s;position:relative;overflow:hidden;animation:postIn .5s ease-out}
+@keyframes postIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 .post::before{content:"";position:absolute;top:0;left:0;width:2px;height:100%;background:linear-gradient(180deg,#ff3366,#00f2fe);opacity:0;transition:opacity .3s}
 .post:hover{border-color:rgba(255,255,255,.15);transform:translateY(-2px)}
 .post:hover::before{opacity:1}
@@ -122,11 +72,11 @@ header{
 .post-author{font-weight:600;font-size:clamp(13px,1.6vw,15px);color:#fff;margin-bottom:2px}
 .post-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:#666;letter-spacing:1px}
 .post-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:#ff3366;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border:1px solid rgba(255,51,102,.3);border-radius:20px;flex-shrink:0}
-.post-body{font-size:clamp(13px,1.7vw,15px);line-height:1.7;color:#c8c8c8;margin-bottom:18px;font-weight:300}
+.post-body{font-size:clamp(13px,1.7vw,15px);line-height:1.7;color:#c8c8c8;margin-bottom:18px;font-weight:300;word-wrap:break-word;white-space:pre-wrap}
 .post-body strong{color:#fff;font-weight:600}
 .post-body code{font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.05);padding:2px 6px;border-radius:4px;font-size:.9em;color:#00f2fe}
-.post-img{width:100%;border-radius:12px;margin-bottom:18px;display:block;aspect-ratio:16/9;object-fit:cover}
-.post-actions{display:flex;gap:clamp(14px,3vw,24px);padding-top:14px;border-top:1px solid rgba(255,255,255,.05);align-items:center}
+.post-img{width:100%;border-radius:12px;margin-bottom:18px;display:block;aspect-ratio:16/9;object-fit:cover;background:#0e1014}
+.post-actions{display:flex;gap:clamp(14px,3vw,24px);padding-top:14px;border-top:1px solid rgba(255,255,255,.05);align-items:center;flex-wrap:wrap}
 .act{background:none;border:none;color:#888;font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,12px);letter-spacing:1px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:color .2s;padding:4px 0}
 .act:hover{color:#fff}
 .act.liked{color:#ff3366}
@@ -148,7 +98,11 @@ header{
 
 .sand-section{padding:clamp(30px,6vw,60px) clamp(18px,4vw,48px);text-align:center;position:relative;z-index:2}
 .sand-section h2{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:6px;color:#666;text-transform:uppercase;margin-bottom:clamp(20px,4vw,36px)}
-#sandCanvas{display:block;width:100%;height:clamp(200px,40vw,340px);background:radial-gradient(circle at top,#0e1220,#050810);border-radius:20px;border:1px solid rgba(255,255,255,.06);cursor:pointer}
+.sand-link{display:block;text-decoration:none;cursor:pointer;position:relative;border-radius:20px;overflow:hidden;transition:transform .3s}
+.sand-link:hover{transform:scale(1.01)}
+.sand-link::after{content:"→ metaimperiya.com";position:absolute;bottom:14px;right:18px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2px;color:rgba(236,204,116,.7);background:rgba(5,8,16,.6);padding:6px 12px;border-radius:20px;backdrop-filter:blur(10px);transition:color .3s,background .3s}
+.sand-link:hover::after{color:#fff;background:rgba(255,51,102,.8)}
+#sandCanvas{display:block;width:100%;height:clamp(200px,40vw,340px);background:radial-gradient(circle at top,#0e1220,#050810);border-radius:20px;border:1px solid rgba(255,255,255,.06)}
 
 footer{padding:clamp(40px,8vw,80px) clamp(18px,4vw,48px);border-top:1px solid rgba(255,255,255,.05);text-align:center;position:relative;z-index:2}
 footer .f-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(14px,2vw,18px);font-weight:700;letter-spacing:6px;color:#fff;margin-bottom:20px}
@@ -199,67 +153,64 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
   </div>
 
   <section class="feed" id="feed">
-    <div class="feed-title"><span>// ЛЕНТА</span><span>03 POSTS</span></div>
 
-    <article class="post">
-      <div class="post-head">
-        <div class="post-avatar">MI</div>
-        <div class="post-meta"><div class="post-author">METAIMPERIYA</div><div class="post-time">2 МИНУТЫ НАЗАД</div></div>
-        <div class="post-tag">NEW</div>
+    <!-- ФОРМА СОЗДАНИЯ ПОСТА -->
+    <div class="create-post">
+      <h3>// Создать пост</h3>
+      <input id="newPostName" type="text" placeholder="Ваше имя" maxlength="40">
+      <textarea id="newPostText" placeholder="О чём хотите рассказать?..." maxlength="500"></textarea>
+      <input id="newPostImage" type="text" placeholder="Ссылка на картинку (необязательно)">
+      <div class="create-post-row">
+        <button onclick="publishPost()">Опубликовать</button>
+        <span class="hint">Пост появится вверху ленты</span>
       </div>
-      <div class="post-body"><strong>Запуск прямого эфира</strong> — уже сегодня в 20:00. Поговорим про SMM-тренды, ответим на вопросы и покажем <code>живую панель</code> аналитики.</div>
-      <div class="post-actions">
-        <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">12</span></button>
-        <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">3</span></button>
-        <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
-      </div>
-      <div class="comments">
-        <div class="comment"><div class="comment-avatar">A</div><div class="comment-body"><div class="comment-author">@alex</div><div class="comment-text">Огонь! Буду обязательно 🔥</div></div></div>
-        <div class="comment"><div class="comment-avatar">M</div><div class="comment-body"><div class="comment-author">@maria</div><div class="comment-text">Можно вопрос про таргет?</div></div></div>
-        <div class="comment"><div class="comment-avatar">D</div><div class="comment-body"><div class="comment-author">@dmitry</div><div class="comment-text">Ждём эфир!</div></div></div>
-        <form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form>
-      </div>
-    </article>
+    </div>
 
-    <article class="post">
-      <div class="post-head">
-        <div class="post-avatar">MI</div>
-        <div class="post-meta"><div class="post-author">METAIMPERIYA</div><div class="post-time">4 ЧАСА НАЗАД</div></div>
-        <div class="post-tag">CASE</div>
-      </div>
-      <div class="post-body"><strong>Кейс:</strong> за 2 месяца вывели бренд одежды в топ-10 поиска. Охваты выросли в <code>x4.2</code>, стоимость подписки снизилась на <code>67%</code>.</div>
-      <img class="post-img" src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=450&fit=crop" alt="case">
-      <div class="post-actions">
-        <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">47</span></button>
-        <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
-        <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
-      </div>
-      <div class="comments">
-        <form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form>
-      </div>
-    </article>
+    <div class="feed-title"><span>// ЛЕНТА</span><span id="feedCount">03 POSTS</span></div>
 
-    <article class="post">
-      <div class="post-head">
-        <div class="post-avatar">MI</div>
-        <div class="post-meta"><div class="post-author">METAIMPERIYA</div><div class="post-time">ВЧЕРА</div></div>
-        <div class="post-tag">TIP</div>
-      </div>
-      <div class="post-body"><strong>Совет дня:</strong> не гонитесь за всеми соцсетями сразу. Выберите <code>2 платформы</code> и выжмите максимум. Концентрация сильнее распыления.</div>
-      <div class="post-actions">
-        <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">28</span></button>
-        <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
-        <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
-      </div>
-      <div class="comments">
-        <form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form>
-      </div>
-    </article>
+    <div id="postsContainer">
+      <article class="post">
+        <div class="post-head">
+          <div class="post-avatar">MI</div>
+          <div class="post-meta"><div class="post-author">METAIMPERIYA</div><div class="post-time">2 МИНУТЫ НАЗАД</div></div>
+          <div class="post-tag">NEW</div>
+        </div>
+        <div class="post-body"><strong>Запуск прямого эфира</strong> — уже сегодня в 20:00. Поговорим про SMM-тренды, ответим на вопросы и покажем живую панель аналитики.</div>
+        <div class="post-actions">
+          <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">12</span></button>
+          <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
+          <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
+        </div>
+        <div class="comments">
+          <form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form>
+        </div>
+      </article>
+
+      <article class="post">
+        <div class="post-head">
+          <div class="post-avatar">MI</div>
+          <div class="post-meta"><div class="post-author">METAIMPERIYA</div><div class="post-time">4 ЧАСА НАЗАД</div></div>
+          <div class="post-tag">CASE</div>
+        </div>
+        <div class="post-body"><strong>Кейс:</strong> за 2 месяца вывели бренд одежды в топ-10 поиска. Охваты выросли в x4.2, стоимость подписки снизилась на 67%.</div>
+        <img class="post-img" src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=450&fit=crop" alt="case">
+        <div class="post-actions">
+          <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">47</span></button>
+          <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
+          <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
+        </div>
+        <div class="comments">
+          <form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form>
+        </div>
+      </article>
+    </div>
   </section>
 
   <section class="sand-section" id="showcase">
     <h2>// METAIMPERIYA</h2>
-    <canvas id="sandCanvas"></canvas>
+    <a href="https://metaimperiya.com/" target="_blank" class="sand-link">
+      <canvas id="sandCanvas"></canvas>
+    </a>
   </section>
 
   <footer>
@@ -356,58 +307,13 @@ let sw,sh,sdpr=Math.min(window.devicePixelRatio||1,2);
 let cols,rows,cellSize,fixed,pile,falling=[],phase='codepen',phaseTime=0,lastTime=performance.now();
 const START_TEXT="METAIMPERIYA";
 let codepenCells=[],looseCells=[];
-
-function sandResize(){
-  const rect=sandCanvas.getBoundingClientRect();
-  sw=rect.width;sh=rect.height;
-  sandCanvas.width=sw*sdpr;sandCanvas.height=sh*sdpr;
-  sctx.setTransform(sdpr,0,0,sdpr,0,0);
-  cellSize=Math.max(2,Math.floor(Math.min(sw,sh)/90));
-  cols=Math.ceil(sw/cellSize);rows=Math.ceil(sh/cellSize);
-  fixed=new Uint8Array(cols*rows);pile=new Uint8Array(cols*rows);
-  codepenCells=[];looseCells=[];falling=[];
-  phase='codepen';phaseTime=0;
-  buildText();
-}
-
+function sandResize(){const rect=sandCanvas.getBoundingClientRect();sw=rect.width;sh=rect.height;sandCanvas.width=sw*sdpr;sandCanvas.height=sh*sdpr;sctx.setTransform(sdpr,0,0,sdpr,0,0);cellSize=Math.max(2,Math.floor(Math.min(sw,sh)/90));cols=Math.ceil(sw/cellSize);rows=Math.ceil(sh/cellSize);fixed=new Uint8Array(cols*rows);pile=new Uint8Array(cols*rows);codepenCells=[];looseCells=[];falling=[];phase='codepen';phaseTime=0;buildText();}
 function idx(c,r){return r*cols+c;}
 function colF(i){return i%cols;} function rowF(i){return Math.floor(i/cols);}
 function pSolid(c,r){if(r>=rows)return true;if(c<0||c>=cols)return true;return pile[idx(c,r)]===1;}
 function setP(c,r){if(c<0||c>=cols||r<0||r>=rows)return;pile[idx(c,r)]=1;}
 function rand(a,b){return a+Math.random()*(b-a);}
-
-function buildText(){
-  const mc=document.createElement('canvas');
-  const mctx=mc.getContext('2d');
-  mc.width=sw;mc.height=sh;
-  mctx.fillStyle='#fff';
-  mctx.textAlign='center';
-  mctx.textBaseline='middle';
-  const maxWidth = sw * 0.88;
-  let fs = sh * 0.5;
-  mctx.font=`900 ${fs}px system-ui,sans-serif`;
-  let textWidth = mctx.measureText(START_TEXT).width;
-  while(textWidth > maxWidth && fs > 8){
-    fs -= 1;
-    mctx.font=`900 ${fs}px system-ui,sans-serif`;
-    textWidth = mctx.measureText(START_TEXT).width;
-  }
-  mctx.fillText(START_TEXT, sw/2, sh/2);
-  const data=mctx.getImageData(0,0,sw,sh).data;
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-    const x=Math.floor(c*cellSize+cellSize/2),y=Math.floor(r*cellSize+cellSize/2);
-    const pi=(y*sw+x)*4;
-    if(data[pi+3]>50){
-      const i=idx(c,r);
-      fixed[i]=1;codepenCells.push(i);looseCells.push(i);
-    }
-  }
-  for(let i=looseCells.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];
-  }
-}
-
+function buildText(){const mc=document.createElement('canvas');const mctx=mc.getContext('2d');mc.width=sw;mc.height=sh;mctx.fillStyle='#fff';mctx.textAlign='center';mctx.textBaseline='middle';const maxWidth=sw*0.88;let fs=sh*0.5;mctx.font=`900 ${fs}px system-ui,sans-serif`;let tw=mctx.measureText(START_TEXT).width;while(tw>maxWidth&&fs>8){fs-=1;mctx.font=`900 ${fs}px system-ui,sans-serif`;tw=mctx.measureText(START_TEXT).width;}mctx.fillText(START_TEXT,sw/2,sh/2);const data=mctx.getImageData(0,0,sw,sh).data;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const x=Math.floor(c*cellSize+cellSize/2),y=Math.floor(r*cellSize+cellSize/2);const pi=(y*sw+x)*4;if(data[pi+3]>50){const i=idx(c,r);fixed[i]=1;codepenCells.push(i);looseCells.push(i);}}for(let i=looseCells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];}}
 function releaseOne(i){const c=colF(i),r=rowF(i);fixed[i]=0;falling.push({x:c*cellSize,y:r*cellSize,vx:rand(-30,30),vy:rand(60,180)});}
 function releaseParticles(){if(looseCells.length===0){phase='falling';phaseTime=0;return;}for(let k=0;k<60;k++){if(looseCells.length===0)break;const li=Math.floor(Math.random()*looseCells.length);const ci=looseCells[li];if(fixed[ci]===0){looseCells.splice(li,1);continue;}if(Math.random()<0.04){releaseOne(ci);looseCells.splice(li,1);}}}
 function settleP(p){let c=Math.floor(p.x/cellSize),r=Math.floor(p.y/cellSize);c=Math.max(0,Math.min(cols-1,c));r=Math.max(0,Math.min(rows-1,r));if(!pSolid(c,r)){setP(c,r);return;}if(!pSolid(c-1,r)){setP(c-1,r);return;}if(!pSolid(c+1,r)){setP(c+1,r);return;}for(let y=r-1;y>=0;y--){if(!pSolid(c,y)){setP(c,y);return;}}}
@@ -417,12 +323,135 @@ function resetSand(){fixed.fill(0);pile.fill(0);falling=[];looseCells=codepenCel
 function update(dt){phaseTime+=dt;if(phase==='codepen')releaseParticles();if(phase==='pile'&&phaseTime>=1.5){resetSand();}}
 function draw(){sctx.clearRect(0,0,sw,sh);sctx.fillStyle='rgb(236,204,116)';const s=cellSize;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(fixed[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);for(const p of falling)sctx.fillRect(p.x,p.y,s,s);for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(pile[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);}
 function tick(now){const dt=Math.min((now-lastTime)/1000,0.033);lastTime=now;update(dt);updateFall(dt);if(phase!=='falling'){for(let i=0;i<3;i++)settlePile();}draw();requestAnimationFrame(tick);}
-sandResize();window.addEventListener('resize',sandResize);sandCanvas.addEventListener('click',resetSand);sandCanvas.addEventListener('touchstart',(e)=>{e.preventDefault();resetSand();},{passive:false});requestAnimationFrame(tick);
+sandResize();window.addEventListener('resize',sandResize);requestAnimationFrame(tick);
 
-document.querySelectorAll('.like-btn').forEach(btn=>{btn.addEventListener('click',()=>{const cnt=btn.querySelector('.like-count');const liked=btn.classList.toggle('liked');const icon=btn.querySelector('i');icon.className=liked?'fas fa-heart':'far fa-heart';let n=parseInt(cnt.textContent);cnt.textContent=liked?n+1:n-1;});});
-document.querySelectorAll('.comment-toggle').forEach(btn=>{btn.addEventListener('click',()=>{btn.closest('.post').querySelector('.comments').classList.toggle('show');});});
-function addComment(e,form){e.preventDefault();const input=form.querySelector('.comment-input');const text=input.value.trim();if(!text)return;const post=form.closest('.post');const list=post.querySelector('.comments');const name='@guest_'+Math.floor(Math.random()*900+100);const div=document.createElement('div');div.className='comment';div.innerHTML='<div class="comment-avatar">'+name.charAt(1).toUpperCase()+'</div><div class="comment-body"><div class="comment-author">'+name+'</div><div class="comment-text"></div></div>';div.querySelector('.comment-text').textContent=text;list.insertBefore(div,form);const cnt=post.querySelector('.comment-count');cnt.textContent=parseInt(cnt.textContent)+1;input.value='';list.classList.add('show');}
-document.querySelectorAll('.share-btn').forEach(btn=>{btn.addEventListener('click',()=>{if(navigator.share){navigator.share({title:'METAIMPERIYA',url:location.href});}else{navigator.clipboard.writeText(location.href);alert('Ссылка скопирована!');}});});
+// ========== ЛЕНТА: ПОСТЫ ==========
+const POSTS_KEY='metaimperiya_posts';
+let userPosts=[];
+
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60)return'ТОЛЬКО ЧТО';
+  if(s<3600)return Math.floor(s/60)+' МИН НАЗАД';
+  if(s<86400)return Math.floor(s/3600)+' Ч НАЗАД';
+  return Math.floor(s/86400)+' ДН НАЗАД';
+}
+
+function escapeHtml(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderPost(post){
+  const el=document.createElement('article');
+  el.className='post';
+  el.dataset.id=post.id;
+  const initial=(post.name||'U').charAt(0).toUpperCase();
+  let imgHtml='';
+  if(post.image){
+    imgHtml='<img class="post-img" src="'+escapeHtml(post.image)+'" alt="post" onerror="this.style.display=\'none\'">';
+  }
+  el.innerHTML='<div class="post-head"><div class="post-avatar">'+initial+'</div><div class="post-meta"><div class="post-author">'+escapeHtml(post.name)+'</div><div class="post-time">'+timeAgo(post.ts)+'</div></div>'+(post.tag?'<div class="post-tag">'+escapeHtml(post.tag)+'</div>':'')+'</div><div class="post-body"></div>'+imgHtml+'<div class="post-actions"><button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">0</span></button><button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button><button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button></div><div class="comments"><form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form></div>';
+  el.querySelector('.post-body').textContent=post.text;
+  return el;
+}
+
+function updateFeedCount(){
+  const count=document.querySelectorAll('#postsContainer .post').length;
+  document.getElementById('feedCount').textContent=String(count).padStart(2,'0')+' POSTS';
+}
+
+function loadPosts(){
+  try{
+    userPosts=JSON.parse(localStorage.getItem(POSTS_KEY)||'[]');
+  }catch(e){userPosts=[];}
+  const container=document.getElementById('postsContainer');
+  userPosts.forEach(post=>{
+    const el=renderPost(post);
+    container.insertBefore(el,container.firstChild);
+  });
+  updateFeedCount();
+}
+
+function publishPost(){
+  const name=document.getElementById('newPostName').value.trim();
+  const text=document.getElementById('newPostText').value.trim();
+  const image=document.getElementById('newPostImage').value.trim();
+
+  if(!name){alert('Введи своё имя');return;}
+  if(!text){alert('Напиши текст поста');return;}
+
+  const post={
+    id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),
+    name:name,
+    text:text,
+    image:image||'',
+    ts:Date.now(),
+    tag:''
+  };
+
+  userPosts.unshift(post);
+  try{localStorage.setItem(POSTS_KEY,JSON.stringify(userPosts));}catch(e){}
+
+  const container=document.getElementById('postsContainer');
+  const el=renderPost(post);
+  container.insertBefore(el,container.firstChild);
+  updateFeedCount();
+
+  document.getElementById('newPostName').value='';
+  document.getElementById('newPostText').value='';
+  document.getElementById('newPostImage').value='';
+
+  el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ========== ЛАЙКИ, КОММЕНТЫ, ШЕРИНГ (делегирование) ==========
+document.addEventListener('click',function(e){
+  const likeBtn=e.target.closest('.like-btn');
+  if(likeBtn){
+    const cnt=likeBtn.querySelector('.like-count');
+    const liked=likeBtn.classList.toggle('liked');
+    const icon=likeBtn.querySelector('i');
+    icon.className=liked?'fas fa-heart':'far fa-heart';
+    let n=parseInt(cnt.textContent)||0;
+    cnt.textContent=liked?n+1:Math.max(0,n-1);
+    return;
+  }
+  const toggleBtn=e.target.closest('.comment-toggle');
+  if(toggleBtn){
+    const post=toggleBtn.closest('.post');
+    post.querySelector('.comments').classList.toggle('show');
+    return;
+  }
+  const shareBtn=e.target.closest('.share-btn');
+  if(shareBtn){
+    if(navigator.share){
+      navigator.share({title:'METAIMPERIYA',url:location.href}).catch(()=>{});
+    }else{
+      navigator.clipboard.writeText(location.href).then(()=>alert('Ссылка скопирована!')).catch(()=>{});
+    }
+  }
+});
+
+function addComment(e,form){
+  e.preventDefault();
+  const input=form.querySelector('.comment-input');
+  const text=input.value.trim();
+  if(!text)return;
+  const post=form.closest('.post');
+  const list=post.querySelector('.comments');
+  const name='@guest_'+Math.floor(Math.random()*900+100);
+  const div=document.createElement('div');
+  div.className='comment';
+  div.innerHTML='<div class="comment-avatar">'+name.charAt(1).toUpperCase()+'</div><div class="comment-body"><div class="comment-author">'+name+'</div><div class="comment-text"></div></div>';
+  div.querySelector('.comment-text').textContent=text;
+  list.insertBefore(div,form);
+  const cnt=post.querySelector('.comment-count');
+  cnt.textContent=(parseInt(cnt.textContent)||0)+1;
+  input.value='';
+  list.classList.add('show');
+}
+
+loadPosts();
 </script>
 </body>
 </html>
