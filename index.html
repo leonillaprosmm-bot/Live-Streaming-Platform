@@ -3,7 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<title>METAIMPERIYA — Social Platform</title>
+
+<title>METAIMPERIYA — Social Platform & SMM-агентство</title>
+
+<!-- SEO -->
+<meta name="description" content="METAIMPERIYA — SMM-агентство полного цикла. Продвижение брендов в TikTok, Telegram и соцсетях. Контент, стратегия, таргет, прямые эфиры и живая лента сообщества.">
+<meta name="keywords" content="SMM, SMM-агентство, продвижение, TikTok, Telegram, контент-маркетинг, таргет, прямые эфиры, METAIMPERIYA">
+<meta name="author" content="METAIMPERIYA">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#050810">
+
+<!-- Open Graph (Telegram, ВК, Facebook, WhatsApp) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iii-three-self.vercel.app/">
+<meta property="og:title" content="METAIMPERIYA — Social Platform & SMM-агентство">
+<meta property="og:description" content="Продвижение брендов, контент, таргет и прямые эфиры. Живая лента сообщества и эфиры в реальном времени.">
+<meta property="og:image" content="https://placehold.co/1200x630/050810/00f2fe?text=METAIMPERIYA&font=montserrat">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:site_name" content="METAIMPERIYA">
+<meta property="og:locale" content="ru_RU">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="METAIMPERIYA — Social Platform & SMM-агентство">
+<meta name="twitter:description" content="Продвижение брендов, контент, таргет и прямые эфиры.">
+<meta name="twitter:image" content="https://placehold.co/1200x630/050810/00f2fe?text=METAIMPERIYA&font=montserrat">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -44,7 +70,17 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:clamp(14px,2vw,20
 .marquee-inner span{color:#ff3366}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .feed{max-width:820px;margin:0 auto;padding:clamp(40px,8vw,100px) clamp(18px,4vw,48px)}
-.create-post{background:rgba(14,16,22,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,51,102,.3);border-radius:20px;padding:clamp(20px,3vw,28px);margin-bottom:clamp(24px,4vw,40px);position:relative;overflow:hidden}
+.create-post-toggle{width:100%;background:rgba(14,16,22,.9);border:1px solid rgba(255,51,102,.3);border-radius:20px;padding:16px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all .25s;font-family:inherit;color:#fff}
+.create-post-toggle:hover{border-color:#ff3366;background:rgba(255,51,102,.05)}
+.create-post-toggle-left{display:flex;align-items:center;gap:14px}
+.create-post-toggle-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#ff3366,#00f2fe);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:16px;color:#fff}
+.create-post-toggle-text{font-size:14px;color:#888;text-align:left}
+.create-post-toggle-text strong{color:#fff;display:block;font-weight:600;margin-bottom:2px;font-size:15px}
+.create-post-toggle-icon{color:#666;font-size:18px;transition:transform .25s}
+.create-post-toggle.open .create-post-toggle-icon{transform:rotate(180deg)}
+.create-post{background:rgba(14,16,22,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,51,102,.3);border-radius:20px;padding:clamp(20px,3vw,28px);margin-bottom:20px;position:relative;overflow:hidden;display:none}
+.create-post.open{display:block;animation:slideDown .3s ease-out}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 .create-post::before{content:"";position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,#ff3366,#00f2fe)}
 .create-post h3{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:4px;color:#ff3366;text-transform:uppercase;margin-bottom:16px}
 .create-post input[type="text"],.create-post textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px 16px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:10px;resize:vertical}
@@ -58,10 +94,10 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:clamp(14px,2vw,20
 .file-preview{display:none;width:100%;max-height:200px;object-fit:cover;border-radius:10px;margin-bottom:10px}
 .file-preview.show{display:block}
 .create-post-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.create-post button{background:linear-gradient(90deg,#ff3366,#e00045);border:none;color:#fff;padding:12px 28px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;transition:transform .2s,box-shadow .2s;flex-shrink:0;font-family:inherit}
-.create-post button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,51,102,.5)}
-.create-post .hint{font-family:'JetBrains Mono',monospace;font-size:10px;color:#666;letter-spacing:1px;margin-left:auto}
-@media(max-width:480px){.create-post .hint{margin-left:0;width:100%}}
+.create-post button.primary{background:linear-gradient(90deg,#ff3366,#e00045);border:none;color:#fff;padding:12px 28px;border-radius:10px;font-weight:700;font-size:14px;cursor:pointer;transition:transform .2s,box-shadow .2s;font-family:inherit}
+.create-post button.primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,51,102,.5)}
+.create-post button.cancel{background:transparent;border:1px solid rgba(255,255,255,.1);color:#888;padding:12px 20px;border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit}
+.create-post button.cancel:hover{color:#fff;border-color:rgba(255,255,255,.2)}
 .feed-title{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:6px;color:#888;text-transform:uppercase;margin-bottom:clamp(24px,5vw,48px);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:16px}
 .feed-title span:last-child{color:#ff3366}
 .post{background:rgba(14,16,22,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:clamp(20px,3vw,28px);margin-bottom:clamp(20px,3vw,28px);transition:border-color .3s,transform .3s;position:relative;overflow:hidden;animation:postIn .5s ease-out}
@@ -175,8 +211,19 @@ footer .f-copy a:hover{color:#ff3366}
   </div>
 
   <section class="feed" id="feed">
-    <div class="create-post">
-      <h3>// Создать пост</h3>
+    <button class="create-post-toggle" id="createPostToggle" onclick="toggleCreatePost()">
+      <div class="create-post-toggle-left">
+        <div class="create-post-toggle-avatar">＋</div>
+        <div class="create-post-toggle-text">
+          <strong>Создать пост</strong>
+          Чем поделитесь сегодня?
+        </div>
+      </div>
+      <i class="fas fa-chevron-down create-post-toggle-icon"></i>
+    </button>
+
+    <div class="create-post" id="createPostForm">
+      <h3>// НОВЫЙ ПОСТ</h3>
       <input id="newPostName" type="text" placeholder="Ваше имя" maxlength="40">
       <textarea id="newPostText" placeholder="О чём хотите рассказать?..." maxlength="500"></textarea>
       <label class="file-label" id="fileLabel">
@@ -185,8 +232,8 @@ footer .f-copy a:hover{color:#ff3366}
       </label>
       <img id="filePreview" class="file-preview" alt="preview">
       <div class="create-post-row">
-        <button onclick="publishPost()">Опубликовать</button>
-        <span class="hint">Пост появится вверху ленты</span>
+        <button class="primary" onclick="publishPost()">Опубликовать</button>
+        <button class="cancel" onclick="toggleCreatePost()">Отмена</button>
       </div>
     </div>
 
@@ -227,7 +274,7 @@ footer .f-copy a:hover{color:#ff3366}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { getDatabase, ref, push, onValue, remove, query, limitToLast, set } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove, query, limitToLast, set, get } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyB0G2ZiFEwSr3472_9SsLJUMs6RORmLFWs",
@@ -248,9 +295,62 @@ signInAnonymously(auth).catch(err => console.error("Auth error:", err));
 
 const ADMIN_PASSWORD = 'admin123';
 const POSTS_PATH = 'posts';
+const DEMO_FLAG = 'metaimperiya_demo_added_v2';
 let userPosts = [];
 let deletePostId = null;
 let selectedImageBase64 = '';
+
+window.toggleCreatePost = function() {
+  const form = document.getElementById('createPostForm');
+  const toggle = document.getElementById('createPostToggle');
+  form.classList.toggle('open');
+  toggle.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    setTimeout(() => document.getElementById('newPostName').focus(), 300);
+  }
+};
+
+async function addDemoPostsIfNeeded() {
+  if (localStorage.getItem(DEMO_FLAG) === 'done') return;
+  const snap = await get(ref(db, POSTS_PATH));
+  if (snap.exists()) {
+    localStorage.setItem(DEMO_FLAG, 'done');
+    return;
+  }
+
+  console.log('🎬 Добавляю демо-посты...');
+  const now = Date.now();
+  const demoPosts = [
+    {
+      name: 'METAIMPERIYA',
+      text: '🔥 Сегодня в 20:00 — прямой эфир с разбором трендов SMM 2026. Поговорим про AI-контент, TikTok-алгоритмы и как работают воронки. Подключайтесь!',
+      image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=450&fit=crop',
+      likes: 47,
+      ts: now - 1000 * 60 * 12
+    },
+    {
+      name: 'METAIMPERIYA',
+      text: '📊 КЕЙС: за 2 месяца вывели бренд одежды в топ-10 поиска.\n\n• Охваты: +420%\n• Стоимость подписки: -67%\n• CTR в таргете: 4.8%\n\nЧто делали: пересобрали контент-стратегию, запустили Reels-серию, добавили UGC-контент. Хотите такой же результат — пишите в личку.',
+      image: '',
+      likes: 128,
+      ts: now - 1000 * 60 * 60 * 5
+    },
+    {
+      name: 'METAIMPERIYA',
+      text: '💡 Совет дня: не гонитесь за всеми соцсетями сразу. Выберите 2 платформы и выжмите из них максимум. Концентрация всегда сильнее распыления.\n\nМы чаще всего работаем с TikTok + Telegram — эта связка даёт лучший ROI для русскоязычного рынка.',
+      image: 'https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=800&h=450&fit=crop',
+      likes: 89,
+      ts: now - 1000 * 60 * 60 * 24
+    }
+  ];
+
+  for (const p of demoPosts) {
+    const newRef = push(ref(db, POSTS_PATH));
+    await set(newRef, { name: p.name, text: p.text, image: p.image, ts: p.ts, likes: p.likes });
+  }
+  localStorage.setItem(DEMO_FLAG, 'done');
+  console.log('✅ Демо-посты добавлены');
+}
 
 window.publishPost = function() {
   if (!currentUser) { alert('Подключение... подожди секунду'); return; }
@@ -261,8 +361,6 @@ window.publishPost = function() {
 
   if (!name) { alert('Введи имя'); return; }
   if (!text && !file && !selectedImageBase64) { alert('Напиши текст или прикрепи картинку'); return; }
-
-  console.log('📝 Публикация. Картинка готова:', selectedImageBase64 ? 'ДА (' + Math.round(selectedImageBase64.length/1024) + ' КБ)' : 'НЕТ');
 
   if (selectedImageBase64) {
     savePostToFirebase(name, text, selectedImageBase64);
@@ -280,12 +378,10 @@ window.publishPost = function() {
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
           const compressed = canvas.toDataURL('image/jpeg', 0.7);
-          console.log('✅ Сжато до:', Math.round(compressed.length/1024), 'КБ');
           savePostToFirebase(name, text, compressed);
         } catch (e) {
-          console.error('❌ Canvas error:', e);
           document.getElementById('loadingOverlay').classList.remove('show');
-          alert('Ошибка обработки картинки: ' + e.message);
+          alert('Ошибка обработки: ' + e.message);
         }
       };
       img.onerror = function() {
@@ -294,10 +390,6 @@ window.publishPost = function() {
       };
       img.src = ev.target.result;
     };
-    reader.onerror = function() {
-      document.getElementById('loadingOverlay').classList.remove('show');
-      alert('Ошибка чтения файла');
-    };
     reader.readAsDataURL(file);
   } else {
     savePostToFirebase(name, text, '');
@@ -305,11 +397,9 @@ window.publishPost = function() {
 };
 
 function savePostToFirebase(name, text, imageBase64) {
-  console.log('📤 Отправка в Firebase. Размер картинки:', imageBase64 ? Math.round(imageBase64.length/1024) + ' КБ' : '0');
   const newPostRef = push(ref(db, POSTS_PATH));
-  set(newPostRef, { name: name, text: text, image: imageBase64 || '', ts: Date.now() })
+  set(newPostRef, { name: name, text: text, image: imageBase64 || '', ts: Date.now(), likes: 0 })
     .then(() => {
-      console.log('✅ Пост сохранён успешно');
       document.getElementById('loadingOverlay').classList.remove('show');
       document.getElementById('newPostName').value = '';
       document.getElementById('newPostText').value = '';
@@ -321,11 +411,11 @@ function savePostToFirebase(name, text, imageBase64) {
       label.classList.remove('has-file');
       label.innerHTML = '<input id="newPostFile" type="file" accept="image/*"><i class="fas fa-image"></i> ВЫБРАТЬ КАРТИНКУ (необязательно)';
       attachFileHandler();
+      toggleCreatePost();
     })
     .catch(err => {
-      console.error('❌ Firebase error:', err);
       document.getElementById('loadingOverlay').classList.remove('show');
-      alert('❌ Ошибка: ' + err.message + '\n\nПроверь правила Firebase.');
+      alert('❌ Ошибка: ' + err.message);
     });
 }
 
@@ -365,10 +455,10 @@ function renderPost(post) {
   const initial = (post.name || 'U').charAt(0).toUpperCase();
   let imgHtml = '';
   if (post.image && post.image.length > 10) {
-    console.log('🖼 Пост с картинкой:', post.image.slice(0, 50));
-    imgHtml = '<img class="post-img" src="' + post.image + '" alt="post" onerror="console.error(\'❌ Картинка не загрузилась\', this.src.slice(0,50))">';
+    imgHtml = '<img class="post-img" src="' + post.image + '" alt="post">';
   }
-  el.innerHTML = '<div class="post-head"><div class="post-avatar">' + initial + '</div><div class="post-meta"><div class="post-author">' + escapeHtml(post.name) + '</div><div class="post-time">' + timeAgo(post.ts) + '</div></div><div class="post-menu"><button class="post-menu-btn" onclick="togglePostMenu(\'' + post.id + '\', event)">⋮</button><div class="post-menu-dropdown" id="menu-' + post.id + '"><button onclick="openDeleteModal(\'' + post.id + '\')"><i class="fas fa-trash"></i> Удалить пост</button></div></div></div><div class="post-body"></div>' + imgHtml + '<div class="post-actions"><button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">0</span></button><button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button><button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button></div><div class="comments"><form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form></div>';
+  const likesCount = post.likes || 0;
+  el.innerHTML = '<div class="post-head"><div class="post-avatar">' + initial + '</div><div class="post-meta"><div class="post-author">' + escapeHtml(post.name) + '</div><div class="post-time">' + timeAgo(post.ts) + '</div></div><div class="post-menu"><button class="post-menu-btn" onclick="togglePostMenu(\'' + post.id + '\', event)">⋮</button><div class="post-menu-dropdown" id="menu-' + post.id + '"><button onclick="openDeleteModal(\'' + post.id + '\')"><i class="fas fa-trash"></i> Удалить пост</button></div></div></div><div class="post-body"></div>' + imgHtml + '<div class="post-actions"><button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">' + likesCount + '</span></button><button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button><button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button></div><div class="comments"><form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form></div>';
   el.querySelector('.post-body').textContent = post.text;
   return el;
 }
@@ -455,7 +545,6 @@ function attachFileHandler() {
   fileInput.addEventListener('change', function() {
     const file = this.files[0];
     if (!file) return;
-    console.log('📸 Выбран файл:', file.name, '(' + Math.round(file.size/1024) + ' КБ)');
     fileLabel.classList.add('has-file');
     fileLabel.innerHTML = '<i class="fas fa-check"></i> ' + escapeHtml(file.name) + ' <span style="color:#666;font-size:9px">(нажми чтобы изменить)</span><input id="newPostFile" type="file" accept="image/*">';
     attachFileHandler();
@@ -473,10 +562,7 @@ function attachFileHandler() {
           canvas.width = w; canvas.height = h;
           canvas.getContext('2d').drawImage(img, 0, 0, w, h);
           selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
-          console.log('✅ Картинка готова к отправке:', Math.round(selectedImageBase64.length/1024), 'КБ');
-        } catch (e) {
-          console.error('❌ Ошибка сжатия:', e);
-        }
+        } catch (e) { console.error(e); }
       };
       img.src = e.target.result;
     };
@@ -484,10 +570,11 @@ function attachFileHandler() {
   });
 }
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     console.log('🔥 Firebase OK');
+    await addDemoPostsIfNeeded();
     loadPosts();
     attachFileHandler();
   }
