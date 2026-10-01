@@ -9,143 +9,222 @@
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
 <style>
-*{box-sizing:border-box}
-body{font-family:'Inter',sans-serif;margin:0;background:#0b0f19;color:#eee;overflow-x:hidden}
-.screen{display:none}.screen.active{display:flex}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hidden;min-height:100vh}
+.screen{display:none}
+.screen.active{display:flex;flex-direction:column}
+
+/* --- ШАПКА --- */
+.live-header{background:#111827;border-bottom:1px solid #1f2937;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;flex-shrink:0}
+.live-header-left{display:flex;align-items:center;gap:12px;min-width:0}
+.live-header-right{display:flex;gap:8px;flex-wrap:wrap}
+.h-logo{background:linear-gradient(90deg,#ff0050,#00f2fe);padding:8px;border-radius:10px;text-decoration:none;flex-shrink:0}
+.live-header h1{margin:0;font-size:14px;color:white;font-weight:bold;white-space:nowrap}
+.live-header p{margin:0;font-size:10px;color:#999}
+.btn-header{background:#1f2937;border:1px solid #374151;color:white;padding:8px 14px;border-radius:10px;font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit}
+.btn-header:hover{background:#374151}
+.btn-header.blue{background:linear-gradient(90deg,#00f2fe,#3b82f6);border:none;font-weight:bold}
+.btn-header.red{background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);color:#fca5a5}
+
+/* --- ОСНОВНАЯ СЕТКА --- */
+.live-main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;padding:12px;flex:1;min-height:0}
+.live-left{display:flex;flex-direction:column;gap:12px;min-width:0;overflow:hidden}
+.live-right{min-width:0;display:flex;flex-direction:column}
+
+/* --- СЦЕНА --- */
+.stage-wrapper{position:relative;width:100%;aspect-ratio:16/9;background:black;border-radius:16px;overflow:hidden;transition:all .3s;max-height:60vh}
+.stage-wrapper.vertical{aspect-ratio:9/16;max-width:420px;margin:0 auto;max-height:70vh}
+.stage-wrapper img,.stage-wrapper video,.stage-wrapper canvas,.stage-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border:none}
+.stage-label{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.7);padding:6px 10px;border-radius:8px;font-size:11px;color:white;z-index:5;display:flex;gap:6px;align-items:center}
+.stage-clear-btn{position:absolute;top:10px;right:10px;background:#dc2626;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:bold;cursor:pointer;z-index:6;display:none}
+.return-self-btn{display:none;background:linear-gradient(90deg,#10b981,#059669);color:white;border:none;padding:12px;border-radius:12px;font-size:13px;font-weight:bold;cursor:pointer;width:100%}
+
+/* --- УЧАСТНИКИ --- */
+.participants-title{font-size:11px;color:#999;text-transform:uppercase;margin:0 0 8px 0}
+.guest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;max-height:220px;overflow-y:auto}
 .guest-tile{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;border:2px solid transparent;cursor:pointer;transition:all .2s}
 .guest-tile:hover{border-color:#00f2fe}
 .guest-tile.on-stage{border-color:#ff0050;box-shadow:0 0 20px rgba(255,0,80,.5)}
 .guest-tile video,.guest-tile canvas{width:100%;height:100%;object-fit:cover}
+.guest-name{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.7);padding:2px 6px;border-radius:4px;font-size:10px;color:white;z-index:2}
+.tile-menu{display:none;position:absolute;top:4px;right:4px;z-index:10}
+.guest-tile:hover .tile-menu{display:block}
+
+/* --- УПРАВЛЕНИЕ --- */
+.controls-bar{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.controls-bar-left{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
+.btn-ctrl{background:#1f2937;border:1px solid #374151;color:white;padding:8px 12px;border-radius:10px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.btn-ctrl:hover{background:#374151}
+.btn-like{background:linear-gradient(90deg,#ff0050,#ec4899);color:white;border:none;padding:8px 14px;border-radius:10px;font-size:11px;font-weight:bold;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.btn-request{display:none;background:linear-gradient(90deg,#f59e0b,#ea580c);color:white;border:none;padding:8px 12px;border-radius:10px;font-size:11px;font-weight:bold;cursor:pointer;align-items:center;gap:6px}
+
+/* --- СТУДИЯ --- */
+.studio-panel{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:14px;overflow-y:auto;max-height:calc(100vh - 120px);display:none;flex-direction:column;gap:4px}
+.studio-panel h2{margin:0 0 14px 0;font-size:14px;color:white}
+.studio-section-title{font-size:11px;color:#999;margin:14px 0 8px 0}
+.studio-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.studio-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.btn-studio{background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer;font-family:inherit}
+.btn-studio:hover{background:#374151}
+.btn-studio.active{background:#ff0050;border-color:#ff0050}
 .bg-thumb{width:100%;aspect-ratio:16/9;border-radius:6px;cursor:pointer;border:2px solid transparent;object-fit:cover}
 .bg-thumb:hover{border-color:#00f2fe}
 .bg-thumb.active{border-color:#ff0050}
+.studio-input{width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:6px;padding:8px;color:white;font-size:11px;font-family:inherit;margin-bottom:6px}
+.studio-input:focus{outline:none;border-color:#ff3366}
 input[type="range"]{-webkit-appearance:none;height:4px;background:#374151;border-radius:2px;outline:none;width:100%}
 input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#00f2fe;cursor:pointer}
-.tile-menu{display:none;position:absolute;top:4px;right:4px;z-index:10}
-.guest-tile:hover .tile-menu{display:block}
-.main-grid{display:grid;grid-template-columns:1fr 340px;gap:12px;padding:12px;overflow:hidden}
+
+/* --- ЧАТ --- */
+.chat-panel{background:#111827;border:1px solid #1f2937;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100vh - 120px);height:100%}
+.chat-header{padding:12px;border-bottom:1px solid #1f2937;flex-shrink:0}
+.chat-header h2{margin:0;font-size:14px;color:white}
+.chat-messages{flex:1;padding:12px;overflow-y:auto;font-size:12px;min-height:200px}
+.chat-form{padding:12px;border-top:1px solid #1f2937;display:flex;gap:6px;flex-shrink:0}
+.chat-form input{flex:1;background:#0b0f19;border:1px solid #1f2937;border-radius:10px;padding:8px;color:white;font-size:12px;font-family:inherit;min-width:0}
+.chat-form input:focus{outline:none;border-color:#ff0050}
+.chat-form button{background:#ff0050;border:none;color:white;padding:8px 12px;border-radius:10px;cursor:pointer;flex-shrink:0}
+
+/* --- КНОПКА СТУДИЯ (плавающая) --- */
+.open-studio-btn{display:none;position:fixed;bottom:90px;right:24px;background:linear-gradient(90deg,#ff0050,#ec4899);color:white;border:none;padding:12px 20px;border-radius:30px;font-weight:bold;font-size:13px;cursor:pointer;box-shadow:0 4px 20px rgba(255,0,80,.5);z-index:50;font-family:inherit}
+
+/* --- ВХОД --- */
+.welcome-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.welcome-box{max-width:420px;width:100%}
+.welcome-logo{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:16px;background:linear-gradient(90deg,#ff0050,#00f2fe);margin-bottom:16px;text-decoration:none}
+.welcome-form{background:#111827;border:1px solid #1f2937;border-radius:16px;padding:24px}
+.welcome-form label{display:block;font-size:11px;color:#999;margin-bottom:6px}
+.welcome-form input{width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:10px;padding:12px;color:white;font-size:14px;margin-bottom:14px;font-family:inherit}
+.welcome-form input:focus{outline:none;border-color:#ff3366}
+.welcome-form button{width:100%;background:linear-gradient(90deg,#ff0050,#e00045);color:white;border:none;padding:14px;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit}
+.welcome-back{display:block;text-align:center;margin-top:14px;color:#666;font-size:12px;text-decoration:none}
+
+/* ============ АДАПТИВ ============ */
 @media(max-width:1024px){
-  .main-grid{grid-template-columns:1fr;padding:8px;gap:8px}
-  .studio-panel,.chat-panel{max-height:400px !important}
-  .header-wrap{flex-wrap:wrap;gap:8px}
+  .live-main{grid-template-columns:1fr;padding:8px;gap:8px}
+  .live-right{max-height:none}
+  .studio-panel,.chat-panel{max-height:400px}
+  .stage-wrapper{max-height:50vh}
+  .stage-wrapper.vertical{max-width:340px;max-height:60vh}
+  .guest-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));max-height:180px}
+}
+
+@media(max-width:640px){
+  .live-header{padding:10px 12px;gap:8px}
+  .live-header h1{font-size:12px}
+  .live-header p{font-size:9px}
+  .btn-header{padding:6px 10px;font-size:10px}
+  .h-logo{padding:6px}
+  .h-logo i{font-size:14px}
+  .controls-bar{padding:10px}
+  .btn-ctrl{padding:7px 10px;font-size:10px}
+  .stage-wrapper{max-height:40vh;border-radius:12px}
+  .stage-wrapper.vertical{max-width:280px;max-height:50vh}
+  .guest-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;max-height:150px}
+  .chat-panel,.studio-panel{max-height:320px}
+  .open-studio-btn{bottom:20px;right:16px;padding:10px 16px;font-size:12px}
+}
+
+@media(max-width:400px){
+  .live-header h1{font-size:11px}
+  .btn-header{padding:5px 8px;font-size:9px}
+  .btn-ctrl{padding:6px 8px;font-size:9px}
+  .btn-ctrl span{display:none}
 }
 </style>
 </head>
 <body>
 
-<div id="screen-welcome" class="screen active min-h-screen flex-col items-center justify-center p-4" style="min-height:100vh">
-<div style="max-width:420px;width:100%">
+<!-- ЭКРАН ВХОДА -->
+<div id="screen-welcome" class="screen active">
+<div class="welcome-wrap">
+<div class="welcome-box">
 <div style="text-align:center;margin-bottom:32px">
-<a href="index.html" style="display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:16px;background:linear-gradient(90deg,#ff0050,#00f2fe);margin-bottom:16px;text-decoration:none">
-<i class="fa-solid fa-video" style="font-size:24px;color:white"></i>
-</a>
-<h1 style="font-size:24px;font-weight:bold;color:white;margin:0">METAIMPERIYA LIVE</h1>
+<a href="index.html" class="welcome-logo"><i class="fa-solid fa-video" style="font-size:24px;color:white"></i></a>
+<h1 style="font-size:24px;font-weight:bold;color:white">METAIMPERIYA LIVE</h1>
 <p style="color:#999;font-size:13px;margin-top:4px">Прямой эфир</p>
 </div>
-<div style="background:#111827;border:1px solid #1f2937;border-radius:16px;padding:24px">
-<label style="display:block;font-size:11px;color:#999;margin-bottom:6px">Ваше имя</label>
-<input id="inputName" type="text" placeholder="Например: Иван" maxlength="30" style="width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:10px;padding:12px;color:white;font-size:14px;margin-bottom:14px">
-<label style="display:block;font-size:11px;color:#999;margin-bottom:6px">Пароль ведущего (гости — пусто)</label>
-<input id="inputHostKey" type="password" placeholder="admin123" style="width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:10px;padding:12px;color:white;font-size:14px;margin-bottom:18px">
-<button onclick="enterStream()" style="width:100%;background:linear-gradient(90deg,#ff0050,#e00045);color:white;border:none;padding:14px;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer">
-<i class="fa-solid fa-arrow-right"></i> Войти в эфир
-</button>
-<a href="index.html" style="display:block;text-align:center;margin-top:14px;color:#666;font-size:12px;text-decoration:none">← На главную</a>
+<div class="welcome-form">
+<label>Ваше имя</label>
+<input id="inputName" type="text" placeholder="Например: Иван" maxlength="30">
+<label>Пароль ведущего (гости — пусто)</label>
+<input id="inputHostKey" type="password" placeholder="admin123">
+<button onclick="enterStream()"><i class="fa-solid fa-arrow-right"></i> Войти в эфир</button>
+<a href="index.html" class="welcome-back">← На главную</a>
+</div>
 </div>
 </div>
 </div>
 
-<div id="screen-room" class="screen flex-col" style="min-height:100vh">
-<header class="header-wrap" style="background:#111827;border-bottom:1px solid #1f2937;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
-<div style="display:flex;align-items:center;gap:12px">
-<a href="index.html" style="background:linear-gradient(90deg,#ff0050,#00f2fe);padding:8px;border-radius:10px;text-decoration:none">
-<i class="fa-solid fa-video" style="color:white"></i>
-</a>
+<!-- ЭКРАН ЭФИРА -->
+<div id="screen-room" class="screen">
+<header class="live-header">
+<div class="live-header-left">
+<a href="index.html" class="h-logo"><i class="fa-solid fa-video" style="color:white"></i></a>
 <div>
-<h1 style="margin:0;font-size:14px;color:white;font-weight:bold">Прямой эфир <span style="background:#dc2626;font-size:10px;padding:2px 8px;border-radius:10px;color:white">● LIVE</span></h1>
-<p id="roomSubtitle" style="margin:0;font-size:10px;color:#999">—</p>
+<h1>Прямой эфир <span style="background:#dc2626;font-size:10px;padding:2px 8px;border-radius:10px;color:white">● LIVE</span></h1>
+<p id="roomSubtitle">—</p>
 </div>
 </div>
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-<button onclick="toggleOrientation()" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px 14px;border-radius:10px;font-size:11px;cursor:pointer">
-<i id="orientIcon" class="fa-solid fa-mobile-screen" style="color:#00f2fe"></i> <span id="orientLabel">Горизонт</span>
-</button>
-<button onclick="copyInviteLink()" style="background:linear-gradient(90deg,#00f2fe,#3b82f6);color:white;border:none;padding:8px 14px;border-radius:10px;font-size:11px;font-weight:bold;cursor:pointer">
-<i class="fa-solid fa-link"></i> Ссылка
-</button>
-<button onclick="leaveRoom()" style="background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);color:#fca5a5;padding:8px 14px;border-radius:10px;font-size:11px;cursor:pointer">
-<i class="fa-solid fa-right-from-bracket"></i> Выйти
-</button>
+<div class="live-header-right">
+<button class="btn-header" onclick="toggleOrientation()"><i id="orientIcon" class="fa-solid fa-mobile-screen" style="color:#00f2fe"></i> <span id="orientLabel">Горизонт</span></button>
+<button class="btn-header blue" onclick="copyInviteLink()"><i class="fa-solid fa-link"></i> Ссылка</button>
+<button class="btn-header red" onclick="leaveRoom()"><i class="fa-solid fa-right-from-bracket"></i> Выйти</button>
 </div>
 </header>
 
-<main class="main-grid" style="flex:1">
-<div style="display:flex;flex-direction:column;gap:12px;overflow:hidden">
-<div id="stageWrapper" style="position:relative;width:100%;aspect-ratio:16/9;background:black;border-radius:16px;overflow:hidden;margin:0 auto;max-width:100%;transition:all .3s">
-<div id="mainVideoBox" style="width:100%;height:100%;position:relative;display:flex;align-items:center;justify-content:center">
+<main class="live-main">
+<div class="live-left">
+<div id="stageWrapper" class="stage-wrapper">
+<div id="mainVideoBox" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
 <img id="stageBgImage" src="https://placehold.co/1280x720/0b0f19/00f2fe?text=METAIMPERIYA+LIVE&font=montserrat" style="width:100%;height:100%;object-fit:cover">
 </div>
-<iframe id="stageIframe" style="display:none;width:100%;height:100%;border:none;position:absolute;top:0;left:0;z-index:4"></iframe>
-<div style="position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.7);padding:6px 10px;border-radius:8px;font-size:11px;color:white;z-index:5">
+<iframe id="stageIframe" style="display:none;z-index:4"></iframe>
+<div class="stage-label">
 <i id="mainMicIcon" class="fa-solid fa-microphone" style="color:#34d399"></i>
 <span id="mainNameLabel">Сцена свободна</span>
 </div>
-<button id="clearStageBtn" onclick="clearStage()" style="display:none;position:absolute;top:10px;right:10px;background:#dc2626;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:bold;cursor:pointer;z-index:6">
-<i class="fa-solid fa-xmark"></i> Убрать со сцены
-</button>
+<button id="clearStageBtn" class="stage-clear-btn" onclick="clearStage()"><i class="fa-solid fa-xmark"></i> Убрать со сцены</button>
 </div>
 
-<button id="returnSelfBtn" onclick="returnSelfToStage()" style="display:none;background:linear-gradient(90deg,#10b981,#059669);color:white;border:none;padding:12px;border-radius:12px;font-size:13px;font-weight:bold;cursor:pointer;width:100%">
-<i class="fa-solid fa-arrow-up"></i> Вернуть себя на сцену
-</button>
+<button id="returnSelfBtn" class="return-self-btn" onclick="returnSelfToStage()"><i class="fa-solid fa-arrow-up"></i> Вернуть себя на сцену</button>
 
 <div>
-<h3 style="font-size:11px;color:#999;text-transform:uppercase;margin:0 0 8px 0">
-<i class="fa-solid fa-users"></i> Участники (<span id="guestsCount">0</span>)
-</h3>
-<div id="guestGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;max-height:220px;overflow-y:auto">
+<h3 class="participants-title"><i class="fa-solid fa-users"></i> Участники (<span id="guestsCount">0</span>)</h3>
+<div id="guestGrid" class="guest-grid">
 <p id="noGuestsHint" style="color:#666;font-size:11px;text-align:center;grid-column:1/-1;padding:16px">Пока никого</p>
 </div>
 </div>
 
-<div style="background:#111827;border:1px solid #1f2937;border-radius:14px;padding:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px">
-<div style="display:flex;gap:8px;flex-wrap:wrap">
-<button id="roomCamBtn" onclick="toggleRoomCam()" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px 12px;border-radius:10px;font-size:11px;cursor:pointer">
-<i id="roomCamIcon" class="fa-solid fa-video" style="color:#00f2fe"></i> Камера
-</button>
-<button id="roomMicBtn" onclick="toggleRoomMic()" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px 12px;border-radius:10px;font-size:11px;cursor:pointer">
-<i id="roomMicIcon" class="fa-solid fa-microphone" style="color:#34d399"></i> Микрофон
-</button>
-<button onclick="toggleScreenShare()" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px 12px;border-radius:10px;font-size:11px;cursor:pointer">
-<i class="fa-solid fa-desktop" style="color:#a78bfa"></i> <span id="shareScreenLabel">Экран</span>
-</button>
-<button id="requestStageBtn" onclick="requestStage()" style="display:none;background:linear-gradient(90deg,#f59e0b,#ea580c);color:white;border:none;padding:8px 12px;border-radius:10px;font-size:11px;font-weight:bold;cursor:pointer">
-<i class="fa-solid fa-hand"></i> <span id="requestStageLabel">Хочу в эфир</span>
-</button>
+<div class="controls-bar">
+<div class="controls-bar-left">
+<button id="roomCamBtn" class="btn-ctrl" onclick="toggleRoomCam()"><i id="roomCamIcon" class="fa-solid fa-video" style="color:#00f2fe"></i> Камера</button>
+<button id="roomMicBtn" class="btn-ctrl" onclick="toggleRoomMic()"><i id="roomMicIcon" class="fa-solid fa-microphone" style="color:#34d399"></i> Микрофон</button>
+<button class="btn-ctrl" onclick="toggleScreenShare()"><i class="fa-solid fa-desktop" style="color:#a78bfa"></i> <span id="shareScreenLabel">Экран</span></button>
+<button id="requestStageBtn" class="btn-request" onclick="requestStage()"><i class="fa-solid fa-hand"></i> <span id="requestStageLabel">Хочу в эфир</span></button>
 </div>
-<button onclick="sendLikeBurst()" style="background:linear-gradient(90deg,#ff0050,#ec4899);color:white;border:none;padding:8px 14px;border-radius:10px;font-size:11px;font-weight:bold;cursor:pointer">
-<i class="fa-solid fa-heart"></i> Лайк
-</button>
+<button class="btn-like" onclick="sendLikeBurst()"><i class="fa-solid fa-heart"></i> Лайк</button>
 </div>
 </div>
 
-<div id="studioPanel" class="studio-panel" style="background:#111827;border:1px solid #1f2937;border-radius:14px;padding:14px;overflow-y:auto;max-height:calc(100vh - 100px);display:none">
-<h2 style="margin:0 0 14px 0;font-size:14px;color:white"><i class="fa-solid fa-wand-magic-sparkles" style="color:#ff0050"></i> Студия</h2>
+<div class="live-right">
+<div id="studioPanel" class="studio-panel">
+<h2><i class="fa-solid fa-wand-magic-sparkles" style="color:#ff0050"></i> Студия</h2>
 
-<h3 style="font-size:11px;color:#999;margin:0 0 8px 0">🌐 Сайт в эфире</h3>
-<input id="iframeUrl" type="text" placeholder="https://example.com" style="width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:6px;padding:8px;color:white;font-size:11px;margin-bottom:6px">
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px">
-<button onclick="showIframe()" style="background:#10b981;border:none;color:white;padding:8px;border-radius:6px;font-size:10px;font-weight:bold;cursor:pointer">Показать сайт</button>
-<button onclick="hideIframe()" style="background:#374151;border:none;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer">Скрыть</button>
+<div class="studio-section-title">🌐 Сайт в эфире</div>
+<input id="iframeUrl" type="text" placeholder="https://example.com" class="studio-input">
+<div class="studio-grid-2">
+<button class="btn-studio" onclick="showIframe()" style="background:#10b981;border:none;font-weight:bold">Показать сайт</button>
+<button class="btn-studio" onclick="hideIframe()">Скрыть</button>
 </div>
 
-<h3 style="font-size:11px;color:#999;margin:0 0 8px 0">Фон</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px">
-<button onclick="studioSetBg('none')" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer">Ориг</button>
-<button onclick="studioSetBg('blur')" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer">Блюр</button>
-<button onclick="studioSetBg('green')" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer">Зелёный</button>
+<div class="studio-section-title">Фон</div>
+<div class="studio-grid-3" style="margin-bottom:10px">
+<button class="btn-studio" onclick="studioSetBg('none')">Ориг</button>
+<button class="btn-studio" onclick="studioSetBg('blur')">Блюр</button>
+<button class="btn-studio" onclick="studioSetBg('green')">Зелёный</button>
 </div>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px">
+<div class="studio-grid-3">
 <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
 <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
 <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
@@ -154,43 +233,38 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 <img src="https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
 </div>
 
-<h3 style="font-size:11px;color:#999;margin:0 0 8px 0">Эффект</h3>
-<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:16px">
-<button onclick="studioSetEffect('original')" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer">Ориг</button>
-<button onclick="studioSetEffect('vhs')" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer">VHS</button>
-<button onclick="studioSetEffect('invert')" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer">Инверт</button>
-<button onclick="studioSetEffect('sepia')" style="background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer">Сепия</button>
+<div class="studio-section-title">Эффект</div>
+<div class="studio-grid-2">
+<button class="btn-studio" onclick="studioSetEffect('original')">Ориг</button>
+<button class="btn-studio" onclick="studioSetEffect('vhs')">VHS</button>
+<button class="btn-studio" onclick="studioSetEffect('invert')">Инверт</button>
+<button class="btn-studio" onclick="studioSetEffect('sepia')">Сепия</button>
 </div>
 
-<h3 style="font-size:11px;color:#999;margin:0 0 8px 0">Текст</h3>
-<input id="studioText" type="text" placeholder="Текст..." maxlength="40" oninput="studioSetText()" style="width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:6px;padding:8px;color:white;font-size:11px;margin-bottom:8px">
+<div class="studio-section-title">Текст</div>
+<input id="studioText" type="text" placeholder="Текст..." maxlength="40" oninput="studioSetText()" class="studio-input">
 <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
 <input id="studioTextColor" type="color" value="#ff3366" onchange="studioSetText()" style="width:32px;height:28px;border:none;border-radius:6px;cursor:pointer">
 <input id="studioTextSize" type="range" min="20" max="180" value="80" oninput="studioSetTextSize()">
 </div>
 
-<h3 style="font-size:11px;color:#999;margin:0 0 8px 0">Масштаб видео</h3>
+<div class="studio-section-title">Масштаб видео</div>
 <input id="studioVideoScale" type="range" min="50" max="200" value="100" oninput="studioSetVideoScale()">
 </div>
 
-<div id="chatPanel" class="chat-panel" style="background:#111827;border:1px solid #1f2937;border-radius:14px;padding:0;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100vh - 100px)">
-<div style="padding:12px;border-bottom:1px solid #1f2937">
-<h2 style="margin:0;font-size:14px;color:white"><i class="fa-solid fa-comments" style="color:#ff0050"></i> Чат</h2>
-</div>
-<div id="chatMessages" style="flex:1;padding:12px;overflow-y:auto;font-size:12px;min-height:200px"></div>
-<form onsubmit="handleSendMessage(event)" style="padding:12px;border-top:1px solid #1f2937;display:flex;gap:6px">
-<input id="chatInput" type="text" placeholder="Написать..." maxlength="300" style="flex:1;background:#0b0f19;border:1px solid #1f2937;border-radius:10px;padding:8px;color:white;font-size:12px">
-<button type="submit" style="background:#ff0050;border:none;color:white;padding:8px 12px;border-radius:10px;cursor:pointer">
-<i class="fa-solid fa-paper-plane"></i>
-</button>
+<div id="chatPanel" class="chat-panel">
+<div class="chat-header"><h2><i class="fa-solid fa-comments" style="color:#ff0050"></i> Чат</h2></div>
+<div id="chatMessages" class="chat-messages"></div>
+<form class="chat-form" onsubmit="handleSendMessage(event)">
+<input id="chatInput" type="text" placeholder="Написать..." maxlength="300">
+<button type="submit"><i class="fa-solid fa-paper-plane"></i></button>
 </form>
+</div>
 </div>
 </main>
 </div>
 
-<button id="openStudioBtn" onclick="toggleStudio()" style="display:none;position:fixed;bottom:90px;right:24px;background:linear-gradient(90deg,#ff0050,#ec4899);color:white;border:none;padding:12px 20px;border-radius:30px;font-weight:bold;font-size:13px;cursor:pointer;box-shadow:0 4px 20px rgba(255,0,80,.5);z-index:50">
-<i class="fa-solid fa-wand-magic-sparkles"></i> Студия
-</button>
+<button id="openStudioBtn" class="open-studio-btn" onclick="toggleStudio()"><i class="fa-solid fa-wand-magic-sparkles"></i> Студия</button>
 
 <script type="module">
 import { Room, RoomEvent, Track } from 'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.esm.mjs';
@@ -225,7 +299,7 @@ window.toggleStudio = function() {
     const chatPanel = document.getElementById('chatPanel');
     const btn = document.getElementById('openStudioBtn');
     if (panel.style.display === 'none' || !panel.style.display) {
-        panel.style.display = 'block';
+        panel.style.display = 'flex';
         chatPanel.style.display = 'none';
         btn.style.display = 'none';
     } else {
@@ -249,7 +323,7 @@ window.enterStream = async function() {
     if (isHost) {
         document.getElementById('openStudioBtn').style.display = 'block';
     } else {
-        document.getElementById('requestStageBtn').style.display = 'inline-block';
+        document.getElementById('requestStageBtn').style.display = 'inline-flex';
     }
 
     await connectToLiveKit(isHost);
@@ -368,9 +442,7 @@ function renderGuestTile(identity, isLocal) {
         <div id="guest-video-${identity}" style="width:100%;height:100%;background:#111827;display:flex;align-items:center;justify-content:center">
             <i class="fa-solid fa-user" style="color:#555;font-size:24px"></i>
         </div>
-        <div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.7);padding:2px 6px;border-radius:4px;font-size:10px;color:white;z-index:2">
-            ${isLocal ? 'Вы' : escapeHtml(identity)}
-        </div>
+        <div class="guest-name">${isLocal ? 'Вы' : escapeHtml(identity)}</div>
         ${window.appState.isHost && !isLocal ? `
         <div class="tile-menu">
             <button onclick="event.stopPropagation();putOnStage('${escapeHtml(identity).replace(/'/g,'&#39;')}')" style="background:#f59e0b;color:black;border:none;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:bold;cursor:pointer">
@@ -678,15 +750,13 @@ window.toggleOrientation = function() {
 
     if (window.appState.orientation === 'horizontal') {
         window.appState.orientation = 'vertical';
-        wrapper.style.aspectRatio = '9/16';
-        wrapper.style.maxWidth = '420px';
+        wrapper.classList.add('vertical');
         icon.className = 'fa-solid fa-desktop';
         label.innerText = 'Вертикал';
         if (studio) studio.setOrientation('vertical');
     } else {
         window.appState.orientation = 'horizontal';
-        wrapper.style.aspectRatio = '16/9';
-        wrapper.style.maxWidth = '100%';
+        wrapper.classList.remove('vertical');
         icon.className = 'fa-solid fa-mobile-screen';
         label.innerText = 'Горизонт';
         if (studio) studio.setOrientation('horizontal');
