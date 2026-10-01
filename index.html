@@ -11,9 +11,9 @@
 html,body{background:#050810;font-family:'Inter',sans-serif;color:#e8e8e8;overflow-x:hidden;min-height:100%}
 
 #aurora{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
-
 .wrap{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column}
 
+/* ЗАСТАВКА */
 #intro{position:fixed;inset:0;background:#050810;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
 #intro.hide{opacity:0;pointer-events:none}
 .intro-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(24px,7vw,64px);font-weight:700;letter-spacing:6px;color:#fff}
@@ -22,35 +22,99 @@ html,body{background:#050810;font-family:'Inter',sans-serif;color:#e8e8e8;overfl
 .intro-bar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#ff3366,#00f2fe);width:0;animation:bar 1.8s ease-out forwards}
 @keyframes bar{to{width:100%}}
 
+/* ШАПКА */
 header{
   position:fixed;top:0;left:0;right:0;z-index:100;
-  padding:clamp(14px,2vw,22px) clamp(18px,4vw,48px);
+  padding:clamp(14px,2vw,20px) clamp(18px,4vw,48px);
   display:flex;justify-content:space-between;align-items:center;
-  background:rgba(5,8,16,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(255,255,255,.05);
+  background:rgba(5,8,16,.55);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid rgba(255,255,255,.06);
 }
-.h-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.6vw,15px);font-weight:700;letter-spacing:4px;color:#fff}
+.h-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.6vw,15px);font-weight:700;letter-spacing:4px;color:#fff;display:flex;align-items:center;gap:10px}
+.h-logo::before{content:"";width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,#ff3366,#00f2fe)}
 .h-logo span{color:#ff3366}
-.h-menu{display:flex;gap:clamp(18px,3vw,40px);align-items:center}
-.h-menu a{color:#888;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12px);letter-spacing:2px;text-transform:uppercase;transition:color .2s}
+.h-menu{display:flex;gap:clamp(14px,2.5vw,32px);align-items:center}
+.h-menu a{color:#888;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12px);letter-spacing:2px;text-transform:uppercase;transition:color .25s;position:relative;padding:6px 0}
+.h-menu a::after{content:"";position:absolute;bottom:0;left:0;width:0;height:1px;background:#ff3366;transition:width .25s}
 .h-menu a:hover{color:#fff}
+.h-menu a:hover::after{width:100%}
 .h-live{color:#ff3366 !important;display:inline-flex;align-items:center;gap:8px}
-.h-live::after{content:"";width:6px;height:6px;background:#ff3366;border-radius:50%;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.h-live::before{content:"";width:6px;height:6px;background:#ff3366;border-radius:50%;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
 @media(max-width:640px){
   .h-menu a:not(.h-live){display:none}
+  .h-logo{font-size:12px;letter-spacing:3px}
 }
 
-.hero{padding:clamp(120px,20vw,200px) clamp(18px,4vw,48px) clamp(60px,10vw,100px);text-align:center;position:relative}
-.hero-tag{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.4vw,12px);letter-spacing:6px;color:#666;margin-bottom:clamp(20px,4vw,40px);text-transform:uppercase}
-.hero h1{font-size:clamp(42px,12vw,160px);font-weight:900;letter-spacing:-.02em;line-height:.95;margin-bottom:clamp(20px,4vw,40px);background:linear-gradient(180deg,#fff 40%,#ff3366 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-desc{max-width:min(620px,90vw);margin:0 auto;font-size:clamp(13px,1.8vw,17px);color:#99a;line-height:1.7;font-weight:300}
+/* ГЕРОЙ С АНИМАЦИЕЙ */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden;background:#ffee25}
+.hero-text-mask{position:absolute;inset:0;overflow:hidden}
+.hero-text-mask p{
+  position:absolute;
+  top:0;left:0;
+  width:100%;
+  margin:0;
+  padding:0;
+  font-family:'Inter',sans-serif;
+  font-size:13px;
+  line-height:10px;
+  font-weight:900;
+  background:url(https://media.giphy.com/media/41x8G9RQjdKSKbO7it/giphy.webp) no-repeat;
+  background-size:cover;
+  background-position:center;
+  background-attachment:fixed;
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:rgba(255,255,255,0);
+  mix-blend-mode:darken;
+  color:transparent;
+  word-break:break-word;
+  height:100%;
+  overflow:hidden;
+}
+.hero-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(5,8,16,.15) 0%,rgba(5,8,16,0) 40%,rgba(5,8,16,0) 60%,rgba(5,8,16,.9) 100%);
+  pointer-events:none;
+  z-index:3;
+}
+.hero-content{
+  position:relative;
+  z-index:5;
+  text-align:center;
+  padding:clamp(20px,4vw,40px);
+  background:rgba(5,8,16,.75);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:24px;
+  max-width:min(600px,90vw);
+  pointer-events:auto;
+}
+.hero-tag{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.4vw,12px);letter-spacing:6px;color:#888;margin-bottom:16px;text-transform:uppercase}
+.hero-desc{font-size:clamp(13px,1.8vw,16px);color:#ccc;line-height:1.7;font-weight:400}
+.hero-cta{margin-top:24px}
+.hero-cta a{
+  display:inline-block;
+  padding:14px 32px;
+  background:linear-gradient(90deg,#ff3366,#e00045);
+  color:#fff;
+  text-decoration:none;
+  border-radius:40px;
+  font-weight:700;
+  font-size:14px;
+  transition:transform .2s,box-shadow .2s;
+  box-shadow:0 6px 30px rgba(255,51,102,.5);
+}
+.hero-cta a:hover{transform:translateY(-3px);box-shadow:0 10px 40px rgba(255,51,102,.7)}
 
-.hero-marquee{position:relative;overflow:hidden;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding:clamp(12px,2vw,20px) 0;background:rgba(0,0,0,.35);margin-top:clamp(40px,8vw,80px)}
+/* БЕГУЩАЯ СТРОКА */
+.marquee{position:relative;overflow:hidden;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding:clamp(12px,2vw,20px) 0;background:rgba(5,8,16,.6);backdrop-filter:blur(10px)}
 .marquee-inner{display:flex;gap:40px;animation:marquee 30s linear infinite;font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:4px;color:#666;white-space:nowrap}
 .marquee-inner span{color:#ff3366}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
+/* ЛЕНТА */
 .feed{max-width:820px;margin:0 auto;padding:clamp(40px,8vw,100px) clamp(18px,4vw,48px)}
 .feed-title{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:6px;color:#888;text-transform:uppercase;margin-bottom:clamp(24px,5vw,48px);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:16px}
 .feed-title span:last-child{color:#ff3366}
@@ -76,7 +140,6 @@ header{
 .act.liked i{animation:heartPop .4s}
 @keyframes heartPop{0%{transform:scale(1)}50%{transform:scale(1.4)}100%{transform:scale(1)}}
 .act i{font-size:14px}
-
 .comments{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.05);display:none}
 .comments.show{display:block}
 .comment{display:flex;gap:10px;margin-bottom:12px;font-size:clamp(12px,1.5vw,13px)}
@@ -95,6 +158,7 @@ header{
 .sand-section h2{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:6px;color:#666;text-transform:uppercase;margin-bottom:clamp(20px,4vw,36px)}
 #sandCanvas{display:block;width:100%;height:clamp(200px,40vw,340px);background:radial-gradient(circle at top,#0e1220,#050810);border-radius:20px;border:1px solid rgba(255,255,255,.06);cursor:pointer}
 
+/* ФУТЕР */
 footer{padding:clamp(40px,8vw,80px) clamp(18px,4vw,48px);border-top:1px solid rgba(255,255,255,.05);text-align:center;position:relative;z-index:2}
 footer .f-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(14px,2vw,18px);font-weight:700;letter-spacing:6px;color:#fff;margin-bottom:20px}
 footer .f-logo span{color:#ff3366}
@@ -125,17 +189,25 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
     </div>
   </header>
 
+  <!-- ГЕРОЙ С АНИМАЦИЕЙ ВМЕСТО ЗАГОЛОВКА -->
   <section class="hero">
-    <div class="hero-tag">SMM · CONTENT · LIVE</div>
-    <h1>Мы делаем<br>бренды<br>громкими</h1>
-    <p class="hero-desc">Стратегия, контент, продвижение и прямые эфиры. Всё, чтобы ваш бренд звучал в каждом канале</p>
-    <div class="hero-marquee">
-      <div class="marquee-inner">
-        <span>◆</span> SMM <span>◆</span> CONTENT <span>◆</span> STRATEGY <span>◆</span> LIVE <span>◆</span> ANALYTICS <span>◆</span> COMMUNITY <span>◆</span> TARGETING <span>◆</span> DESIGN <span>◆</span>
-        <span>◆</span> SMM <span>◆</span> CONTENT <span>◆</span> STRATEGY <span>◆</span> LIVE <span>◆</span> ANALYTICS <span>◆</span> COMMUNITY <span>◆</span> TARGETING <span>◆</span> DESIGN <span>◆</span>
+    <div class="hero-text-mask" id="heroTextMask"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <div class="hero-tag">SMM · CONTENT · LIVE</div>
+      <p class="hero-desc">Стратегия, контент, продвижение и прямые эфиры. Всё, чтобы ваш бренд звучал в каждом канале</p>
+      <div class="hero-cta">
+        <a href="live.html">🎥 Смотреть эфир</a>
       </div>
     </div>
   </section>
+
+  <div class="marquee">
+    <div class="marquee-inner">
+      <span>◆</span> SMM <span>◆</span> CONTENT <span>◆</span> STRATEGY <span>◆</span> LIVE <span>◆</span> ANALYTICS <span>◆</span> COMMUNITY <span>◆</span> TARGETING <span>◆</span> DESIGN <span>◆</span>
+      <span>◆</span> SMM <span>◆</span> CONTENT <span>◆</span> STRATEGY <span>◆</span> LIVE <span>◆</span> ANALYTICS <span>◆</span> COMMUNITY <span>◆</span> TARGETING <span>◆</span> DESIGN <span>◆</span>
+    </div>
+  </div>
 
   <section class="feed" id="feed">
     <div class="feed-title"><span>// ЛЕНТА</span><span>03 POSTS</span></div>
@@ -196,7 +268,6 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
     </article>
   </section>
 
-  <!-- ПЕСОЧНАЯ АНИМАЦИЯ -->
   <section class="sand-section" id="showcase">
     <h2>// METAIMPERIYA</h2>
     <canvas id="sandCanvas"></canvas>
@@ -268,6 +339,15 @@ gl_FragColor=vec4(finalColor,1.0);
 }
 </script>
 <script>
+// Заполняем hero-text-mask текстом (латиница для эффекта гифки)
+const textSample = "METAIMPERIYA SOCIAL PLATFORM CREATE CONTENT STRATEGY LIVE SMM MARKETING BRAND DESIGN PROMOTION GROWTH ANALYTICS COMMUNITY TARGETING EFFECTIVE AMAZING POWERFUL CREATIVE ";
+const heroMask = document.getElementById('heroTextMask');
+let fullText = '';
+while(fullText.length < 15000){fullText += textSample + ' ';}
+const p = document.createElement('p');
+p.textContent = fullText;
+heroMask.appendChild(p);
+
 // Заставка
 setTimeout(()=>{document.getElementById('intro').classList.add('hide');setTimeout(()=>document.getElementById('intro').style.display='none',900);},1900);
 
@@ -292,124 +372,29 @@ let sw,sh,sdpr=Math.min(window.devicePixelRatio||1,2);
 let cols,rows,cellSize,fixed,pile,falling=[],phase='codepen',phaseTime=0,lastTime=performance.now();
 const START_TEXT="METAIMPERIYA";
 let codepenCells=[],looseCells=[];
-function sandResize(){
-  const rect=sandCanvas.getBoundingClientRect();
-  sw=rect.width;sh=rect.height;
-  sandCanvas.width=sw*sdpr;sandCanvas.height=sh*sdpr;
-  sctx.setTransform(sdpr,0,0,sdpr,0,0);
-  cellSize=Math.max(2,Math.floor(Math.min(sw,sh)/90));
-  cols=Math.ceil(sw/cellSize);rows=Math.ceil(sh/cellSize);
-  fixed=new Uint8Array(cols*rows);pile=new Uint8Array(cols*rows);
-  codepenCells=[];looseCells=[];falling=[];
-  phase='codepen';phaseTime=0;
-  buildText();
-}
+function sandResize(){const rect=sandCanvas.getBoundingClientRect();sw=rect.width;sh=rect.height;sandCanvas.width=sw*sdpr;sandCanvas.height=sh*sdpr;sctx.setTransform(sdpr,0,0,sdpr,0,0);cellSize=Math.max(2,Math.floor(Math.min(sw,sh)/90));cols=Math.ceil(sw/cellSize);rows=Math.ceil(sh/cellSize);fixed=new Uint8Array(cols*rows);pile=new Uint8Array(cols*rows);codepenCells=[];looseCells=[];falling=[];phase='codepen';phaseTime=0;buildText();}
 function idx(c,r){return r*cols+c;}
 function colF(i){return i%cols;} function rowF(i){return Math.floor(i/cols);}
 function pSolid(c,r){if(r>=rows)return true;if(c<0||c>=cols)return true;return pile[idx(c,r)]===1;}
 function setP(c,r){if(c<0||c>=cols||r<0||r>=rows)return;pile[idx(c,r)]=1;}
 function rand(a,b){return a+Math.random()*(b-a);}
-function buildText(){
-  const mc=document.createElement('canvas');const mctx=mc.getContext('2d');
-  mc.width=sw;mc.height=sh;
-  const fs=Math.min(sw*0.14,sh*0.5,90);
-  mctx.fillStyle='#fff';mctx.textAlign='center';mctx.textBaseline='middle';
-  mctx.font=`900 ${fs}px system-ui,sans-serif`;
-  mctx.fillText(START_TEXT,sw/2,sh/2);
-  const data=mctx.getImageData(0,0,sw,sh).data;
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-    const x=Math.floor(c*cellSize+cellSize/2),y=Math.floor(r*cellSize+cellSize/2);
-    const pi=(y*sw+x)*4;
-    if(data[pi+3]>50){const i=idx(c,r);fixed[i]=1;codepenCells.push(i);looseCells.push(i);}
-  }
-  for(let i=looseCells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];}
-}
+function buildText(){const mc=document.createElement('canvas');const mctx=mc.getContext('2d');mc.width=sw;mc.height=sh;const fs=Math.min(sw*0.14,sh*0.5,90);mctx.fillStyle='#fff';mctx.textAlign='center';mctx.textBaseline='middle';mctx.font=`900 ${fs}px system-ui,sans-serif`;mctx.fillText(START_TEXT,sw/2,sh/2);const data=mctx.getImageData(0,0,sw,sh).data;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){const x=Math.floor(c*cellSize+cellSize/2),y=Math.floor(r*cellSize+cellSize/2);const pi=(y*sw+x)*4;if(data[pi+3]>50){const i=idx(c,r);fixed[i]=1;codepenCells.push(i);looseCells.push(i);}}for(let i=looseCells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];}}
 function releaseOne(i){const c=colF(i),r=rowF(i);fixed[i]=0;falling.push({x:c*cellSize,y:r*cellSize,vx:rand(-30,30),vy:rand(60,180)});}
-function releaseParticles(){
-  if(looseCells.length===0){phase='falling';phaseTime=0;return;}
-  for(let k=0;k<60;k++){
-    if(looseCells.length===0)break;
-    const li=Math.floor(Math.random()*looseCells.length);
-    const ci=looseCells[li];
-    if(fixed[ci]===0){looseCells.splice(li,1);continue;}
-    if(Math.random()<0.04){releaseOne(ci);looseCells.splice(li,1);}
-  }
-}
-function settleP(p){
-  let c=Math.floor(p.x/cellSize),r=Math.floor(p.y/cellSize);
-  c=Math.max(0,Math.min(cols-1,c));r=Math.max(0,Math.min(rows-1,r));
-  if(!pSolid(c,r)){setP(c,r);return;}
-  if(!pSolid(c-1,r)){setP(c-1,r);return;}
-  if(!pSolid(c+1,r)){setP(c+1,r);return;}
-  for(let y=r-1;y>=0;y--){if(!pSolid(c,y)){setP(c,y);return;}}
-}
-function updateFall(dt){
-  for(let i=falling.length-1;i>=0;i--){
-    const p=falling[i];p.vy+=800*dt;p.vx*=0.99;p.vy*=0.99;p.x+=p.vx*dt;p.y+=p.vy*dt;
-    const c=Math.floor(p.x/cellSize),nr=Math.floor((p.y+cellSize)/cellSize);
-    if(p.x<0)p.x=0;if(p.x>sw)p.x=sw-cellSize;
-    if(nr>=rows||pSolid(c,nr)){settleP(p);falling.splice(i,1);}
-  }
-  if(phase==='falling'&&falling.length===0){phase='pile';phaseTime=0;}
-}
-function settlePile(){
-  for(let r=rows-2;r>=0;r--)for(let c=1;c<cols-1;c++){
-    const cur=idx(c,r);if(pile[cur]!==1)continue;
-    if(!pSolid(c,r+1)){pile[idx(c,r+1)]=1;pile[cur]=0;continue;}
-    const pl=Math.random()>0.5;
-    if(pl){if(!pSolid(c-1,r+1)){pile[idx(c-1,r+1)]=1;pile[cur]=0;continue;}if(!pSolid(c+1,r+1)){pile[idx(c+1,r+1)]=1;pile[cur]=0;}}
-    else{if(!pSolid(c+1,r+1)){pile[idx(c+1,r+1)]=1;pile[cur]=0;continue;}if(!pSolid(c-1,r+1)){pile[idx(c-1,r+1)]=1;pile[cur]=0;}}
-  }
-}
-function resetSand(){
-  fixed.fill(0);pile.fill(0);falling=[];
-  looseCells=codepenCells.slice();
-  for(let i=looseCells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];}
-  for(const c of codepenCells)fixed[c]=1;
-  phase='codepen';phaseTime=0;
-}
+function releaseParticles(){if(looseCells.length===0){phase='falling';phaseTime=0;return;}for(let k=0;k<60;k++){if(looseCells.length===0)break;const li=Math.floor(Math.random()*looseCells.length);const ci=looseCells[li];if(fixed[ci]===0){looseCells.splice(li,1);continue;}if(Math.random()<0.04){releaseOne(ci);looseCells.splice(li,1);}}}
+function settleP(p){let c=Math.floor(p.x/cellSize),r=Math.floor(p.y/cellSize);c=Math.max(0,Math.min(cols-1,c));r=Math.max(0,Math.min(rows-1,r));if(!pSolid(c,r)){setP(c,r);return;}if(!pSolid(c-1,r)){setP(c-1,r);return;}if(!pSolid(c+1,r)){setP(c+1,r);return;}for(let y=r-1;y>=0;y--){if(!pSolid(c,y)){setP(c,y);return;}}}
+function updateFall(dt){for(let i=falling.length-1;i>=0;i--){const p=falling[i];p.vy+=800*dt;p.vx*=0.99;p.vy*=0.99;p.x+=p.vx*dt;p.y+=p.vy*dt;const c=Math.floor(p.x/cellSize),nr=Math.floor((p.y+cellSize)/cellSize);if(p.x<0)p.x=0;if(p.x>sw)p.x=sw-cellSize;if(nr>=rows||pSolid(c,nr)){settleP(p);falling.splice(i,1);}}if(phase==='falling'&&falling.length===0){phase='pile';phaseTime=0;}}
+function settlePile(){for(let r=rows-2;r>=0;r--)for(let c=1;c<cols-1;c++){const cur=idx(c,r);if(pile[cur]!==1)continue;if(!pSolid(c,r+1)){pile[idx(c,r+1)]=1;pile[cur]=0;continue;}const pl=Math.random()>0.5;if(pl){if(!pSolid(c-1,r+1)){pile[idx(c-1,r+1)]=1;pile[cur]=0;continue;}if(!pSolid(c+1,r+1)){pile[idx(c+1,r+1)]=1;pile[cur]=0;}}else{if(!pSolid(c+1,r+1)){pile[idx(c+1,r+1)]=1;pile[cur]=0;continue;}if(!pSolid(c-1,r+1)){pile[idx(c-1,r+1)]=1;pile[cur]=0;}}}}
+function resetSand(){fixed.fill(0);pile.fill(0);falling=[];looseCells=codepenCells.slice();for(let i=looseCells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];}for(const c of codepenCells)fixed[c]=1;phase='codepen';phaseTime=0;}
 function update(dt){phaseTime+=dt;if(phase==='codepen')releaseParticles();if(phase==='pile'&&phaseTime>=1.5){resetSand();}}
-function draw(){
-  sctx.clearRect(0,0,sw,sh);
-  sctx.fillStyle='rgb(236,204,116)';
-  const s=cellSize;
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(fixed[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);
-  for(const p of falling)sctx.fillRect(p.x,p.y,s,s);
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(pile[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);
-}
+function draw(){sctx.clearRect(0,0,sw,sh);sctx.fillStyle='rgb(236,204,116)';const s=cellSize;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(fixed[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);for(const p of falling)sctx.fillRect(p.x,p.y,s,s);for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(pile[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);}
 function tick(now){const dt=Math.min((now-lastTime)/1000,0.033);lastTime=now;update(dt);updateFall(dt);if(phase!=='falling'){for(let i=0;i<3;i++)settlePile();}draw();requestAnimationFrame(tick);}
-sandResize();
-window.addEventListener('resize',sandResize);
-sandCanvas.addEventListener('click',resetSand);
-sandCanvas.addEventListener('touchstart',(e)=>{e.preventDefault();resetSand();},{passive:false});
-requestAnimationFrame(tick);
+sandResize();window.addEventListener('resize',sandResize);sandCanvas.addEventListener('click',resetSand);sandCanvas.addEventListener('touchstart',(e)=>{e.preventDefault();resetSand();},{passive:false});requestAnimationFrame(tick);
 
-// Лайки
-document.querySelectorAll('.like-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const cnt=btn.querySelector('.like-count');const liked=btn.classList.toggle('liked');
-    const icon=btn.querySelector('i');icon.className=liked?'fas fa-heart':'far fa-heart';
-    let n=parseInt(cnt.textContent);cnt.textContent=liked?n+1:n-1;
-  });
-});
-document.querySelectorAll('.comment-toggle').forEach(btn=>{
-  btn.addEventListener('click',()=>{btn.closest('.post').querySelector('.comments').classList.toggle('show');});
-});
-function addComment(e,form){
-  e.preventDefault();
-  const input=form.querySelector('.comment-input');const text=input.value.trim();if(!text)return;
-  const post=form.closest('.post');const list=post.querySelector('.comments');
-  const name='@guest_'+Math.floor(Math.random()*900+100);
-  const div=document.createElement('div');div.className='comment';
-  div.innerHTML='<div class="comment-avatar">'+name.charAt(1).toUpperCase()+'</div><div class="comment-body"><div class="comment-author">'+name+'</div><div class="comment-text"></div></div>';
-  div.querySelector('.comment-text').textContent=text;
-  list.insertBefore(div,form);
-  const cnt=post.querySelector('.comment-count');cnt.textContent=parseInt(cnt.textContent)+1;
-  input.value='';list.classList.add('show');
-}
-document.querySelectorAll('.share-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{if(navigator.share){navigator.share({title:'METAIMPERIYA',url:location.href});}else{navigator.clipboard.writeText(location.href);alert('Ссылка скопирована!');}});
-});
+// Лайки, комменты, шеринг
+document.querySelectorAll('.like-btn').forEach(btn=>{btn.addEventListener('click',()=>{const cnt=btn.querySelector('.like-count');const liked=btn.classList.toggle('liked');const icon=btn.querySelector('i');icon.className=liked?'fas fa-heart':'far fa-heart';let n=parseInt(cnt.textContent);cnt.textContent=liked?n+1:n-1;});});
+document.querySelectorAll('.comment-toggle').forEach(btn=>{btn.addEventListener('click',()=>{btn.closest('.post').querySelector('.comments').classList.toggle('show');});});
+function addComment(e,form){e.preventDefault();const input=form.querySelector('.comment-input');const text=input.value.trim();if(!text)return;const post=form.closest('.post');const list=post.querySelector('.comments');const name='@guest_'+Math.floor(Math.random()*900+100);const div=document.createElement('div');div.className='comment';div.innerHTML='<div class="comment-avatar">'+name.charAt(1).toUpperCase()+'</div><div class="comment-body"><div class="comment-author">'+name+'</div><div class="comment-text"></div></div>';div.querySelector('.comment-text').textContent=text;list.insertBefore(div,form);const cnt=post.querySelector('.comment-count');cnt.textContent=parseInt(cnt.textContent)+1;input.value='';list.classList.add('show');}
+document.querySelectorAll('.share-btn').forEach(btn=>{btn.addEventListener('click',()=>{if(navigator.share){navigator.share({title:'METAIMPERIYA',url:location.href});}else{navigator.clipboard.writeText(location.href);alert('Ссылка скопирована!');}});});
 </script>
 </body>
 </html>
