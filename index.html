@@ -250,32 +250,53 @@ const ADMIN_PASSWORD = 'admin123';
 const POSTS_PATH = 'posts';
 let userPosts = [];
 let deletePostId = null;
+let selectedImageBase64 = '';
 
 window.publishPost = function() {
-  if (!currentUser) { alert('Подключение... подожди'); return; }
+  if (!currentUser) { alert('Подключение... подожди секунду'); return; }
   const name = document.getElementById('newPostName').value.trim();
   const text = document.getElementById('newPostText').value.trim();
   const fileInput = document.getElementById('newPostFile');
   const file = fileInput.files[0];
-  if (!name) { alert('Введи имя'); return; }
-  if (!text && !file) { alert('Напиши текст или прикрепи картинку'); return; }
 
-  if (file) {
+  if (!name) { alert('Введи имя'); return; }
+  if (!text && !file && !selectedImageBase64) { alert('Напиши текст или прикрепи картинку'); return; }
+
+  console.log('📝 Публикация. Картинка готова:', selectedImageBase64 ? 'ДА (' + Math.round(selectedImageBase64.length/1024) + ' КБ)' : 'НЕТ');
+
+  if (selectedImageBase64) {
+    savePostToFirebase(name, text, selectedImageBase64);
+  } else if (file) {
     document.getElementById('loadingOverlay').classList.add('show');
     const reader = new FileReader();
     reader.onload = function(ev) {
       const img = new Image();
       img.onload = function() {
-        const maxW = 800;
-        let w = img.width, h = img.height;
-        if (w > maxW) { h = h * (maxW / w); w = maxW; }
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        const compressed = canvas.toDataURL('image/jpeg', 0.7);
-        savePostToFirebase(name, text, compressed);
+        try {
+          const maxW = 800;
+          let w = img.width, h = img.height;
+          if (w > maxW) { h = h * (maxW / w); w = maxW; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL('image/jpeg', 0.7);
+          console.log('✅ Сжато до:', Math.round(compressed.length/1024), 'КБ');
+          savePostToFirebase(name, text, compressed);
+        } catch (e) {
+          console.error('❌ Canvas error:', e);
+          document.getElementById('loadingOverlay').classList.remove('show');
+          alert('Ошибка обработки картинки: ' + e.message);
+        }
+      };
+      img.onerror = function() {
+        document.getElementById('loadingOverlay').classList.remove('show');
+        alert('Не удалось загрузить картинку');
       };
       img.src = ev.target.result;
+    };
+    reader.onerror = function() {
+      document.getElementById('loadingOverlay').classList.remove('show');
+      alert('Ошибка чтения файла');
     };
     reader.readAsDataURL(file);
   } else {
@@ -284,23 +305,27 @@ window.publishPost = function() {
 };
 
 function savePostToFirebase(name, text, imageBase64) {
+  console.log('📤 Отправка в Firebase. Размер картинки:', imageBase64 ? Math.round(imageBase64.length/1024) + ' КБ' : '0');
   const newPostRef = push(ref(db, POSTS_PATH));
-  set(newPostRef, { name: name, text: text, image: imageBase64, ts: Date.now() })
+  set(newPostRef, { name: name, text: text, image: imageBase64 || '', ts: Date.now() })
     .then(() => {
+      console.log('✅ Пост сохранён успешно');
       document.getElementById('loadingOverlay').classList.remove('show');
       document.getElementById('newPostName').value = '';
       document.getElementById('newPostText').value = '';
       document.getElementById('newPostFile').value = '';
       document.getElementById('filePreview').classList.remove('show');
       document.getElementById('filePreview').src = '';
+      selectedImageBase64 = '';
       const label = document.getElementById('fileLabel');
       label.classList.remove('has-file');
       label.innerHTML = '<input id="newPostFile" type="file" accept="image/*"><i class="fas fa-image"></i> ВЫБРАТЬ КАРТИНКУ (необязательно)';
       attachFileHandler();
     })
     .catch(err => {
+      console.error('❌ Firebase error:', err);
       document.getElementById('loadingOverlay').classList.remove('show');
-      alert('❌ Ошибка: ' + err.message + '\n\nПроверь правила Firebase: /posts должен разрешать запись.');
+      alert('❌ Ошибка: ' + err.message + '\n\nПроверь правила Firebase.');
     });
 }
 
@@ -339,7 +364,10 @@ function renderPost(post) {
   el.dataset.id = post.id;
   const initial = (post.name || 'U').charAt(0).toUpperCase();
   let imgHtml = '';
-  if (post.image) imgHtml = '<img class="post-img" src="' + post.image + '" alt="post">';
+  if (post.image && post.image.length > 10) {
+    console.log('🖼 Пост с картинкой:', post.image.slice(0, 50));
+    imgHtml = '<img class="post-img" src="' + post.image + '" alt="post" onerror="console.error(\'❌ Картинка не загрузилась\', this.src.slice(0,50))">';
+  }
   el.innerHTML = '<div class="post-head"><div class="post-avatar">' + initial + '</div><div class="post-meta"><div class="post-author">' + escapeHtml(post.name) + '</div><div class="post-time">' + timeAgo(post.ts) + '</div></div><div class="post-menu"><button class="post-menu-btn" onclick="togglePostMenu(\'' + post.id + '\', event)">⋮</button><div class="post-menu-dropdown" id="menu-' + post.id + '"><button onclick="openDeleteModal(\'' + post.id + '\')"><i class="fas fa-trash"></i> Удалить пост</button></div></div></div><div class="post-body"></div>' + imgHtml + '<div class="post-actions"><button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">0</span></button><button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button><button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button></div><div class="comments"><form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form></div>';
   el.querySelector('.post-body').textContent = post.text;
   return el;
@@ -426,14 +454,33 @@ function attachFileHandler() {
   if (!fileInput) return;
   fileInput.addEventListener('change', function() {
     const file = this.files[0];
-    if (file) {
-      fileLabel.classList.add('has-file');
-      fileLabel.innerHTML = '<i class="fas fa-check"></i> ' + escapeHtml(file.name) + ' <span style="color:#666;font-size:9px">(нажми чтобы изменить)</span><input id="newPostFile" type="file" accept="image/*">';
-      attachFileHandler();
-      const reader = new FileReader();
-      reader.onload = function(e) { filePreview.src = e.target.result; filePreview.classList.add('show'); };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    console.log('📸 Выбран файл:', file.name, '(' + Math.round(file.size/1024) + ' КБ)');
+    fileLabel.classList.add('has-file');
+    fileLabel.innerHTML = '<i class="fas fa-check"></i> ' + escapeHtml(file.name) + ' <span style="color:#666;font-size:9px">(нажми чтобы изменить)</span><input id="newPostFile" type="file" accept="image/*">';
+    attachFileHandler();
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      filePreview.src = e.target.result;
+      filePreview.classList.add('show');
+      const img = new Image();
+      img.onload = function() {
+        try {
+          const maxW = 800;
+          let w = img.width, h = img.height;
+          if (w > maxW) { h = h * (maxW / w); w = maxW; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          console.log('✅ Картинка готова к отправке:', Math.round(selectedImageBase64.length/1024), 'КБ');
+        } catch (e) {
+          console.error('❌ Ошибка сжатия:', e);
+        }
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
   });
 }
 
