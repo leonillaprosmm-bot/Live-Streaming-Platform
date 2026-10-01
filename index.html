@@ -8,10 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{background:#08090c;font-family:'Inter',sans-serif;color:#e8e8e8;overflow-x:hidden;min-height:100%}
+html,body{background:#050810;font-family:'Inter',sans-serif;color:#e8e8e8;overflow-x:hidden;min-height:100%}
 
-/* ЗАСТАВКА */
-#intro{position:fixed;inset:0;background:#08090c;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
+#aurora{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+.wrap{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column}
+
+#intro{position:fixed;inset:0;background:#050810;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .8s}
 #intro.hide{opacity:0;pointer-events:none}
 .intro-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(24px,7vw,64px);font-weight:700;letter-spacing:6px;color:#fff}
 .intro-logo span{color:#ff3366}
@@ -19,61 +22,55 @@ html,body{background:#08090c;font-family:'Inter',sans-serif;color:#e8e8e8;overfl
 .intro-bar{position:absolute;bottom:0;left:0;height:2px;background:linear-gradient(90deg,#ff3366,#00f2fe);width:0;animation:bar 1.8s ease-out forwards}
 @keyframes bar{to{width:100%}}
 
-/* ТОНКАЯ ШАПКА */
 header{
   position:fixed;top:0;left:0;right:0;z-index:100;
   padding:clamp(14px,2vw,22px) clamp(18px,4vw,48px);
   display:flex;justify-content:space-between;align-items:center;
-  background:rgba(8,9,12,.7);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  border-bottom:1px solid rgba(255,255,255,.04);
+  background:rgba(5,8,16,.6);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,.05);
 }
 .h-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(12px,1.6vw,15px);font-weight:700;letter-spacing:4px;color:#fff}
 .h-logo span{color:#ff3366}
 .h-menu{display:flex;gap:clamp(18px,3vw,40px);align-items:center}
-.h-menu a{color:#666;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12px);letter-spacing:2px;text-transform:uppercase;transition:color .2s;position:relative}
+.h-menu a{color:#888;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12px);letter-spacing:2px;text-transform:uppercase;transition:color .2s}
 .h-menu a:hover{color:#fff}
-.h-menu a::before{content:"[";position:absolute;left:-10px;opacity:0;transition:opacity .2s;color:#ff3366}
-.h-menu a::after{content:"]";position:absolute;right:-10px;opacity:0;transition:opacity .2s;color:#ff3366}
-.h-menu a:hover::before,.h-menu a:hover::after{opacity:1}
 .h-live{color:#ff3366 !important;display:inline-flex;align-items:center;gap:8px}
 .h-live::after{content:"";width:6px;height:6px;background:#ff3366;border-radius:50%;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 @media(max-width:640px){
   .h-menu a:not(.h-live){display:none}
-  .h-menu{gap:0}
 }
 
-/* ГЕРОЙ */
-.hero{padding:clamp(120px,20vw,200px) clamp(18px,4vw,48px) clamp(60px,10vw,100px);text-align:center;position:relative;overflow:hidden}
+.hero{padding:clamp(120px,20vw,200px) clamp(18px,4vw,48px) clamp(60px,10vw,100px);text-align:center;position:relative}
 .hero-tag{font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.4vw,12px);letter-spacing:6px;color:#666;margin-bottom:clamp(20px,4vw,40px);text-transform:uppercase}
 .hero h1{font-size:clamp(42px,12vw,160px);font-weight:900;letter-spacing:-.02em;line-height:.95;margin-bottom:clamp(20px,4vw,40px);background:linear-gradient(180deg,#fff 40%,#ff3366 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-desc{max-width:min(620px,90vw);margin:0 auto clamp(30px,6vw,60px);font-size:clamp(13px,1.8vw,17px);color:#888;line-height:1.7;font-weight:300}
-.hero-marquee{position:relative;overflow:hidden;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding:clamp(12px,2vw,20px) 0;background:rgba(0,0,0,.3)}
-.marquee-inner{display:flex;gap:40px;animation:marquee 30s linear infinite;font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:4px;color:#555;white-space:nowrap}
+.hero-desc{max-width:min(620px,90vw);margin:0 auto;font-size:clamp(13px,1.8vw,17px);color:#99a;line-height:1.7;font-weight:300}
+
+.hero-marquee{position:relative;overflow:hidden;border-top:1px solid rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.06);padding:clamp(12px,2vw,20px) 0;background:rgba(0,0,0,.35);margin-top:clamp(40px,8vw,80px)}
+.marquee-inner{display:flex;gap:40px;animation:marquee 30s linear infinite;font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:4px;color:#666;white-space:nowrap}
 .marquee-inner span{color:#ff3366}
 @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 
-/* ЛЕНТА */
 .feed{max-width:820px;margin:0 auto;padding:clamp(40px,8vw,100px) clamp(18px,4vw,48px)}
-.feed-title{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:6px;color:#666;text-transform:uppercase;margin-bottom:clamp(24px,5vw,48px);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:16px}
+.feed-title{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:6px;color:#888;text-transform:uppercase;margin-bottom:clamp(24px,5vw,48px);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.08);padding-bottom:16px}
 .feed-title span:last-child{color:#ff3366}
 
-.post{background:#0e1014;border:1px solid rgba(255,255,255,.05);border-radius:20px;padding:clamp(20px,3vw,28px);margin-bottom:clamp(20px,3vw,28px);transition:border-color .3s,transform .3s;position:relative;overflow:hidden}
+.post{background:rgba(14,16,22,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.06);border-radius:20px;padding:clamp(20px,3vw,28px);margin-bottom:clamp(20px,3vw,28px);transition:border-color .3s,transform .3s;position:relative;overflow:hidden}
 .post::before{content:"";position:absolute;top:0;left:0;width:2px;height:100%;background:linear-gradient(180deg,#ff3366,#00f2fe);opacity:0;transition:opacity .3s}
-.post:hover{border-color:rgba(255,255,255,.12);transform:translateY(-2px)}
+.post:hover{border-color:rgba(255,255,255,.15);transform:translateY(-2px)}
 .post:hover::before{opacity:1}
 .post-head{display:flex;align-items:center;gap:14px;margin-bottom:16px}
 .post-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#ff3366,#00f2fe);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:14px;color:#fff;flex-shrink:0}
 .post-meta{flex:1;min-width:0}
 .post-author{font-weight:600;font-size:clamp(13px,1.6vw,15px);color:#fff;margin-bottom:2px}
-.post-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:#555;letter-spacing:1px}
-.post-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:#ff3366;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border:1px solid rgba(255,51,102,.3);border-radius:20px}
+.post-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:#666;letter-spacing:1px}
+.post-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:#ff3366;letter-spacing:2px;text-transform:uppercase;padding:4px 10px;border:1px solid rgba(255,51,102,.3);border-radius:20px;flex-shrink:0}
 .post-body{font-size:clamp(13px,1.7vw,15px);line-height:1.7;color:#c8c8c8;margin-bottom:18px;font-weight:300}
 .post-body strong{color:#fff;font-weight:600}
 .post-body code{font-family:'JetBrains Mono',monospace;background:rgba(255,255,255,.05);padding:2px 6px;border-radius:4px;font-size:.9em;color:#00f2fe}
 .post-img{width:100%;border-radius:12px;margin-bottom:18px;display:block;aspect-ratio:16/9;object-fit:cover}
 .post-actions{display:flex;gap:clamp(14px,3vw,24px);padding-top:14px;border-top:1px solid rgba(255,255,255,.05);align-items:center}
-.act{background:none;border:none;color:#666;font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,12px);letter-spacing:1px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:color .2s;padding:4px 0}
+.act{background:none;border:none;color:#888;font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,12px);letter-spacing:1px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:color .2s;padding:4px 0}
 .act:hover{color:#fff}
 .act.liked{color:#ff3366}
 .act.liked i{animation:heartPop .4s}
@@ -93,14 +90,18 @@ header{
 .comment-submit{background:#ff3366;border:none;color:#fff;padding:10px 16px;border-radius:10px;cursor:pointer;font-size:13px;transition:background .2s;flex-shrink:0}
 .comment-submit:hover{background:#e00045}
 
-/* ФУТЕР */
-footer{padding:clamp(40px,8vw,80px) clamp(18px,4vw,48px);border-top:1px solid rgba(255,255,255,.05);text-align:center}
+/* ПЕСОЧНАЯ АНИМАЦИЯ */
+.sand-section{padding:clamp(30px,6vw,60px) clamp(18px,4vw,48px);text-align:center;position:relative;z-index:2}
+.sand-section h2{font-family:'JetBrains Mono',monospace;font-size:clamp(11px,1.4vw,13px);letter-spacing:6px;color:#666;text-transform:uppercase;margin-bottom:clamp(20px,4vw,36px)}
+#sandCanvas{display:block;width:100%;height:clamp(200px,40vw,340px);background:radial-gradient(circle at top,#0e1220,#050810);border-radius:20px;border:1px solid rgba(255,255,255,.06);cursor:pointer}
+
+footer{padding:clamp(40px,8vw,80px) clamp(18px,4vw,48px);border-top:1px solid rgba(255,255,255,.05);text-align:center;position:relative;z-index:2}
 footer .f-logo{font-family:'JetBrains Mono',monospace;font-size:clamp(14px,2vw,18px);font-weight:700;letter-spacing:6px;color:#fff;margin-bottom:20px}
 footer .f-logo span{color:#ff3366}
 footer .f-links{display:flex;gap:clamp(16px,3vw,32px);justify-content:center;flex-wrap:wrap;margin-bottom:24px}
-footer .f-links a{color:#666;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12px);letter-spacing:2px;text-transform:uppercase;transition:color .2s}
+footer .f-links a{color:#888;text-decoration:none;font-family:'JetBrains Mono',monospace;font-size:clamp(10px,1.2vw,12px);letter-spacing:2px;text-transform:uppercase;transition:color .2s}
 footer .f-links a:hover{color:#ff3366}
-footer .f-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:#333;letter-spacing:1px}
+footer .f-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:#444;letter-spacing:1px}
 footer .f-copy a{color:#00f2fe;text-decoration:none}
 </style>
 </head>
@@ -112,176 +113,302 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
   <div class="intro-bar"></div>
 </div>
 
-<header>
-  <div class="h-logo">META<span>IMPERIYA</span></div>
-  <div class="h-menu">
-    <a href="#feed">Лента</a>
-    <a href="#about">О нас</a>
-    <a href="live.html" class="h-live">LIVE</a>
-  </div>
-</header>
+<canvas id="aurora"></canvas>
 
-<section class="hero">
-  <div class="hero-tag">SMM · CONTENT · LIVE</div>
-  <h1>Мы делаем<br>бренды<br>громкими</h1>
-  <p class="hero-desc">Стратегия, контент, продвижение и прямые эфиры. Всё, чтобы ваш бренд звучал в каждом канале</p>
-</section>
+<div class="wrap">
+  <header>
+    <div class="h-logo">META<span>IMPERIYA</span></div>
+    <div class="h-menu">
+      <a href="#feed">Лента</a>
+      <a href="#showcase">Шоу</a>
+      <a href="live.html" class="h-live">LIVE</a>
+    </div>
+  </header>
 
-<div class="hero-marquee">
-  <div class="marquee-inner">
-    <span>◆</span> SMM <span>◆</span> CONTENT <span>◆</span> STRATEGY <span>◆</span> LIVE <span>◆</span> ANALYTICS <span>◆</span> COMMUNITY <span>◆</span> TARGETING <span>◆</span> DESIGN <span>◆</span>
-    <span>◆</span> SMM <span>◆</span> CONTENT <span>◆</span> STRATEGY <span>◆</span> LIVE <span>◆</span> ANALYTICS <span>◆</span> COMMUNITY <span>◆</span> TARGETING <span>◆</span> DESIGN <span>◆</span>
-  </div>
+  <section class="hero">
+    <div class="hero-tag">SMM · CONTENT · LIVE</div>
+    <h1>Мы делаем<br>бренды<br>громкими</h1>
+    <p class="hero-desc">Стратегия, контент, продвижение и прямые эфиры. Всё, чтобы ваш бренд звучал в каждом канале</p>
+    <div class="hero-marquee">
+      <div class="marquee-inner">
+        <span>◆</span> SMM <span>◆</span> CONTENT <span>◆</span> STRATEGY <span>◆</span> LIVE <span>◆</span> ANALYTICS <span>◆</span> COMMUNITY <span>◆</span> TARGETING <span>◆</span> DESIGN <span>◆</span>
+        <span>◆</span> SMM <span>◆</span> CONTENT <span>◆</span> STRATEGY <span>◆</span> LIVE <span>◆</span> ANALYTICS <span>◆</span> COMMUNITY <span>◆</span> TARGETING <span>◆</span> DESIGN <span>◆</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="feed" id="feed">
+    <div class="feed-title"><span>// ЛЕНТА</span><span>03 POSTS</span></div>
+
+    <article class="post">
+      <div class="post-head">
+        <div class="post-avatar">MI</div>
+        <div class="post-meta"><div class="post-author">METAIMPERIYA</div><div class="post-time">2 МИНУТЫ НАЗАД</div></div>
+        <div class="post-tag">NEW</div>
+      </div>
+      <div class="post-body"><strong>Запуск прямого эфира</strong> — уже сегодня в 20:00. Поговорим про SMM-тренды, ответим на вопросы и покажем <code>живую панель</code> аналитики.</div>
+      <div class="post-actions">
+        <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">12</span></button>
+        <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">3</span></button>
+        <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
+      </div>
+      <div class="comments">
+        <div class="comment"><div class="comment-avatar">A</div><div class="comment-body"><div class="comment-author">@alex</div><div class="comment-text">Огонь! Буду обязательно 🔥</div></div></div>
+        <div class="comment"><div class="comment-avatar">M</div><div class="comment-body"><div class="comment-author">@maria</div><div class="comment-text">Можно вопрос про таргет?</div></div></div>
+        <div class="comment"><div class="comment-avatar">D</div><div class="comment-body"><div class="comment-author">@dmitry</div><div class="comment-text">Ждём эфир!</div></div></div>
+        <form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form>
+      </div>
+    </article>
+
+    <article class="post">
+      <div class="post-head">
+        <div class="post-avatar">MI</div>
+        <div class="post-meta"><div class="post-author">METAIMPERIYA</div><div class="post-time">4 ЧАСА НАЗАД</div></div>
+        <div class="post-tag">CASE</div>
+      </div>
+      <div class="post-body"><strong>Кейс:</strong> за 2 месяца вывели бренд одежды в топ-10 поиска. Охваты выросли в <code>x4.2</code>, стоимость подписки снизилась на <code>67%</code>.</div>
+      <img class="post-img" src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=450&fit=crop" alt="case">
+      <div class="post-actions">
+        <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">47</span></button>
+        <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
+        <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
+      </div>
+      <div class="comments">
+        <form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form>
+      </div>
+    </article>
+
+    <article class="post">
+      <div class="post-head">
+        <div class="post-avatar">MI</div>
+        <div class="post-meta"><div class="post-author">METAIMPERIYA</div><div class="post-time">ВЧЕРА</div></div>
+        <div class="post-tag">TIP</div>
+      </div>
+      <div class="post-body"><strong>Совет дня:</strong> не гонитесь за всеми соцсетями сразу. Выберите <code>2 платформы</code> и выжмите максимум. Концентрация сильнее распыления.</div>
+      <div class="post-actions">
+        <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">28</span></button>
+        <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
+        <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
+      </div>
+      <div class="comments">
+        <form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form>
+      </div>
+    </article>
+  </section>
+
+  <!-- ПЕСОЧНАЯ АНИМАЦИЯ -->
+  <section class="sand-section" id="showcase">
+    <h2>// METAIMPERIYA</h2>
+    <canvas id="sandCanvas"></canvas>
+  </section>
+
+  <footer>
+    <div class="f-logo">META<span>IMPERIYA</span></div>
+    <div class="f-links">
+      <a href="#feed">Лента</a>
+      <a href="live.html">Эфир</a>
+      <a href="https://metaimperiya.com/" target="_blank">metaimperiya.com</a>
+    </div>
+    <div class="f-copy">© 2026 <a href="https://metaimperiya.com/" target="_blank">METAIMPERIYA — Social Platform</a></div>
+  </footer>
 </div>
 
-<section class="feed" id="feed">
-  <div class="feed-title">
-    <span>// ЛЕНТА</span>
-    <span>03 POSTS</span>
-  </div>
-
-  <article class="post" data-id="post-1">
-    <div class="post-head">
-      <div class="post-avatar">MI</div>
-      <div class="post-meta">
-        <div class="post-author">METAIMPERIYA</div>
-        <div class="post-time">2 МИНУТЫ НАЗАД</div>
-      </div>
-      <div class="post-tag">NEW</div>
-    </div>
-    <div class="post-body">
-      <strong>Запуск прямого эфира</strong> — уже сегодня в 20:00. Поговорим про SMM-тренды, ответим на вопросы и покажем <code>живую панель</code> аналитики.
-    </div>
-    <div class="post-actions">
-      <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">12</span></button>
-      <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">3</span></button>
-      <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
-    </div>
-    <div class="comments">
-      <div class="comment"><div class="comment-avatar">A</div><div class="comment-body"><div class="comment-author">@alex</div><div class="comment-text">Огонь! Буду обязательно 🔥</div></div></div>
-      <div class="comment"><div class="comment-avatar">M</div><div class="comment-body"><div class="comment-author">@maria</div><div class="comment-text">Можно вопрос про таргет?</div></div></div>
-      <div class="comment"><div class="comment-avatar">D</div><div class="comment-body"><div class="comment-author">@dmitry</div><div class="comment-text">Ждём эфир!</div></div></div>
-      <form class="comment-form" onsubmit="addComment(event, this)">
-        <input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200">
-        <button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button>
-      </form>
-    </div>
-  </article>
-
-  <article class="post" data-id="post-2">
-    <div class="post-head">
-      <div class="post-avatar">MI</div>
-      <div class="post-meta">
-        <div class="post-author">METAIMPERIYA</div>
-        <div class="post-time">4 ЧАСА НАЗАД</div>
-      </div>
-      <div class="post-tag">CASE</div>
-    </div>
-    <div class="post-body">
-      <strong>Кейс:</strong> за 2 месяца вывели бренд одежды в топ-10 поиска по нише. Охваты выросли в <code>x4.2</code>, а стоимость подписки снизилась на <code>67%</code>.
-    </div>
-    <img class="post-img" src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=450&fit=crop" alt="case">
-    <div class="post-actions">
-      <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">47</span></button>
-      <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
-      <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
-    </div>
-    <div class="comments">
-      <form class="comment-form" onsubmit="addComment(event, this)">
-        <input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200">
-        <button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button>
-      </form>
-    </div>
-  </article>
-
-  <article class="post" data-id="post-3">
-    <div class="post-head">
-      <div class="post-avatar">MI</div>
-      <div class="post-meta">
-        <div class="post-author">METAIMPERIYA</div>
-        <div class="post-time">ВЧЕРА</div>
-      </div>
-      <div class="post-tag">TIP</div>
-    </div>
-    <div class="post-body">
-      <strong>Совет дня:</strong> не гонитесь за всеми соцсетями сразу. Выберите <code>2 платформы</code> и выжмите из них максимум. Концентрация всегда сильнее распыления.
-    </div>
-    <div class="post-actions">
-      <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">28</span></button>
-      <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
-      <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
-    </div>
-    <div class="comments">
-      <form class="comment-form" onsubmit="addComment(event, this)">
-        <input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200">
-        <button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button>
-      </form>
-    </div>
-  </article>
-
-</section>
-
-<footer id="about">
-  <div class="f-logo">META<span>IMPERIYA</span></div>
-  <div class="f-links">
-    <a href="#feed">Лента</a>
-    <a href="live.html">Эфир</a>
-    <a href="https://metaimperiya.com/" target="_blank">metaimperiya.com</a>
-  </div>
-  <div class="f-copy">© 2026 <a href="https://metaimperiya.com/" target="_blank">METAIMPERIYA — Social Platform</a></div>
-</footer>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script id="vs" type="x-shader/x-vertex">
+varying vec2 vUv;
+void main(){vUv=uv;gl_Position=vec4(position,1.0);}
+</script>
+<script id="fs" type="x-shader/x-fragment">
+uniform float time;
+uniform vec2 resolution;
+varying vec2 vUv;
+vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}
+vec2 mod289(vec2 x){return x-floor(x*(1.0/289.0))*289.0;}
+vec3 permute(vec3 x){return mod289(((x*34.0)+1.0)*x);}
+float snoise(vec2 v){
+const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);
+vec2 i=floor(v+dot(v,C.yy));
+vec2 x0=v-i+dot(i,C.xx);
+vec2 i1;
+i1=(x0.x>x0.y)?vec2(1.0,0.0):vec2(0.0,1.0);
+vec4 x12=x0.xyxy+C.xxzz;
+x12.xy-=i1;
+i=mod289(i);
+vec3 p=permute(permute(i.y+vec3(0.0,i1.y,1.0))+i.x+vec3(0.0,i1.x,1.0));
+vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.0);
+m=m*m;m=m*m;
+vec3 x=2.0*fract(p*C.www)-1.0;
+vec3 h=abs(x)-0.5;
+vec3 a0=x-floor(x+0.5);
+vec3 g=a0*x0.x+h*x0.y;
+return 130.0*dot(m,g);
+}
+void main(){
+vec2 p=(gl_FragCoord.xy*2.0-resolution)/min(resolution.x,resolution.y);
+vec3 bgColor=vec3(0.0,0.01,0.04);
+vec3 finalColor=bgColor;
+float starNoise=snoise(vUv*500.0);
+if(starNoise>0.995){float sparkle=sin(time*5.0+starNoise*100.0)*0.5+0.5;finalColor+=vec3(0.8,0.9,1.0)*sparkle*smoothstep(0.995,1.0,starNoise);}
+vec3 auroraColor=vec3(0.0);
+float auroraNoise=0.0;
+float amp=1.0;
+float freq=0.5;
+float t=time*0.15;
+for(int i=0;i<4;i++){auroraNoise+=snoise(vec2(p.x*freq+t,p.y*freq-t*0.5))*amp;amp*=0.6;freq*=1.8;}
+float yMask=smoothstep(0.0,0.9,p.y);
+float ribbon=smoothstep(0.4,0.6,sin(p.x*3.0+auroraNoise*4.0+time*0.1)*0.5+0.5);
+vec3 colorGreen=vec3(0.0,1.0,0.6);
+vec3 colorPurple=vec3(0.6,0.1,1.0);
+vec3 mixedAuroraColor=mix(colorGreen,colorPurple,auroraNoise*0.5+0.5);
+float intensity=smoothstep(0.3,0.8,auroraNoise)*smoothstep(0.0,-0.5,p.y+auroraNoise*0.2)*ribbon*yMask;
+auroraColor=mixedAuroraColor*intensity*1.5;
+finalColor+=auroraColor;
+finalColor*=1.0-length(p*0.3);
+gl_FragColor=vec4(finalColor,1.0);
+}
+</script>
 <script>
 // Заставка
 setTimeout(()=>{document.getElementById('intro').classList.add('hide');setTimeout(()=>document.getElementById('intro').style.display='none',900);},1900);
 
+// AURORA
+const ac=document.getElementById('aurora');
+const scene=new THREE.Scene();
+const camera=new THREE.OrthographicCamera(-1,1,1,-1,0.1,10);
+const renderer=new THREE.WebGLRenderer({canvas:ac,antialias:true,alpha:true});
+function resize(){renderer.setSize(window.innerWidth,window.innerHeight);if(material)material.uniforms.resolution.value.set(window.innerWidth,window.innerHeight);}
+const geometry=new THREE.PlaneGeometry(2,2);
+const uniforms={time:{value:1.0},resolution:{value:new THREE.Vector2()}};
+const material=new THREE.ShaderMaterial({vertexShader:document.getElementById('vs').textContent,fragmentShader:document.getElementById('fs').textContent,uniforms:uniforms,transparent:true});
+const mesh=new THREE.Mesh(geometry,material);scene.add(mesh);camera.position.z=1;
+function animate(t){requestAnimationFrame(animate);uniforms.time.value=t*0.001;renderer.render(scene,camera);}
+resize();window.addEventListener('resize',resize);animate();
+</script>
+<script>
+// ПЕСОЧНАЯ АНИМАЦИЯ
+const sandCanvas=document.getElementById('sandCanvas');
+const sctx=sandCanvas.getContext('2d');
+let sw,sh,sdpr=Math.min(window.devicePixelRatio||1,2);
+let cols,rows,cellSize,fixed,pile,falling=[],phase='codepen',phaseTime=0,lastTime=performance.now();
+const START_TEXT="METAIMPERIYA";
+let codepenCells=[],looseCells=[];
+function sandResize(){
+  const rect=sandCanvas.getBoundingClientRect();
+  sw=rect.width;sh=rect.height;
+  sandCanvas.width=sw*sdpr;sandCanvas.height=sh*sdpr;
+  sctx.setTransform(sdpr,0,0,sdpr,0,0);
+  cellSize=Math.max(2,Math.floor(Math.min(sw,sh)/90));
+  cols=Math.ceil(sw/cellSize);rows=Math.ceil(sh/cellSize);
+  fixed=new Uint8Array(cols*rows);pile=new Uint8Array(cols*rows);
+  codepenCells=[];looseCells=[];falling=[];
+  phase='codepen';phaseTime=0;
+  buildText();
+}
+function idx(c,r){return r*cols+c;}
+function colF(i){return i%cols;} function rowF(i){return Math.floor(i/cols);}
+function pSolid(c,r){if(r>=rows)return true;if(c<0||c>=cols)return true;return pile[idx(c,r)]===1;}
+function setP(c,r){if(c<0||c>=cols||r<0||r>=rows)return;pile[idx(c,r)]=1;}
+function rand(a,b){return a+Math.random()*(b-a);}
+function buildText(){
+  const mc=document.createElement('canvas');const mctx=mc.getContext('2d');
+  mc.width=sw;mc.height=sh;
+  const fs=Math.min(sw*0.14,sh*0.5,90);
+  mctx.fillStyle='#fff';mctx.textAlign='center';mctx.textBaseline='middle';
+  mctx.font=`900 ${fs}px system-ui,sans-serif`;
+  mctx.fillText(START_TEXT,sw/2,sh/2);
+  const data=mctx.getImageData(0,0,sw,sh).data;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const x=Math.floor(c*cellSize+cellSize/2),y=Math.floor(r*cellSize+cellSize/2);
+    const pi=(y*sw+x)*4;
+    if(data[pi+3]>50){const i=idx(c,r);fixed[i]=1;codepenCells.push(i);looseCells.push(i);}
+  }
+  for(let i=looseCells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];}
+}
+function releaseOne(i){const c=colF(i),r=rowF(i);fixed[i]=0;falling.push({x:c*cellSize,y:r*cellSize,vx:rand(-30,30),vy:rand(60,180)});}
+function releaseParticles(){
+  if(looseCells.length===0){phase='falling';phaseTime=0;return;}
+  for(let k=0;k<60;k++){
+    if(looseCells.length===0)break;
+    const li=Math.floor(Math.random()*looseCells.length);
+    const ci=looseCells[li];
+    if(fixed[ci]===0){looseCells.splice(li,1);continue;}
+    if(Math.random()<0.04){releaseOne(ci);looseCells.splice(li,1);}
+  }
+}
+function settleP(p){
+  let c=Math.floor(p.x/cellSize),r=Math.floor(p.y/cellSize);
+  c=Math.max(0,Math.min(cols-1,c));r=Math.max(0,Math.min(rows-1,r));
+  if(!pSolid(c,r)){setP(c,r);return;}
+  if(!pSolid(c-1,r)){setP(c-1,r);return;}
+  if(!pSolid(c+1,r)){setP(c+1,r);return;}
+  for(let y=r-1;y>=0;y--){if(!pSolid(c,y)){setP(c,y);return;}}
+}
+function updateFall(dt){
+  for(let i=falling.length-1;i>=0;i--){
+    const p=falling[i];p.vy+=800*dt;p.vx*=0.99;p.vy*=0.99;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    const c=Math.floor(p.x/cellSize),nr=Math.floor((p.y+cellSize)/cellSize);
+    if(p.x<0)p.x=0;if(p.x>sw)p.x=sw-cellSize;
+    if(nr>=rows||pSolid(c,nr)){settleP(p);falling.splice(i,1);}
+  }
+  if(phase==='falling'&&falling.length===0){phase='pile';phaseTime=0;}
+}
+function settlePile(){
+  for(let r=rows-2;r>=0;r--)for(let c=1;c<cols-1;c++){
+    const cur=idx(c,r);if(pile[cur]!==1)continue;
+    if(!pSolid(c,r+1)){pile[idx(c,r+1)]=1;pile[cur]=0;continue;}
+    const pl=Math.random()>0.5;
+    if(pl){if(!pSolid(c-1,r+1)){pile[idx(c-1,r+1)]=1;pile[cur]=0;continue;}if(!pSolid(c+1,r+1)){pile[idx(c+1,r+1)]=1;pile[cur]=0;}}
+    else{if(!pSolid(c+1,r+1)){pile[idx(c+1,r+1)]=1;pile[cur]=0;continue;}if(!pSolid(c-1,r+1)){pile[idx(c-1,r+1)]=1;pile[cur]=0;}}
+  }
+}
+function resetSand(){
+  fixed.fill(0);pile.fill(0);falling=[];
+  looseCells=codepenCells.slice();
+  for(let i=looseCells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[looseCells[i],looseCells[j]]=[looseCells[j],looseCells[i]];}
+  for(const c of codepenCells)fixed[c]=1;
+  phase='codepen';phaseTime=0;
+}
+function update(dt){phaseTime+=dt;if(phase==='codepen')releaseParticles();if(phase==='pile'&&phaseTime>=1.5){resetSand();}}
+function draw(){
+  sctx.clearRect(0,0,sw,sh);
+  sctx.fillStyle='rgb(236,204,116)';
+  const s=cellSize;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(fixed[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);
+  for(const p of falling)sctx.fillRect(p.x,p.y,s,s);
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(pile[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);
+}
+function tick(now){const dt=Math.min((now-lastTime)/1000,0.033);lastTime=now;update(dt);updateFall(dt);if(phase!=='falling'){for(let i=0;i<3;i++)settlePile();}draw();requestAnimationFrame(tick);}
+sandResize();
+window.addEventListener('resize',sandResize);
+sandCanvas.addEventListener('click',resetSand);
+sandCanvas.addEventListener('touchstart',(e)=>{e.preventDefault();resetSand();},{passive:false});
+requestAnimationFrame(tick);
+
 // Лайки
 document.querySelectorAll('.like-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    const cnt=btn.querySelector('.like-count');
-    const liked=btn.classList.toggle('liked');
-    const icon=btn.querySelector('i');
-    icon.className=liked?'fas fa-heart':'far fa-heart';
-    let n=parseInt(cnt.textContent);
-    cnt.textContent=liked?n+1:n-1;
+    const cnt=btn.querySelector('.like-count');const liked=btn.classList.toggle('liked');
+    const icon=btn.querySelector('i');icon.className=liked?'fas fa-heart':'far fa-heart';
+    let n=parseInt(cnt.textContent);cnt.textContent=liked?n+1:n-1;
   });
 });
-
-// Комментарии toggle
 document.querySelectorAll('.comment-toggle').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    const post=btn.closest('.post');
-    const comments=post.querySelector('.comments');
-    comments.classList.toggle('show');
-  });
+  btn.addEventListener('click',()=>{btn.closest('.post').querySelector('.comments').classList.toggle('show');});
 });
-
-// Добавить комментарий
 function addComment(e,form){
   e.preventDefault();
-  const input=form.querySelector('.comment-input');
-  const text=input.value.trim();
-  if(!text)return;
-  const post=form.closest('.post');
-  const list=post.querySelector('.comments');
+  const input=form.querySelector('.comment-input');const text=input.value.trim();if(!text)return;
+  const post=form.closest('.post');const list=post.querySelector('.comments');
   const name='@guest_'+Math.floor(Math.random()*900+100);
-  const div=document.createElement('div');
-  div.className='comment';
+  const div=document.createElement('div');div.className='comment';
   div.innerHTML='<div class="comment-avatar">'+name.charAt(1).toUpperCase()+'</div><div class="comment-body"><div class="comment-author">'+name+'</div><div class="comment-text"></div></div>';
   div.querySelector('.comment-text').textContent=text;
   list.insertBefore(div,form);
-  const cnt=post.querySelector('.comment-count');
-  cnt.textContent=parseInt(cnt.textContent)+1;
-  input.value='';
-  list.classList.add('show');
+  const cnt=post.querySelector('.comment-count');cnt.textContent=parseInt(cnt.textContent)+1;
+  input.value='';list.classList.add('show');
 }
-
-// Шеринг
 document.querySelectorAll('.share-btn').forEach(btn=>{
-  btn.addEventListener('click',()=>{
-    if(navigator.share){navigator.share({title:'METAIMPERIYA',url:location.href});}
-    else{navigator.clipboard.writeText(location.href);alert('Ссылка скопирована!');}
-  });
+  btn.addEventListener('click',()=>{if(navigator.share){navigator.share({title:'METAIMPERIYA',url:location.href});}else{navigator.clipboard.writeText(location.href);alert('Ссылка скопирована!');}});
 });
 </script>
 </body>
