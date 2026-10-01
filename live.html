@@ -14,7 +14,21 @@ body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hid
 .screen{display:none}
 .screen.active{display:flex;flex-direction:column}
 
-/* --- ШАПКА --- */
+/* ЭКРАН ВХОДА */
+.welcome-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.welcome-box{max-width:420px;width:100%}
+.welcome-logo{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:16px;background:linear-gradient(90deg,#ff0050,#00f2fe);margin-bottom:16px;text-decoration:none}
+.welcome-form{background:#111827;border:1px solid #1f2937;border-radius:16px;padding:24px}
+.welcome-form label{display:block;font-size:11px;color:#999;margin-bottom:6px}
+.welcome-form input{width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:10px;padding:12px;color:white;font-size:14px;margin-bottom:14px;font-family:inherit}
+.welcome-form input:focus{outline:none;border-color:#ff3366}
+.welcome-form button{width:100%;background:linear-gradient(90deg,#ff0050,#e00045);color:white;border:none;padding:14px;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit;margin-bottom:10px}
+.welcome-form button.secondary{background:transparent;border:1px solid #374151;color:#ccc;padding:10px;font-size:12px;font-weight:normal}
+.host-key-row{display:none;margin-bottom:14px}
+.host-key-row.show{display:block}
+.welcome-back{display:block;text-align:center;margin-top:14px;color:#666;font-size:12px;text-decoration:none}
+
+/* ШАПКА */
 .live-header{background:#111827;border-bottom:1px solid #1f2937;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;flex-shrink:0}
 .live-header-left{display:flex;align-items:center;gap:12px;min-width:0}
 .live-header-right{display:flex;gap:8px;flex-wrap:wrap}
@@ -26,12 +40,12 @@ body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hid
 .btn-header.blue{background:linear-gradient(90deg,#00f2fe,#3b82f6);border:none;font-weight:bold}
 .btn-header.red{background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);color:#fca5a5}
 
-/* --- ОСНОВНАЯ СЕТКА --- */
+/* ОСНОВНАЯ СЕТКА */
 .live-main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;padding:12px;flex:1;min-height:0}
 .live-left{display:flex;flex-direction:column;gap:12px;min-width:0;overflow:hidden}
 .live-right{min-width:0;display:flex;flex-direction:column}
 
-/* --- СЦЕНА --- */
+/* СЦЕНА */
 .stage-wrapper{position:relative;width:100%;aspect-ratio:16/9;background:black;border-radius:16px;overflow:hidden;transition:all .3s;max-height:60vh}
 .stage-wrapper.vertical{aspect-ratio:9/16;max-width:420px;margin:0 auto;max-height:70vh}
 .stage-wrapper img,.stage-wrapper video,.stage-wrapper canvas,.stage-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border:none}
@@ -39,7 +53,7 @@ body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hid
 .stage-clear-btn{position:absolute;top:10px;right:10px;background:#dc2626;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:bold;cursor:pointer;z-index:6;display:none}
 .return-self-btn{display:none;background:linear-gradient(90deg,#10b981,#059669);color:white;border:none;padding:12px;border-radius:12px;font-size:13px;font-weight:bold;cursor:pointer;width:100%}
 
-/* --- УЧАСТНИКИ --- */
+/* УЧАСТНИКИ */
 .participants-title{font-size:11px;color:#999;text-transform:uppercase;margin:0 0 8px 0}
 .guest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;max-height:220px;overflow-y:auto}
 .guest-tile{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;border:2px solid transparent;cursor:pointer;transition:all .2s}
@@ -50,7 +64,7 @@ body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hid
 .tile-menu{display:none;position:absolute;top:4px;right:4px;z-index:10}
 .guest-tile:hover .tile-menu{display:block}
 
-/* --- УПРАВЛЕНИЕ --- */
+/* УПРАВЛЕНИЕ */
 .controls-bar{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .controls-bar-left{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
 .btn-ctrl{background:#1f2937;border:1px solid #374151;color:white;padding:8px 12px;border-radius:10px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
@@ -58,7 +72,7 @@ body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hid
 .btn-like{background:linear-gradient(90deg,#ff0050,#ec4899);color:white;border:none;padding:8px 14px;border-radius:10px;font-size:11px;font-weight:bold;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
 .btn-request{display:none;background:linear-gradient(90deg,#f59e0b,#ea580c);color:white;border:none;padding:8px 12px;border-radius:10px;font-size:11px;font-weight:bold;cursor:pointer;align-items:center;gap:6px}
 
-/* --- СТУДИЯ --- */
+/* СТУДИЯ */
 .studio-panel{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:14px;overflow-y:auto;max-height:calc(100vh - 120px);display:none;flex-direction:column;gap:4px}
 .studio-panel h2{margin:0 0 14px 0;font-size:14px;color:white}
 .studio-section-title{font-size:11px;color:#999;margin:14px 0 8px 0}
@@ -66,16 +80,14 @@ body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hid
 .studio-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
 .btn-studio{background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer;font-family:inherit}
 .btn-studio:hover{background:#374151}
-.btn-studio.active{background:#ff0050;border-color:#ff0050}
 .bg-thumb{width:100%;aspect-ratio:16/9;border-radius:6px;cursor:pointer;border:2px solid transparent;object-fit:cover}
 .bg-thumb:hover{border-color:#00f2fe}
-.bg-thumb.active{border-color:#ff0050}
 .studio-input{width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:6px;padding:8px;color:white;font-size:11px;font-family:inherit;margin-bottom:6px}
 .studio-input:focus{outline:none;border-color:#ff3366}
 input[type="range"]{-webkit-appearance:none;height:4px;background:#374151;border-radius:2px;outline:none;width:100%}
 input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#00f2fe;cursor:pointer}
 
-/* --- ЧАТ --- */
+/* ЧАТ */
 .chat-panel{background:#111827;border:1px solid #1f2937;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100vh - 120px);height:100%}
 .chat-header{padding:12px;border-bottom:1px solid #1f2937;flex-shrink:0}
 .chat-header h2{margin:0;font-size:14px;color:white}
@@ -85,21 +97,8 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 .chat-form input:focus{outline:none;border-color:#ff0050}
 .chat-form button{background:#ff0050;border:none;color:white;padding:8px 12px;border-radius:10px;cursor:pointer;flex-shrink:0}
 
-/* --- КНОПКА СТУДИЯ (плавающая) --- */
 .open-studio-btn{display:none;position:fixed;bottom:90px;right:24px;background:linear-gradient(90deg,#ff0050,#ec4899);color:white;border:none;padding:12px 20px;border-radius:30px;font-weight:bold;font-size:13px;cursor:pointer;box-shadow:0 4px 20px rgba(255,0,80,.5);z-index:50;font-family:inherit}
 
-/* --- ВХОД --- */
-.welcome-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.welcome-box{max-width:420px;width:100%}
-.welcome-logo{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:16px;background:linear-gradient(90deg,#ff0050,#00f2fe);margin-bottom:16px;text-decoration:none}
-.welcome-form{background:#111827;border:1px solid #1f2937;border-radius:16px;padding:24px}
-.welcome-form label{display:block;font-size:11px;color:#999;margin-bottom:6px}
-.welcome-form input{width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:10px;padding:12px;color:white;font-size:14px;margin-bottom:14px;font-family:inherit}
-.welcome-form input:focus{outline:none;border-color:#ff3366}
-.welcome-form button{width:100%;background:linear-gradient(90deg,#ff0050,#e00045);color:white;border:none;padding:14px;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit}
-.welcome-back{display:block;text-align:center;margin-top:14px;color:#666;font-size:12px;text-decoration:none}
-
-/* ============ АДАПТИВ ============ */
 @media(max-width:1024px){
   .live-main{grid-template-columns:1fr;padding:8px;gap:8px}
   .live-right{max-height:none}
@@ -108,28 +107,17 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
   .stage-wrapper.vertical{max-width:340px;max-height:60vh}
   .guest-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));max-height:180px}
 }
-
 @media(max-width:640px){
   .live-header{padding:10px 12px;gap:8px}
   .live-header h1{font-size:12px}
   .live-header p{font-size:9px}
   .btn-header{padding:6px 10px;font-size:10px}
-  .h-logo{padding:6px}
-  .h-logo i{font-size:14px}
   .controls-bar{padding:10px}
   .btn-ctrl{padding:7px 10px;font-size:10px}
   .stage-wrapper{max-height:40vh;border-radius:12px}
   .stage-wrapper.vertical{max-width:280px;max-height:50vh}
   .guest-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;max-height:150px}
-  .chat-panel,.studio-panel{max-height:320px}
   .open-studio-btn{bottom:20px;right:16px;padding:10px 16px;font-size:12px}
-}
-
-@media(max-width:400px){
-  .live-header h1{font-size:11px}
-  .btn-header{padding:5px 8px;font-size:9px}
-  .btn-ctrl{padding:6px 8px;font-size:9px}
-  .btn-ctrl span{display:none}
 }
 </style>
 </head>
@@ -146,10 +134,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 </div>
 <div class="welcome-form">
 <label>Ваше имя</label>
-<input id="inputName" type="text" placeholder="Например: Иван" maxlength="30">
-<label>Пароль ведущего (гости — пусто)</label>
+<input id="inputName" type="text" placeholder="Например: Иван" maxlength="30" autocomplete="off">
+<div class="host-key-row" id="hostKeyRow">
+<label>Пароль ведущего</label>
 <input id="inputHostKey" type="password" placeholder="admin123">
-<button onclick="enterStream()"><i class="fa-solid fa-arrow-right"></i> Войти в эфир</button>
+</div>
+<button onclick="enterStream(false)"><i class="fa-solid fa-arrow-right"></i> Войти в эфир</button>
+<button class="secondary" onclick="toggleHostMode()" id="hostBtn">👑 Я ведущий</button>
 <a href="index.html" class="welcome-back">← На главную</a>
 </div>
 </div>
@@ -225,20 +216,9 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 <button class="btn-studio" onclick="studioSetBg('green')">Зелёный</button>
 </div>
 <div class="studio-grid-3">
-<img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
-<img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
-<img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
-<img src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
-<img src="https://images.unsplash.com/photo-1497366811353-6870744d04b2?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
-<img src="https://images.unsplash.com/photo-1541746972996-4e0b0f43e02a?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src, this)">
-</div>
-
-<div class="studio-section-title">Эффект</div>
-<div class="studio-grid-2">
-<button class="btn-studio" onclick="studioSetEffect('original')">Ориг</button>
-<button class="btn-studio" onclick="studioSetEffect('vhs')">VHS</button>
-<button class="btn-studio" onclick="studioSetEffect('invert')">Инверт</button>
-<button class="btn-studio" onclick="studioSetEffect('sepia')">Сепия</button>
+<img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src)">
+<img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src)">
+<img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src)">
 </div>
 
 <div class="studio-section-title">Текст</div>
@@ -247,9 +227,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 <input id="studioTextColor" type="color" value="#ff3366" onchange="studioSetText()" style="width:32px;height:28px;border:none;border-radius:6px;cursor:pointer">
 <input id="studioTextSize" type="range" min="20" max="180" value="80" oninput="studioSetTextSize()">
 </div>
-
-<div class="studio-section-title">Масштаб видео</div>
-<input id="studioVideoScale" type="range" min="50" max="200" value="100" oninput="studioSetVideoScale()">
 </div>
 
 <div id="chatPanel" class="chat-panel">
@@ -273,6 +250,26 @@ import { Studio } from './studio.js';
 const TOKEN_SERVER_URL = "https://prostream-signaling.onrender.com";
 const FIXED_ROOM = "main-studio";
 const HOST_PASSWORD = "admin123";
+
+let hostMode = false;
+
+window.toggleHostMode = function() {
+  hostMode = !hostMode;
+  const row = document.getElementById('hostKeyRow');
+  const btn = document.getElementById('hostBtn');
+  if (hostMode) {
+    row.classList.add('show');
+    btn.innerHTML = '👤 Я гость';
+    btn.style.borderColor = '#ff3366';
+    btn.style.color = '#ff3366';
+    document.getElementById('inputHostKey').focus();
+  } else {
+    row.classList.remove('show');
+    btn.innerHTML = '👑 Я ведущий';
+    btn.style.borderColor = '#374151';
+    btn.style.color = '#ccc';
+  }
+};
 
 window.appState = {
     name: '', isHost: false, room: null, studio: null,
@@ -309,11 +306,12 @@ window.toggleStudio = function() {
     }
 };
 
-window.enterStream = async function() {
+window.enterStream = async function(isHostOverride) {
     const name = document.getElementById('inputName').value.trim();
     const hostKey = document.getElementById('inputHostKey').value;
     if (!name) { alert('Введите ваше имя'); return; }
-    const isHost = (hostKey === HOST_PASSWORD);
+
+    const isHost = hostMode && (hostKey === HOST_PASSWORD);
     window.appState.name = name;
     window.appState.isHost = isHost;
 
@@ -326,6 +324,7 @@ window.enterStream = async function() {
         document.getElementById('requestStageBtn').style.display = 'inline-flex';
     }
 
+    // 🚀 СРАЗУ подключаемся — ничего не надо нажимать
     await connectToLiveKit(isHost);
 };
 
@@ -379,6 +378,7 @@ async function connectToLiveKit(isHost) {
         }
         updateRoomIcons();
 
+        // 🎥 Подтягиваем существующие треки других
         room.remoteParticipants.forEach((p) => {
             renderGuestTile(p.identity, false);
             p.trackPublications.forEach((pub) => {
@@ -494,6 +494,13 @@ function attachRemoteTrack(track, participant) {
         const v = track.attach();
         v.style = 'width:100%;height:100%;object-fit:cover';
         c.appendChild(v);
+
+        // 🎯 АВТО-СЦЕНА: если это ведущий и сцена свободна — поднимаем сразу
+        if (!window.appState.stageIdentity && !window.appState.isHost) {
+            setTimeout(() => {
+                if (!window.appState.stageIdentity) putOnStage(participant.identity);
+            }, 500);
+        }
     } else if (track.kind === Track.Kind.Audio) {
         const a = track.attach();
         a.autoplay = true;
@@ -719,15 +726,9 @@ window.denyRequest = function(identity, btn) {
     btn.closest('div').parentNode.remove();
 };
 
-window.studioSetBg = function(type, imageUrl, el) {
+window.studioSetBg = function(type, imageUrl) {
     if (!window.appState.studio) return;
     window.appState.studio.setBackground(type, imageUrl);
-    document.querySelectorAll('.bg-thumb').forEach(t => t.classList.remove('active'));
-    if (el) el.classList.add('active');
-};
-window.studioSetEffect = function(effect) {
-    if (!window.appState.studio) return;
-    window.appState.studio.setVideoEffect(effect);
 };
 window.studioSetText = function() {
     if (!window.appState.studio) return;
@@ -736,10 +737,6 @@ window.studioSetText = function() {
 window.studioSetTextSize = function() {
     if (!window.appState.studio) return;
     window.appState.studio.setTextSize(parseInt(document.getElementById('studioTextSize').value));
-};
-window.studioSetVideoScale = function() {
-    if (!window.appState.studio) return;
-    window.appState.studio.setVideoScale(parseInt(document.getElementById('studioVideoScale').value) / 100);
 };
 
 window.toggleOrientation = function() {
@@ -801,7 +798,7 @@ window.toggleScreenShare = async function() {
             document.getElementById('shareScreenLabel').innerText = 'Стоп';
             screenTrack.onended = () => { if (window.appState.screenShareTrack) window.toggleScreenShare(); };
         }
-    } catch (err) { console.error(err); alert('Screen share не удалось: ' + err.message); }
+    } catch (err) { console.error(err); }
 };
 
 function updateRoomIcons() {
@@ -833,11 +830,7 @@ window.handleSendMessage = function(event) {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if (!text) return;
-    const payload = new TextEncoder().encode(JSON.stringify({
-        type: 'chat',
-        name: window.appState.name,
-        text: text.slice(0, 300)
-    }));
+    const payload = new TextEncoder().encode(JSON.stringify({ type: 'chat', name: window.appState.name, text: text.slice(0, 300) }));
     window.appState.room.localParticipant.publishData(payload, { reliable: true });
     addChatMessage(window.appState.name, text, true);
     input.value = '';
@@ -865,6 +858,16 @@ window.sendLikeBurst = function() {
         setTimeout(() => heart.remove(), 2100);
     }
 };
+
+// ⚡ АВТОЗАПУСК: если в URL ?name=Имя — сразу подключаемся
+window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const nameFromUrl = params.get('name');
+    if (nameFromUrl) {
+        document.getElementById('inputName').value = nameFromUrl;
+        setTimeout(() => enterStream(), 300);
+    }
+});
 </script>
 </body>
 </html>
