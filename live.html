@@ -14,7 +14,6 @@ body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hid
 .screen{display:none}
 .screen.active{display:flex;flex-direction:column}
 
-/* ЭКРАН ВХОДА */
 .welcome-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
 .welcome-box{max-width:420px;width:100%}
 .welcome-logo{display:inline-flex;align-items:center;justify-content:center;width:64px;height:64px;border-radius:16px;background:linear-gradient(90deg,#ff0050,#00f2fe);margin-bottom:16px;text-decoration:none}
@@ -22,38 +21,36 @@ body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hid
 .welcome-form label{display:block;font-size:11px;color:#999;margin-bottom:6px}
 .welcome-form input{width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:10px;padding:12px;color:white;font-size:14px;margin-bottom:14px;font-family:inherit}
 .welcome-form input:focus{outline:none;border-color:#ff3366}
-.welcome-form button{width:100%;background:linear-gradient(90deg,#ff0050,#e00045);color:white;border:none;padding:14px;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit;margin-bottom:10px}
-.welcome-form button.secondary{background:transparent;border:1px solid #374151;color:#ccc;padding:10px;font-size:12px;font-weight:normal}
-.host-key-row{display:none;margin-bottom:14px}
-.host-key-row.show{display:block}
+.welcome-form button{width:100%;background:linear-gradient(90deg,#ff0050,#e00045);color:white;border:none;padding:14px;border-radius:10px;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit}
+.welcome-form button:disabled{opacity:.5;cursor:wait}
+.welcome-info{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:#34d399;font-size:11px;padding:10px;border-radius:8px;margin-top:14px;text-align:center;line-height:1.6}
 .welcome-back{display:block;text-align:center;margin-top:14px;color:#666;font-size:12px;text-decoration:none}
 
-/* ШАПКА */
 .live-header{background:#111827;border-bottom:1px solid #1f2937;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;flex-shrink:0}
 .live-header-left{display:flex;align-items:center;gap:12px;min-width:0}
-.live-header-right{display:flex;gap:8px;flex-wrap:wrap}
+.live-header-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .h-logo{background:linear-gradient(90deg,#ff0050,#00f2fe);padding:8px;border-radius:10px;text-decoration:none;flex-shrink:0}
 .live-header h1{margin:0;font-size:14px;color:white;font-weight:bold;white-space:nowrap}
 .live-header p{margin:0;font-size:10px;color:#999}
+.viewer-pill{background:rgba(0,242,254,.15);border:1px solid rgba(0,242,254,.4);color:#00f2fe;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:bold;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.viewer-pill .pulse{width:6px;height:6px;border-radius:50%;background:#00f2fe;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
 .btn-header{background:#1f2937;border:1px solid #374151;color:white;padding:8px 14px;border-radius:10px;font-size:11px;cursor:pointer;white-space:nowrap;font-family:inherit}
 .btn-header:hover{background:#374151}
 .btn-header.blue{background:linear-gradient(90deg,#00f2fe,#3b82f6);border:none;font-weight:bold}
 .btn-header.red{background:rgba(220,38,38,.2);border:1px solid rgba(220,38,38,.4);color:#fca5a5}
 
-/* ОСНОВНАЯ СЕТКА */
 .live-main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:12px;padding:12px;flex:1;min-height:0}
 .live-left{display:flex;flex-direction:column;gap:12px;min-width:0;overflow:hidden}
 .live-right{min-width:0;display:flex;flex-direction:column}
 
-/* СЦЕНА */
 .stage-wrapper{position:relative;width:100%;aspect-ratio:16/9;background:black;border-radius:16px;overflow:hidden;transition:all .3s;max-height:60vh}
 .stage-wrapper.vertical{aspect-ratio:9/16;max-width:420px;margin:0 auto;max-height:70vh}
 .stage-wrapper img,.stage-wrapper video,.stage-wrapper canvas,.stage-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border:none}
 .stage-label{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.7);padding:6px 10px;border-radius:8px;font-size:11px;color:white;z-index:5;display:flex;gap:6px;align-items:center}
+.stage-timer{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.7);padding:6px 10px;border-radius:8px;font-size:11px;color:#00f2fe;z-index:5;font-family:monospace;font-weight:bold;display:none}
 .stage-clear-btn{position:absolute;top:10px;right:10px;background:#dc2626;color:white;border:none;padding:6px 10px;border-radius:8px;font-size:11px;font-weight:bold;cursor:pointer;z-index:6;display:none}
-.return-self-btn{display:none;background:linear-gradient(90deg,#10b981,#059669);color:white;border:none;padding:12px;border-radius:12px;font-size:13px;font-weight:bold;cursor:pointer;width:100%}
 
-/* УЧАСТНИКИ */
 .participants-title{font-size:11px;color:#999;text-transform:uppercase;margin:0 0 8px 0}
 .guest-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;max-height:220px;overflow-y:auto}
 .guest-tile{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:16/9;border:2px solid transparent;cursor:pointer;transition:all .2s}
@@ -61,35 +58,20 @@ body{font-family:'Inter',sans-serif;background:#0b0f19;color:#eee;overflow-x:hid
 .guest-tile.on-stage{border-color:#ff0050;box-shadow:0 0 20px rgba(255,0,80,.5)}
 .guest-tile video,.guest-tile canvas{width:100%;height:100%;object-fit:cover}
 .guest-name{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.7);padding:2px 6px;border-radius:4px;font-size:10px;color:white;z-index:2}
-.tile-menu{display:none;position:absolute;top:4px;right:4px;z-index:10}
+.guest-timer{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.7);padding:2px 6px;border-radius:4px;font-size:10px;color:#00f2fe;z-index:2;font-family:monospace;font-weight:bold}
+.guest-live-badge{position:absolute;top:4px;right:4px;background:#dc2626;color:white;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:bold;z-index:2;display:flex;align-items:center;gap:4px}
+.guest-live-badge::before{content:"";width:5px;height:5px;border-radius:50%;background:#fff;animation:pulse 1.5s infinite}
+.tile-menu{display:none;position:absolute;top:4px;right:4px;z-index:10;margin-top:22px}
 .guest-tile:hover .tile-menu{display:block}
 
-/* УПРАВЛЕНИЕ */
 .controls-bar{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 .controls-bar-left{display:flex;gap:8px;flex-wrap:wrap;min-width:0}
 .btn-ctrl{background:#1f2937;border:1px solid #374151;color:white;padding:8px 12px;border-radius:10px;font-size:11px;cursor:pointer;font-family:inherit;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .btn-ctrl:hover{background:#374151}
 .btn-like{background:linear-gradient(90deg,#ff0050,#ec4899);color:white;border:none;padding:8px 14px;border-radius:10px;font-size:11px;font-weight:bold;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-.btn-request{display:none;background:linear-gradient(90deg,#f59e0b,#ea580c);color:white;border:none;padding:8px 12px;border-radius:10px;font-size:11px;font-weight:bold;cursor:pointer;align-items:center;gap:6px}
 
-/* СТУДИЯ */
-.studio-panel{background:#111827;border:1px solid #1f2937;border-radius:14px;padding:14px;overflow-y:auto;max-height:calc(100vh - 120px);display:none;flex-direction:column;gap:4px}
-.studio-panel h2{margin:0 0 14px 0;font-size:14px;color:white}
-.studio-section-title{font-size:11px;color:#999;margin:14px 0 8px 0}
-.studio-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.studio-grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-.btn-studio{background:#1f2937;border:1px solid #374151;color:white;padding:8px;border-radius:6px;font-size:10px;cursor:pointer;font-family:inherit}
-.btn-studio:hover{background:#374151}
-.bg-thumb{width:100%;aspect-ratio:16/9;border-radius:6px;cursor:pointer;border:2px solid transparent;object-fit:cover}
-.bg-thumb:hover{border-color:#00f2fe}
-.studio-input{width:100%;background:#0b0f19;border:1px solid #1f2937;border-radius:6px;padding:8px;color:white;font-size:11px;font-family:inherit;margin-bottom:6px}
-.studio-input:focus{outline:none;border-color:#ff3366}
-input[type="range"]{-webkit-appearance:none;height:4px;background:#374151;border-radius:2px;outline:none;width:100%}
-input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#00f2fe;cursor:pointer}
-
-/* ЧАТ */
 .chat-panel{background:#111827;border:1px solid #1f2937;border-radius:14px;display:flex;flex-direction:column;overflow:hidden;max-height:calc(100vh - 120px);height:100%}
-.chat-header{padding:12px;border-bottom:1px solid #1f2937;flex-shrink:0}
+.chat-header{padding:12px;border-bottom:1px solid #1f2937;flex-shrink:0;display:flex;justify-content:space-between;align-items:center}
 .chat-header h2{margin:0;font-size:14px;color:white}
 .chat-messages{flex:1;padding:12px;overflow-y:auto;font-size:12px;min-height:200px}
 .chat-form{padding:12px;border-top:1px solid #1f2937;display:flex;gap:6px;flex-shrink:0}
@@ -97,12 +79,12 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 .chat-form input:focus{outline:none;border-color:#ff0050}
 .chat-form button{background:#ff0050;border:none;color:white;padding:8px 12px;border-radius:10px;cursor:pointer;flex-shrink:0}
 
-.open-studio-btn{display:none;position:fixed;bottom:90px;right:24px;background:linear-gradient(90deg,#ff0050,#ec4899);color:white;border:none;padding:12px 20px;border-radius:30px;font-weight:bold;font-size:13px;cursor:pointer;box-shadow:0 4px 20px rgba(255,0,80,.5);z-index:50;font-family:inherit}
+.join-message{text-align:center;padding:6px;font-size:11px;color:#34d399;font-style:italic;font-family:monospace;background:rgba(16,185,129,.05);border-radius:6px;margin-bottom:8px}
 
 @media(max-width:1024px){
   .live-main{grid-template-columns:1fr;padding:8px;gap:8px}
   .live-right{max-height:none}
-  .studio-panel,.chat-panel{max-height:400px}
+  .chat-panel{max-height:400px}
   .stage-wrapper{max-height:50vh}
   .stage-wrapper.vertical{max-width:340px;max-height:60vh}
   .guest-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));max-height:180px}
@@ -110,14 +92,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 @media(max-width:640px){
   .live-header{padding:10px 12px;gap:8px}
   .live-header h1{font-size:12px}
-  .live-header p{font-size:9px}
   .btn-header{padding:6px 10px;font-size:10px}
   .controls-bar{padding:10px}
   .btn-ctrl{padding:7px 10px;font-size:10px}
   .stage-wrapper{max-height:40vh;border-radius:12px}
   .stage-wrapper.vertical{max-width:280px;max-height:50vh}
   .guest-grid{grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px;max-height:150px}
-  .open-studio-btn{bottom:20px;right:16px;padding:10px 16px;font-size:12px}
+  .viewer-pill{padding:5px 10px;font-size:10px}
 }
 </style>
 </head>
@@ -135,12 +116,12 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 <div class="welcome-form">
 <label>Ваше имя</label>
 <input id="inputName" type="text" placeholder="Например: Иван" maxlength="30" autocomplete="off">
-<div class="host-key-row" id="hostKeyRow">
-<label>Пароль ведущего</label>
-<input id="inputHostKey" type="password" placeholder="admin123">
+<label>Пароль ведущего (гости — оставьте пустым)</label>
+<input id="inputHostKey" type="password" placeholder="admin123" autocomplete="off">
+<button onclick="enterStream()" id="enterBtn"><i class="fa-solid fa-arrow-right"></i> Войти в эфир</button>
+<div class="welcome-info">
+<i class="fa-solid fa-circle-info"></i> Камера включится автоматически. С паролем — <strong>ведущий</strong>. Без пароля — <strong>гость</strong>.
 </div>
-<button onclick="enterStream(false)"><i class="fa-solid fa-arrow-right"></i> Войти в эфир</button>
-<button class="secondary" onclick="toggleHostMode()" id="hostBtn">👑 Я ведущий</button>
 <a href="index.html" class="welcome-back">← На главную</a>
 </div>
 </div>
@@ -158,6 +139,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 </div>
 </div>
 <div class="live-header-right">
+<div class="viewer-pill"><span class="pulse"></span> <span id="viewerCount">0</span> смотрят</div>
 <button class="btn-header" onclick="toggleOrientation()"><i id="orientIcon" class="fa-solid fa-mobile-screen" style="color:#00f2fe"></i> <span id="orientLabel">Горизонт</span></button>
 <button class="btn-header blue" onclick="copyInviteLink()"><i class="fa-solid fa-link"></i> Ссылка</button>
 <button class="btn-header red" onclick="leaveRoom()"><i class="fa-solid fa-right-from-bracket"></i> Выйти</button>
@@ -170,15 +152,13 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 <div id="mainVideoBox" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
 <img id="stageBgImage" src="https://placehold.co/1280x720/0b0f19/00f2fe?text=METAIMPERIYA+LIVE&font=montserrat" style="width:100%;height:100%;object-fit:cover">
 </div>
-<iframe id="stageIframe" style="display:none;z-index:4"></iframe>
 <div class="stage-label">
 <i id="mainMicIcon" class="fa-solid fa-microphone" style="color:#34d399"></i>
-<span id="mainNameLabel">Сцена свободна</span>
+<span id="mainNameLabel">Ожидание...</span>
 </div>
+<div class="stage-timer" id="stageTimer">00:00</div>
 <button id="clearStageBtn" class="stage-clear-btn" onclick="clearStage()"><i class="fa-solid fa-xmark"></i> Убрать со сцены</button>
 </div>
-
-<button id="returnSelfBtn" class="return-self-btn" onclick="returnSelfToStage()"><i class="fa-solid fa-arrow-up"></i> Вернуть себя на сцену</button>
 
 <div>
 <h3 class="participants-title"><i class="fa-solid fa-users"></i> Участники (<span id="guestsCount">0</span>)</h3>
@@ -192,43 +172,12 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 <button id="roomCamBtn" class="btn-ctrl" onclick="toggleRoomCam()"><i id="roomCamIcon" class="fa-solid fa-video" style="color:#00f2fe"></i> Камера</button>
 <button id="roomMicBtn" class="btn-ctrl" onclick="toggleRoomMic()"><i id="roomMicIcon" class="fa-solid fa-microphone" style="color:#34d399"></i> Микрофон</button>
 <button class="btn-ctrl" onclick="toggleScreenShare()"><i class="fa-solid fa-desktop" style="color:#a78bfa"></i> <span id="shareScreenLabel">Экран</span></button>
-<button id="requestStageBtn" class="btn-request" onclick="requestStage()"><i class="fa-solid fa-hand"></i> <span id="requestStageLabel">Хочу в эфир</span></button>
 </div>
 <button class="btn-like" onclick="sendLikeBurst()"><i class="fa-solid fa-heart"></i> Лайк</button>
 </div>
 </div>
 
 <div class="live-right">
-<div id="studioPanel" class="studio-panel">
-<h2><i class="fa-solid fa-wand-magic-sparkles" style="color:#ff0050"></i> Студия</h2>
-
-<div class="studio-section-title">🌐 Сайт в эфире</div>
-<input id="iframeUrl" type="text" placeholder="https://example.com" class="studio-input">
-<div class="studio-grid-2">
-<button class="btn-studio" onclick="showIframe()" style="background:#10b981;border:none;font-weight:bold">Показать сайт</button>
-<button class="btn-studio" onclick="hideIframe()">Скрыть</button>
-</div>
-
-<div class="studio-section-title">Фон</div>
-<div class="studio-grid-3" style="margin-bottom:10px">
-<button class="btn-studio" onclick="studioSetBg('none')">Ориг</button>
-<button class="btn-studio" onclick="studioSetBg('blur')">Блюр</button>
-<button class="btn-studio" onclick="studioSetBg('green')">Зелёный</button>
-</div>
-<div class="studio-grid-3">
-<img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src)">
-<img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src)">
-<img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=200&h=112&fit=crop" class="bg-thumb" onclick="studioSetBg('image', this.src)">
-</div>
-
-<div class="studio-section-title">Текст</div>
-<input id="studioText" type="text" placeholder="Текст..." maxlength="40" oninput="studioSetText()" class="studio-input">
-<div style="display:flex;gap:8px;align-items:center;margin-bottom:16px">
-<input id="studioTextColor" type="color" value="#ff3366" onchange="studioSetText()" style="width:32px;height:28px;border:none;border-radius:6px;cursor:pointer">
-<input id="studioTextSize" type="range" min="20" max="180" value="80" oninput="studioSetTextSize()">
-</div>
-</div>
-
 <div id="chatPanel" class="chat-panel">
 <div class="chat-header"><h2><i class="fa-solid fa-comments" style="color:#ff0050"></i> Чат</h2></div>
 <div id="chatMessages" class="chat-messages"></div>
@@ -241,8 +190,6 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;hei
 </main>
 </div>
 
-<button id="openStudioBtn" class="open-studio-btn" onclick="toggleStudio()"><i class="fa-solid fa-wand-magic-sparkles"></i> Студия</button>
-
 <script type="module">
 import { Room, RoomEvent, Track } from 'https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.esm.mjs';
 import { Studio } from './studio.js';
@@ -251,33 +198,15 @@ const TOKEN_SERVER_URL = "https://prostream-signaling.onrender.com";
 const FIXED_ROOM = "main-studio";
 const HOST_PASSWORD = "admin123";
 
-let hostMode = false;
-
-window.toggleHostMode = function() {
-  hostMode = !hostMode;
-  const row = document.getElementById('hostKeyRow');
-  const btn = document.getElementById('hostBtn');
-  if (hostMode) {
-    row.classList.add('show');
-    btn.innerHTML = '👤 Я гость';
-    btn.style.borderColor = '#ff3366';
-    btn.style.color = '#ff3366';
-    document.getElementById('inputHostKey').focus();
-  } else {
-    row.classList.remove('show');
-    btn.innerHTML = '👑 Я ведущий';
-    btn.style.borderColor = '#374151';
-    btn.style.color = '#ccc';
-  }
-};
-
 window.appState = {
     name: '', isHost: false, room: null, studio: null,
     isRoomCamOn: false, isRoomMicOn: true,
     stageIdentity: null, studioTrack: null,
     screenShareTrack: null, orientation: 'horizontal',
     iframeActive: false, selfOnStage: false,
-    remoteStreams: {}
+    remoteStreams: {},
+    joinTimes: {},
+    timers: {}
 };
 
 window.studioCanvas = document.createElement('canvas');
@@ -291,40 +220,23 @@ window.showScreen = function(id) {
     document.getElementById(id).classList.add('active');
 };
 
-window.toggleStudio = function() {
-    const panel = document.getElementById('studioPanel');
-    const chatPanel = document.getElementById('chatPanel');
-    const btn = document.getElementById('openStudioBtn');
-    if (panel.style.display === 'none' || !panel.style.display) {
-        panel.style.display = 'flex';
-        chatPanel.style.display = 'none';
-        btn.style.display = 'none';
-    } else {
-        panel.style.display = 'none';
-        chatPanel.style.display = 'flex';
-        btn.style.display = 'block';
-    }
-};
-
-window.enterStream = async function(isHostOverride) {
+window.enterStream = async function() {
     const name = document.getElementById('inputName').value.trim();
     const hostKey = document.getElementById('inputHostKey').value;
     if (!name) { alert('Введите ваше имя'); return; }
 
-    const isHost = hostMode && (hostKey === HOST_PASSWORD);
+    const isHost = (hostKey === HOST_PASSWORD);
+
+    const btn = document.getElementById('enterBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Подключение...';
+
     window.appState.name = name;
     window.appState.isHost = isHost;
 
     showScreen('screen-room');
     document.getElementById('roomSubtitle').innerText = (isHost ? '👑 Ведущий: ' : '👤 Гость: ') + name;
 
-    if (isHost) {
-        document.getElementById('openStudioBtn').style.display = 'block';
-    } else {
-        document.getElementById('requestStageBtn').style.display = 'inline-flex';
-    }
-
-    // 🚀 СРАЗУ подключаемся — ничего не надо нажимать
     await connectToLiveKit(isHost);
 };
 
@@ -342,11 +254,24 @@ async function connectToLiveKit(isHost) {
         window.appState.room = room;
 
         room
-            .on(RoomEvent.ParticipantConnected, (p) => renderGuestTile(p.identity, false))
+            .on(RoomEvent.ParticipantConnected, (p) => {
+                console.log('👤 Зашёл:', p.identity);
+                addChatMessage('СИСТЕМА', `${p.identity} зашёл в эфир`, false, true);
+                renderGuestTile(p.identity, false);
+                updateViewersCount();
+            })
             .on(RoomEvent.ParticipantDisconnected, (p) => {
+                console.log('👤 Вышел:', p.identity);
+                addChatMessage('СИСТЕМА', `${p.identity} покинул эфир`, false, true);
                 removeGuestTile(p.identity);
                 delete window.appState.remoteStreams[p.identity];
+                delete window.appState.joinTimes[p.identity];
+                if (window.appState.timers[p.identity]) {
+                    clearInterval(window.appState.timers[p.identity]);
+                    delete window.appState.timers[p.identity];
+                }
                 if (window.appState.stageIdentity === p.identity) clearStage();
+                updateViewersCount();
             })
             .on(RoomEvent.TrackSubscribed, (track, pub, participant) => attachRemoteTrack(track, participant))
             .on(RoomEvent.TrackUnsubscribed, (track, pub, participant) => {
@@ -371,23 +296,42 @@ async function connectToLiveKit(isHost) {
         if (isHost) {
             await startHostStudio();
         } else {
-            await room.localParticipant.setMicrophoneEnabled(false);
-            await room.localParticipant.setCameraEnabled(false);
-            window.appState.isRoomMicOn = false;
-            window.appState.isRoomCamOn = false;
+            // 🎥 Гость — камера и микрофон включаются сразу
+            try {
+                await room.localParticipant.enableCameraAndMicrophone();
+                window.appState.isRoomCamOn = true;
+                window.appState.isRoomMicOn = true;
+            } catch (e) {
+                console.warn('Камера недоступна:', e);
+            }
         }
         updateRoomIcons();
 
-        // 🎥 Подтягиваем существующие треки других
+        room.localParticipant.trackPublications.forEach((pub) => {
+            if (pub.track) attachLocalTrack(pub.track);
+        });
+
         room.remoteParticipants.forEach((p) => {
             renderGuestTile(p.identity, false);
             p.trackPublications.forEach((pub) => {
                 if (pub.track && pub.isSubscribed) attachRemoteTrack(pub.track, p);
             });
         });
-        room.localParticipant.trackPublications.forEach((pub) => {
-            if (pub.track) attachLocalTrack(pub.track);
-        });
+
+        updateViewersCount();
+
+        // 🎬 Гость: показываем ведущего на сцене автоматически
+        if (!isHost) {
+            setTimeout(() => {
+                room.remoteParticipants.forEach((p) => {
+                    const c = document.getElementById('guest-video-' + p.identity);
+                    if (c && c.querySelector('video') && !window.appState.stageIdentity) {
+                        putOnStage(p.identity);
+                    }
+                });
+            }, 1500);
+        }
+
     } catch (err) {
         console.error('❌ Ошибка:', err);
         alert('Ошибка подключения: ' + err.message);
@@ -429,6 +373,33 @@ async function startHostStudio() {
     }, 1000);
 }
 
+// ============ ТАЙМЕРЫ ============
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function startTimer(identity) {
+    if (window.appState.timers[identity]) return;
+    window.appState.joinTimes[identity] = Date.now();
+    window.appState.timers[identity] = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - window.appState.joinTimes[identity]) / 1000);
+        const timerEl = document.getElementById('timer-' + identity);
+        if (timerEl) timerEl.innerText = formatTime(elapsed);
+        if (window.appState.stageIdentity === identity) {
+            const stageTimer = document.getElementById('stageTimer');
+            if (stageTimer) stageTimer.innerText = formatTime(elapsed);
+        }
+    }, 1000);
+}
+
+function updateViewersCount() {
+    if (!window.appState.room) return;
+    const count = window.appState.room.remoteParticipants.size + 1;
+    document.getElementById('viewerCount').innerText = count;
+}
+
 function renderGuestTile(identity, isLocal) {
     if (document.getElementById('guest-tile-' + identity)) return;
     const hint = document.getElementById('noGuestsHint');
@@ -442,6 +413,8 @@ function renderGuestTile(identity, isLocal) {
         <div id="guest-video-${identity}" style="width:100%;height:100%;background:#111827;display:flex;align-items:center;justify-content:center">
             <i class="fa-solid fa-user" style="color:#555;font-size:24px"></i>
         </div>
+        <div class="guest-live-badge">LIVE</div>
+        <div class="guest-timer" id="timer-${identity}">00:00</div>
         <div class="guest-name">${isLocal ? 'Вы' : escapeHtml(identity)}</div>
         ${window.appState.isHost && !isLocal ? `
         <div class="tile-menu">
@@ -452,6 +425,7 @@ function renderGuestTile(identity, isLocal) {
     `;
     document.getElementById('guestGrid').appendChild(tile);
     updateGuestsCount();
+    startTimer(identity);
 }
 
 function removeGuestTile(identity) {
@@ -469,7 +443,7 @@ function updateGuestsCount() {
 }
 
 function attachLocalTrack(track) {
-    if (window.appState.isHost) return;
+    if (track.kind === Track.Kind.Video && window.appState.isHost) return;
     if (track.kind === Track.Kind.Video) {
         renderGuestTile(window.appState.name, true);
         const c = document.getElementById('guest-video-' + window.appState.name);
@@ -495,8 +469,7 @@ function attachRemoteTrack(track, participant) {
         v.style = 'width:100%;height:100%;object-fit:cover';
         c.appendChild(v);
 
-        // 🎯 АВТО-СЦЕНА: если это ведущий и сцена свободна — поднимаем сразу
-        if (!window.appState.stageIdentity && !window.appState.isHost) {
+        if (!window.appState.isHost && !window.appState.stageIdentity) {
             setTimeout(() => {
                 if (!window.appState.stageIdentity) putOnStage(participant.identity);
             }, 500);
@@ -512,8 +485,6 @@ window.putOnStage = function(identity) {
     const box = document.getElementById('mainVideoBox');
     box.querySelectorAll('video, canvas').forEach(v => v.remove());
     document.getElementById('stageBgImage').style.display = 'none';
-    document.getElementById('stageIframe').style.display = 'none';
-    window.appState.iframeActive = false;
 
     const c = document.getElementById('guest-video-' + identity);
     if (!c) return;
@@ -550,7 +521,11 @@ window.putOnStage = function(identity) {
     window.appState.selfOnStage = (identity === window.appState.name);
     document.getElementById('mainNameLabel').innerText = identity === window.appState.name ? identity + ' (Вы)' : identity;
     document.getElementById('clearStageBtn').style.display = 'block';
-    document.getElementById('returnSelfBtn').style.display = 'none';
+
+    const stageTimer = document.getElementById('stageTimer');
+    stageTimer.style.display = 'block';
+    const elapsed = Math.floor((Date.now() - (window.appState.joinTimes[identity] || Date.now())) / 1000);
+    stageTimer.innerText = formatTime(elapsed);
 
     document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
     const tile = document.getElementById('guest-tile-' + identity);
@@ -566,10 +541,9 @@ window.clearStage = function() {
     const box = document.getElementById('mainVideoBox');
     box.querySelectorAll('video, canvas').forEach(v => v.remove());
     document.getElementById('stageBgImage').style.display = 'block';
-    document.getElementById('stageIframe').style.display = 'none';
-    window.appState.iframeActive = false;
     document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
     document.getElementById('clearStageBtn').style.display = 'none';
+    document.getElementById('stageTimer').style.display = 'none';
     window.appState.stageIdentity = null;
     window.appState.selfOnStage = false;
     document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
@@ -577,167 +551,27 @@ window.clearStage = function() {
     if (window.appState.isHost && window.appState.room) {
         const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-clear' }));
         window.appState.room.localParticipant.publishData(payload, { reliable: true });
-        document.getElementById('returnSelfBtn').style.display = 'block';
     }
 };
-
-window.returnSelfToStage = function() {
-    document.getElementById('returnSelfBtn').style.display = 'none';
-    putOnStage(window.appState.name);
-};
-
-function clearStageLocal() {
-    const box = document.getElementById('mainVideoBox');
-    box.querySelectorAll('video, canvas').forEach(v => v.remove());
-    document.getElementById('stageBgImage').style.display = 'block';
-    document.getElementById('stageIframe').style.display = 'none';
-    window.appState.iframeActive = false;
-    document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
-    document.getElementById('clearStageBtn').style.display = 'none';
-    window.appState.stageIdentity = null;
-    window.appState.selfOnStage = false;
-    document.querySelectorAll('.guest-tile').forEach(t => t.classList.remove('on-stage'));
-}
-
-window.showIframe = function() {
-    const url = document.getElementById('iframeUrl').value.trim();
-    if (!url) { alert('Вставь ссылку'); return; }
-    let finalUrl = url.startsWith('http') ? url : 'https://' + url;
-
-    const box = document.getElementById('mainVideoBox');
-    box.querySelectorAll('video, canvas').forEach(v => v.remove());
-    document.getElementById('stageBgImage').style.display = 'none';
-
-    const iframe = document.getElementById('stageIframe');
-    iframe.src = finalUrl;
-    iframe.style.display = 'block';
-    window.appState.iframeActive = true;
-    window.appState.stageIdentity = null;
-    document.getElementById('mainNameLabel').innerText = '🌐 ' + finalUrl;
-    document.getElementById('clearStageBtn').style.display = 'block';
-    document.getElementById('returnSelfBtn').style.display = 'none';
-
-    if (window.appState.isHost && window.appState.room) {
-        const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-iframe', url: finalUrl }));
-        window.appState.room.localParticipant.publishData(payload, { reliable: true });
-    }
-};
-
-window.hideIframe = function() {
-    const iframe = document.getElementById('stageIframe');
-    iframe.style.display = 'none';
-    iframe.src = '';
-    window.appState.iframeActive = false;
-    document.getElementById('stageBgImage').style.display = 'block';
-    document.getElementById('clearStageBtn').style.display = 'none';
-    document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
-
-    if (window.appState.isHost && window.appState.room) {
-        const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-clear' }));
-        window.appState.room.localParticipant.publishData(payload, { reliable: true });
-    }
-    if (window.appState.isHost) setTimeout(() => putOnStage(window.appState.name), 300);
-};
-
-function showIframeLocal(url) {
-    const iframe = document.getElementById('stageIframe');
-    const box = document.getElementById('mainVideoBox');
-    box.querySelectorAll('video, canvas').forEach(v => v.remove());
-    document.getElementById('stageBgImage').style.display = 'none';
-    iframe.src = url;
-    iframe.style.display = 'block';
-    window.appState.iframeActive = true;
-    document.getElementById('mainNameLabel').innerText = '🌐 ' + url;
-    document.getElementById('clearStageBtn').style.display = 'block';
-}
 
 function handleDataMessage(data, participant) {
-    if (data.type === 'stage-request') {
-        if (window.appState.isHost) showRequestCard(data.name, participant.identity);
-    } else if (data.type === 'stage-approved') {
-        if (!window.appState.isHost) enableCamThenGoOnStage();
-    } else if (data.type === 'stage-denied') {
-        if (!window.appState.isHost) resetRequestButton();
-    } else if (data.type === 'stage-show') {
+    if (data.type === 'stage-show') {
         if (data.identity) setTimeout(() => putOnStage(data.identity), 500);
     } else if (data.type === 'stage-clear') {
-        clearStageLocal();
-        if (window.appState.isHost && window.appState.name) {
+        const box = document.getElementById('mainVideoBox');
+        box.querySelectorAll('video, canvas').forEach(v => v.remove());
+        document.getElementById('stageBgImage').style.display = 'block';
+        document.getElementById('mainNameLabel').innerText = 'Сцена свободна';
+        document.getElementById('clearStageBtn').style.display = 'none';
+        document.getElementById('stageTimer').style.display = 'none';
+        window.appState.stageIdentity = null;
+        if (window.appState.isHost) {
             setTimeout(() => putOnStage(window.appState.name), 500);
         }
-    } else if (data.type === 'stage-iframe') {
-        if (data.url) showIframeLocal(data.url);
     } else if (data.type === 'chat') {
         addChatMessage(data.name, data.text, false);
     }
 }
-
-async function enableCamThenGoOnStage() {
-    const room = window.appState.room;
-    if (!room) return;
-    try {
-        if (!window.appState.isRoomCamOn) { await room.localParticipant.setCameraEnabled(true); window.appState.isRoomCamOn = true; }
-        if (!window.appState.isRoomMicOn) { await room.localParticipant.setMicrophoneEnabled(true); window.appState.isRoomMicOn = true; }
-        updateRoomIcons();
-    } catch (err) { console.error(err); }
-}
-
-function resetRequestButton() {
-    const btn = document.getElementById('requestStageBtn');
-    const label = document.getElementById('requestStageLabel');
-    if (btn && label) { btn.style.opacity = '1'; btn.style.pointerEvents = 'auto'; label.innerText = 'Хочу в эфир'; }
-}
-
-window.requestStage = function() {
-    if (!window.appState.room || window.appState.isHost) return;
-    const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-request', name: window.appState.name }));
-    window.appState.room.localParticipant.publishData(payload, { reliable: true });
-    document.getElementById('requestStageLabel').innerText = 'Запрос отправлен';
-    document.getElementById('requestStageBtn').style.opacity = '0.5';
-    document.getElementById('requestStageBtn').style.pointerEvents = 'none';
-};
-
-function showRequestCard(name, identity) {
-    const card = document.createElement('div');
-    card.style = 'position:fixed;top:80px;right:16px;background:#111827;border:2px solid #f59e0b;border-radius:12px;padding:16px;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:100;min-width:280px';
-    card.innerHTML = `
-        <p style="margin:0 0 12px 0;color:white;font-weight:bold">${escapeHtml(name)} хочет в эфир</p>
-        <div style="display:flex;gap:8px">
-            <button onclick="approveRequest('${escapeHtml(identity).replace(/'/g,'&#39;')}', this)" style="flex:1;background:#10b981;border:none;color:white;padding:8px;border-radius:8px;font-weight:bold;cursor:pointer">Одобрить</button>
-            <button onclick="denyRequest('${escapeHtml(identity).replace(/'/g,'&#39;')}', this)" style="flex:1;background:#374151;border:none;color:#ccc;padding:8px;border-radius:8px;cursor:pointer">Отклонить</button>
-        </div>
-    `;
-    document.body.appendChild(card);
-    setTimeout(() => { if (card.parentNode) card.remove(); }, 45000);
-}
-
-window.approveRequest = function(identity, btn) {
-    const room = window.appState.room;
-    const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-approved', identity: identity }));
-    room.localParticipant.publishData(payload, { reliable: true });
-    setTimeout(() => putOnStage(identity), 1500);
-    btn.closest('div').parentNode.remove();
-};
-
-window.denyRequest = function(identity, btn) {
-    const room = window.appState.room;
-    const payload = new TextEncoder().encode(JSON.stringify({ type: 'stage-denied' }));
-    room.localParticipant.publishData(payload, { reliable: true });
-    btn.closest('div').parentNode.remove();
-};
-
-window.studioSetBg = function(type, imageUrl) {
-    if (!window.appState.studio) return;
-    window.appState.studio.setBackground(type, imageUrl);
-};
-window.studioSetText = function() {
-    if (!window.appState.studio) return;
-    window.appState.studio.setText(document.getElementById('studioText').value, document.getElementById('studioTextColor').value);
-};
-window.studioSetTextSize = function() {
-    if (!window.appState.studio) return;
-    window.appState.studio.setTextSize(parseInt(document.getElementById('studioTextSize').value));
-};
 
 window.toggleOrientation = function() {
     const wrapper = document.getElementById('stageWrapper');
@@ -811,6 +645,7 @@ function updateRoomIcons() {
 window.leaveRoom = function() {
     if (window.appState.studio) window.appState.studio.stop();
     if (window.appState.room) { window.appState.room.disconnect(); window.appState.room = null; }
+    Object.values(window.appState.timers).forEach(t => clearInterval(t));
     location.reload();
 };
 
@@ -836,11 +671,16 @@ window.handleSendMessage = function(event) {
     input.value = '';
 };
 
-function addChatMessage(name, text, isSelf) {
+function addChatMessage(name, text, isSelf, isSystem) {
     const chatMessages = document.getElementById('chatMessages');
     const div = document.createElement('div');
-    div.style = 'padding:8px;margin-bottom:6px;border-radius:8px;background:' + (isSelf ? 'rgba(255,0,80,.1)' : 'rgba(55,65,81,.3)');
-    div.innerHTML = '<strong style="color:' + (isSelf ? '#ff0050' : '#00f2fe') + '">' + escapeHtml(name) + '</strong><br>' + escapeHtml(text);
+    if (isSystem) {
+        div.className = 'join-message';
+        div.innerText = text;
+    } else {
+        div.style = 'padding:8px;margin-bottom:6px;border-radius:8px;background:' + (isSelf ? 'rgba(255,0,80,.1)' : 'rgba(55,65,81,.3)');
+        div.innerHTML = '<strong style="color:' + (isSelf ? '#ff0050' : '#00f2fe') + '">' + escapeHtml(name) + '</strong><br>' + escapeHtml(text);
+    }
     chatMessages.appendChild(div);
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -858,16 +698,6 @@ window.sendLikeBurst = function() {
         setTimeout(() => heart.remove(), 2100);
     }
 };
-
-// ⚡ АВТОЗАПУСК: если в URL ?name=Имя — сразу подключаемся
-window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const nameFromUrl = params.get('name');
-    if (nameFromUrl) {
-        document.getElementById('inputName').value = nameFromUrl;
-        setTimeout(() => enterStream(), 300);
-    }
-});
 </script>
 </body>
 </html>
