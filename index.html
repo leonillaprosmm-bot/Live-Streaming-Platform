@@ -74,8 +74,13 @@ header{position:fixed;top:0;left:0;right:0;z-index:100;padding:clamp(14px,2vw,20
 .post-meta{flex:1;min-width:0}
 .post-author{font-weight:600;font-size:clamp(13px,1.6vw,15px);color:#fff;margin-bottom:2px}
 .post-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:#666;letter-spacing:1px}
-.post-delete{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#ef4444;font-size:13px;cursor:pointer;padding:6px 10px;border-radius:8px;transition:all .2s;flex-shrink:0}
-.post-delete:hover{background:rgba(239,68,68,.25);color:#fff}
+.post-menu{position:relative;flex-shrink:0}
+.post-menu-btn{background:none;border:none;color:#666;font-size:18px;cursor:pointer;padding:6px 12px;border-radius:8px;transition:all .2s;font-family:inherit;line-height:1}
+.post-menu-btn:hover{color:#fff;background:rgba(255,255,255,.05)}
+.post-menu-dropdown{position:absolute;right:0;top:100%;background:#1a1d24;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:6px;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,.6);display:none;z-index:20;margin-top:4px}
+.post-menu-dropdown.show{display:block}
+.post-menu-dropdown button{background:none;border:none;color:#ef4444;font-family:inherit;font-size:13px;padding:10px 14px;cursor:pointer;border-radius:6px;width:100%;text-align:left;display:flex;align-items:center;gap:10px;transition:background .2s}
+.post-menu-dropdown button:hover{background:rgba(239,68,68,.15)}
 .post-body{font-size:clamp(13px,1.7vw,15px);line-height:1.7;color:#c8c8c8;margin-bottom:18px;font-weight:300;word-wrap:break-word;white-space:pre-wrap}
 .post-body strong{color:#fff;font-weight:600}
 .post-img{width:100%;border-radius:12px;margin-bottom:18px;display:block;max-height:500px;object-fit:cover;background:#0e1014}
@@ -110,6 +115,26 @@ footer .f-links a{color:#888;text-decoration:none;font-family:'JetBrains Mono',m
 footer .f-links a:hover{color:#ff3366}
 footer .f-copy{font-family:'JetBrains Mono',monospace;font-size:10px;color:#444;letter-spacing:1px}
 footer .f-copy a{color:#00f2fe;text-decoration:none}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:9999;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.show{display:flex}
+.modal{background:#111827;border:1px solid rgba(255,51,102,.3);border-radius:20px;padding:28px;max-width:380px;width:100%;position:relative}
+.modal h3{font-family:'JetBrains Mono',monospace;font-size:14px;color:#fff;margin-bottom:8px;letter-spacing:2px}
+.modal p{font-size:13px;color:#888;margin-bottom:20px}
+.modal input{width:100%;background:#0b0f19;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;color:#fff;font-size:14px;font-family:inherit;outline:none;margin-bottom:16px;transition:border-color .2s}
+.modal input:focus{border-color:#ff3366}
+.modal-buttons{display:flex;gap:10px}
+.modal-buttons button{flex:1;padding:12px;border-radius:10px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;border:none}
+.modal-buttons .btn-cancel{background:#1f2937;color:#ccc}
+.modal-buttons .btn-cancel:hover{background:#374151}
+.modal-buttons .btn-delete{background:linear-gradient(90deg,#ef4444,#dc2626);color:#fff}
+.modal-buttons .btn-delete:hover{transform:scale(1.02);box-shadow:0 6px 20px rgba(239,68,68,.5)}
+.modal-close{position:absolute;top:14px;right:16px;background:none;border:none;color:#666;font-size:20px;cursor:pointer;transition:color .2s}
+.modal-close:hover{color:#fff}
+.loading-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:9998;display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px}
+.loading-overlay.show{display:flex}
+.spinner{width:40px;height:40px;border:3px solid rgba(255,255,255,.1);border-top-color:#ff3366;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'JetBrains Mono',monospace;font-size:12px;color:#888;letter-spacing:2px}
 </style>
 </head>
 <body>
@@ -156,7 +181,6 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
       <h3>// Создать пост</h3>
       <input id="newPostName" type="text" placeholder="Ваше имя" maxlength="40">
       <textarea id="newPostText" placeholder="О чём хотите рассказать?..." maxlength="500"></textarea>
-      <input id="newPostAdmin" type="text" placeholder="Пароль админа (для удаления постов)" maxlength="20" style="font-family:'JetBrains Mono',monospace;font-size:12px">
       <label class="file-label" id="fileLabel">
         <input id="newPostFile" type="file" accept="image/*">
         <i class="fas fa-image"></i> ВЫБРАТЬ КАРТИНКУ (необязательно)
@@ -189,6 +213,350 @@ footer .f-copy a{color:#00f2fe;text-decoration:none}
   </footer>
 </div>
 
+<!-- МОДАЛКА УДАЛЕНИЯ -->
+<div id="deleteModal" class="modal-bg">
+  <div class="modal">
+    <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+    <h3>🗑 УДАЛЕНИЕ ПОСТА</h3>
+    <p>Введите пароль администратора для подтверждения удаления</p>
+    <input id="deletePasswordInput" type="password" placeholder="Пароль админа" onkeydown="if(event.key==='Enter')confirmDelete()">
+    <div class="modal-buttons">
+      <button class="btn-cancel" onclick="closeDeleteModal()">Отмена</button>
+      <button class="btn-delete" onclick="confirmDelete()">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<!-- ЗАГРУЗКА КАРТИНКИ -->
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="spinner"></div>
+  <div class="loading-text">ЗАГРУЗКА КАРТИНКИ...</div>
+</div>
+
+<script type="module">
+// ============================================================
+// FIREBASE
+// ============================================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+import { getDatabase, ref, push, onValue, remove, serverTimestamp, query, limitToLast, set } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB0G2ZiFEwSr3472_9SsLJUMs6RORmLFWs",
+    authDomain: "meta-live-chat.firebaseapp.com",
+    databaseURL: "https://meta-live-chat-default-rtdb.firebaseio.com",
+    projectId: "meta-live-chat",
+    storageBucket: "meta-live-chat.firebasestorage.app",
+    messagingSenderId: "695456991297",
+    appId: "1:695456991297:web:55961023f91b86487d1ec0"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp);
+const db = getDatabase(fbApp);
+let currentUser = null;
+
+signInAnonymously(auth).catch(err => console.error("Auth error:", err));
+
+// ============================================================
+// ЛЕНТА ПОСТОВ ЧЕРЕЗ FIREBASE
+// ============================================================
+const ADMIN_PASSWORD = 'admin123';
+const POSTS_PATH = 'posts';
+let userPosts = [];
+let deletePostId = null;
+
+window.publishPost = function() {
+  if (!currentUser) { alert('Подключение... подожди секунду'); return; }
+
+  const name = document.getElementById('newPostName').value.trim();
+  const text = document.getElementById('newPostText').value.trim();
+  const fileInput = document.getElementById('newPostFile');
+  const file = fileInput.files[0];
+
+  if (!name) { alert('Введи своё имя'); return; }
+  if (!text && !file) { alert('Напиши текст или прикрепи картинку'); return; }
+
+  // Если есть файл — сначала сжимаем и конвертируем в base64
+  if (file) {
+    document.getElementById('loadingOverlay').classList.add('show');
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const img = new Image();
+      img.onload = function() {
+        const maxW = 800;
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = h * (maxW / w); w = maxW; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const compressed = canvas.toDataURL('image/jpeg', 0.7);
+        savePostToFirebase(name, text, compressed);
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  } else {
+    savePostToFirebase(name, text, '');
+  }
+};
+
+function savePostToFirebase(name, text, imageBase64) {
+  const newPostRef = push(ref(db, POSTS_PATH));
+  set(newPostRef, {
+    name: name,
+    text: text,
+    image: imageBase64,
+    ts: Date.now()
+  }).then(() => {
+    document.getElementById('loadingOverlay').classList.remove('show');
+    document.getElementById('newPostName').value = '';
+    document.getElementById('newPostText').value = '';
+    document.getElementById('newPostFile').value = '';
+    document.getElementById('filePreview').classList.remove('show');
+    document.getElementById('filePreview').src = '';
+    const label = document.getElementById('fileLabel');
+    label.classList.remove('has-file');
+    label.innerHTML = '<input id="newPostFile" type="file" accept="image/*"><i class="fas fa-image"></i> ВЫБРАТЬ КАРТИНКУ (необязательно)';
+    attachFileHandler();
+  }).catch(err => {
+    document.getElementById('loadingOverlay').classList.remove('show');
+    alert('Ошибка: ' + err.message);
+  });
+}
+
+// Загрузка постов из Firebase
+function loadPosts() {
+  const q = query(ref(db, POSTS_PATH), limitToLast(100));
+  onValue(q, (snap) => {
+    const data = snap.val();
+    if (!data) {
+      // Пустая база — создаём демо-посты
+      if (!window._demoCreated) {
+        window._demoCreated = true;
+        push(ref(db, POSTS_PATH), {
+          name: 'METAIMPERIYA',
+          text: 'Запуск прямого эфира — уже сегодня в 20:00. Поговорим про SMM-тренды, ответим на вопросы и покажем живую панель аналитики.',
+          image: '',
+          ts: Date.now() - 120000
+        });
+        push(ref(db, POSTS_PATH), {
+          name: 'METAIMPERIYA',
+          text: 'Кейс: за 2 месяца вывели бренд одежды в топ-10 поиска. Охваты выросли в x4.2, стоимость подписки снизилась на 67%.',
+          image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=450&fit=crop',
+          ts: Date.now() - 14400000
+        });
+      }
+      return;
+    }
+
+    userPosts = Object.entries(data).map(([id, post]) => ({ id, ...post }))
+      .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+    renderAllPosts();
+  });
+}
+
+function renderAllPosts() {
+  const container = document.getElementById('postsContainer');
+  container.innerHTML = '';
+  userPosts.forEach(post => {
+    const el = renderPost(post);
+    container.appendChild(el);
+  });
+  const count = userPosts.length;
+  document.getElementById('feedCount').textContent = String(count).padStart(2, '0') + ' POSTS';
+}
+
+function timeAgo(ts) {
+  const s = Math.floor((Date.now() - ts) / 1000);
+  if (s < 60) return 'ТОЛЬКО ЧТО';
+  if (s < 3600) return Math.floor(s / 60) + ' МИН НАЗАД';
+  if (s < 86400) return Math.floor(s / 3600) + ' Ч НАЗАД';
+  return Math.floor(s / 86400) + ' ДН НАЗАД';
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function renderPost(post) {
+  const el = document.createElement('article');
+  el.className = 'post';
+  el.dataset.id = post.id;
+  const initial = (post.name || 'U').charAt(0).toUpperCase();
+  let imgHtml = '';
+  if (post.image) {
+    imgHtml = '<img class="post-img" src="' + post.image + '" alt="post" onerror="this.style.display=\'none\'">';
+  }
+  el.innerHTML = `
+    <div class="post-head">
+      <div class="post-avatar">${initial}</div>
+      <div class="post-meta">
+        <div class="post-author">${escapeHtml(post.name)}</div>
+        <div class="post-time">${timeAgo(post.ts)}</div>
+      </div>
+      <div class="post-menu">
+        <button class="post-menu-btn" onclick="togglePostMenu('${post.id}', event)">⋮</button>
+        <div class="post-menu-dropdown" id="menu-${post.id}">
+          <button onclick="openDeleteModal('${post.id}')"><i class="fas fa-trash"></i> Удалить пост</button>
+        </div>
+      </div>
+    </div>
+    <div class="post-body"></div>
+    ${imgHtml}
+    <div class="post-actions">
+      <button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">0</span></button>
+      <button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button>
+      <button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button>
+    </div>
+    <div class="comments">
+      <form class="comment-form" onsubmit="addComment(event, this)">
+        <input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200">
+        <button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button>
+      </form>
+    </div>
+  `;
+  el.querySelector('.post-body').textContent = post.text;
+  return el;
+}
+
+// ============================================================
+// МЕНЮ ПОСТА (три точки)
+// ============================================================
+window.togglePostMenu = function(postId, event) {
+  event.stopPropagation();
+  document.querySelectorAll('.post-menu-dropdown').forEach(m => {
+    if (m.id !== 'menu-' + postId) m.classList.remove('show');
+  });
+  const menu = document.getElementById('menu-' + postId);
+  if (menu) menu.classList.toggle('show');
+};
+
+document.addEventListener('click', function() {
+  document.querySelectorAll('.post-menu-dropdown').forEach(m => m.classList.remove('show'));
+});
+
+// ============================================================
+// УДАЛЕНИЕ С ПАРОЛЕМ
+// ============================================================
+window.openDeleteModal = function(postId) {
+  deletePostId = postId;
+  document.getElementById('deletePasswordInput').value = '';
+  document.getElementById('deleteModal').classList.add('show');
+  setTimeout(() => document.getElementById('deletePasswordInput').focus(), 100);
+};
+
+window.closeDeleteModal = function() {
+  document.getElementById('deleteModal').classList.remove('show');
+  deletePostId = null;
+};
+
+window.confirmDelete = function() {
+  const pass = document.getElementById('deletePasswordInput').value;
+  if (pass !== ADMIN_PASSWORD) {
+    alert('❌ Неверный пароль');
+    return;
+  }
+  if (deletePostId) {
+    remove(ref(db, POSTS_PATH + '/' + deletePostId)).then(() => {
+      closeDeleteModal();
+    }).catch(err => {
+      alert('Ошибка удаления: ' + err.message);
+    });
+  }
+};
+
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDeleteModal();
+});
+
+// ============================================================
+// ЛАЙКИ / КОММЕНТЫ / ШЕРИНГ
+// ============================================================
+document.addEventListener('click', function(e) {
+  const likeBtn = e.target.closest('.like-btn');
+  if (likeBtn) {
+    const cnt = likeBtn.querySelector('.like-count');
+    const liked = likeBtn.classList.toggle('liked');
+    const icon = likeBtn.querySelector('i');
+    icon.className = liked ? 'fas fa-heart' : 'far fa-heart';
+    let n = parseInt(cnt.textContent) || 0;
+    cnt.textContent = liked ? n + 1 : Math.max(0, n - 1);
+    return;
+  }
+  const toggleBtn = e.target.closest('.comment-toggle');
+  if (toggleBtn) {
+    toggleBtn.closest('.post').querySelector('.comments').classList.toggle('show');
+    return;
+  }
+  const shareBtn = e.target.closest('.share-btn');
+  if (shareBtn) {
+    if (navigator.share) {
+      navigator.share({ title: 'METAIMPERIYA', url: location.href }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(location.href).then(() => alert('Ссылка скопирована!')).catch(() => {});
+    }
+  }
+});
+
+window.addComment = function(e, form) {
+  e.preventDefault();
+  const input = form.querySelector('.comment-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const post = form.closest('.post');
+  const list = post.querySelector('.comments');
+  const name = '@guest_' + Math.floor(Math.random() * 900 + 100);
+  const div = document.createElement('div');
+  div.className = 'comment';
+  div.innerHTML = '<div class="comment-avatar">' + name.charAt(1).toUpperCase() + '</div><div class="comment-body"><div class="comment-author">' + name + '</div><div class="comment-text"></div></div>';
+  div.querySelector('.comment-text').textContent = text;
+  list.insertBefore(div, form);
+  const cnt = post.querySelector('.comment-count');
+  cnt.textContent = (parseInt(cnt.textContent) || 0) + 1;
+  input.value = '';
+  list.classList.add('show');
+};
+
+// ============================================================
+// ФАЙЛ КАРТИНКИ
+// ============================================================
+function attachFileHandler() {
+  const fileInput = document.getElementById('newPostFile');
+  const fileLabel = document.getElementById('fileLabel');
+  const filePreview = document.getElementById('filePreview');
+  if (!fileInput) return;
+  fileInput.addEventListener('change', function() {
+    const file = this.files[0];
+    if (file) {
+      fileLabel.classList.add('has-file');
+      fileLabel.innerHTML = '<i class="fas fa-check"></i> ' + escapeHtml(file.name) + ' <span style="color:#666;font-size:9px">(нажми чтобы изменить)</span><input id="newPostFile" type="file" accept="image/*">';
+      attachFileHandler();
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        filePreview.src = e.target.result;
+        filePreview.classList.add('show');
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+}
+
+// ============================================================
+// ИНИЦИАЛИЗАЦИЯ
+// ============================================================
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    console.log('🔥 Firebase OK');
+    loadPosts();
+    attachFileHandler();
+  }
+});
+</script>
+
+<!-- Aurora + Sand -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script id="vs" type="x-shader/x-vertex">
 varying vec2 vUv;
@@ -289,163 +657,6 @@ function update(dt){phaseTime+=dt;if(phase==='codepen')releaseParticles();if(pha
 function draw(){sctx.clearRect(0,0,sw,sh);sctx.fillStyle='rgb(236,204,116)';const s=cellSize;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(fixed[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);for(const p of falling)sctx.fillRect(p.x,p.y,s,s);for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)if(pile[idx(c,r)]===1)sctx.fillRect(c*s,r*s,s,s);}
 function tick(now){const dt=Math.min((now-lastTime)/1000,0.033);lastTime=now;update(dt);updateFall(dt);if(phase!=='falling'){for(let i=0;i<3;i++)settlePile();}draw();requestAnimationFrame(tick);}
 sandResize();window.addEventListener('resize',sandResize);requestAnimationFrame(tick);
-
-// ========== ПОСТЫ ==========
-const POSTS_KEY='metaimperiya_posts_v3';
-const ADMIN_PASSWORD='admin123';
-let userPosts=[];
-let isAdmin=false;
-
-function timeAgo(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'ТОЛЬКО ЧТО';if(s<3600)return Math.floor(s/60)+' МИН НАЗАД';if(s<86400)return Math.floor(s/3600)+' Ч НАЗАД';return Math.floor(s/86400)+' ДН НАЗАД';}
-function escapeHtml(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-function renderPost(post){
-  const el=document.createElement('article');
-  el.className='post';
-  el.dataset.id=post.id;
-  const initial=(post.name||'U').charAt(0).toUpperCase();
-  let imgHtml='';
-  if(post.image){
-    imgHtml='<img class="post-img" src="'+post.image+'" alt="post" onerror="this.style.display=\'none\'">';
-  }
-  let deleteBtn='';
-  if(isAdmin){
-    deleteBtn='<button class="post-delete" onclick="deletePost(\''+post.id+'\')" title="Удалить"><i class="fas fa-trash"></i></button>';
-  }
-  el.innerHTML='<div class="post-head"><div class="post-avatar">'+initial+'</div><div class="post-meta"><div class="post-author">'+escapeHtml(post.name)+'</div><div class="post-time">'+timeAgo(post.ts)+'</div></div>'+deleteBtn+'</div><div class="post-body"></div>'+imgHtml+'<div class="post-actions"><button class="act like-btn"><i class="far fa-heart"></i> <span class="like-count">0</span></button><button class="act comment-toggle"><i class="far fa-comment"></i> <span class="comment-count">0</span></button><button class="act share-btn"><i class="far fa-share-square"></i> SHARE</button></div><div class="comments"><form class="comment-form" onsubmit="addComment(event, this)"><input class="comment-input" type="text" placeholder="Написать комментарий..." maxlength="200"><button class="comment-submit" type="submit"><i class="fas fa-paper-plane"></i></button></form></div>';
-  el.querySelector('.post-body').textContent=post.text;
-  return el;
-}
-
-function updateFeedCount(){const count=document.querySelectorAll('#postsContainer .post').length;document.getElementById('feedCount').textContent=String(count).padStart(2,'0')+' POSTS';}
-
-function renderAllPosts(){
-  const container=document.getElementById('postsContainer');
-  container.innerHTML='';
-  userPosts.forEach(post=>{const el=renderPost(post);container.appendChild(el);});
-  updateFeedCount();
-}
-
-function loadPosts(){
-  try{userPosts=JSON.parse(localStorage.getItem(POSTS_KEY)||'[]');}catch(e){userPosts=[];}
-  if(userPosts.length===0){
-    userPosts=[
-      {id:'d1',name:'METAIMPERIYA',text:'Запуск прямого эфира — уже сегодня в 20:00. Поговорим про SMM-тренды, ответим на вопросы и покажем живую панель аналитики.',image:'',ts:Date.now()-120000},
-      {id:'d2',name:'METAIMPERIYA',text:'Кейс: за 2 месяца вывели бренд одежды в топ-10 поиска. Охваты выросли в x4.2, стоимость подписки снизилась на 67%.',image:'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&h=450&fit=crop',ts:Date.now()-14400000}
-    ];
-    try{localStorage.setItem(POSTS_KEY,JSON.stringify(userPosts));}catch(e){}
-  }
-  renderAllPosts();
-}
-
-window.publishPost=function(){
-  const name=document.getElementById('newPostName').value.trim();
-  const text=document.getElementById('newPostText').value.trim();
-  const adminPass=document.getElementById('newPostAdmin').value.trim();
-  const fileInput=document.getElementById('newPostFile');
-  const file=fileInput.files[0];
-
-  if(!name){alert('Введи своё имя');return;}
-  if(!text&&!file){alert('Напиши текст или прикрепи картинку');return;}
-
-  const wasAdmin=isAdmin;
-  if(adminPass===ADMIN_PASSWORD){isAdmin=true;}
-
-  function finish(imageData){
-    const post={id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name:name,text:text||'',image:imageData||'',ts:Date.now()};
-    userPosts.unshift(post);
-    try{localStorage.setItem(POSTS_KEY,JSON.stringify(userPosts));}catch(e){alert('Картинка слишком большая');userPosts.shift();return;}
-    renderAllPosts();
-    document.getElementById('newPostName').value='';
-    document.getElementById('newPostText').value='';
-    document.getElementById('newPostAdmin').value='';
-    document.getElementById('newPostFile').value='';
-    document.getElementById('filePreview').classList.remove('show');
-    document.getElementById('filePreview').src='';
-    const label=document.getElementById('fileLabel');
-    label.classList.remove('has-file');
-    label.innerHTML='<input id="newPostFile" type="file" accept="image/*"><i class="fas fa-image"></i> ВЫБРАТЬ КАРТИНКУ (необязательно)';
-    attachFileHandler();
-  }
-
-  if(file){
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      const img=new Image();
-      img.onload=function(){
-        const maxW=900;
-        let w=img.width,h=img.height;
-        if(w>maxW){h=h*(maxW/w);w=maxW;}
-        const canvas=document.createElement('canvas');
-        canvas.width=w;canvas.height=h;
-        canvas.getContext('2d').drawImage(img,0,0,w,h);
-        const compressed=canvas.toDataURL('image/jpeg',0.6);
-        finish(compressed);
-      };
-      img.src=ev.target.result;
-    };
-    reader.readAsDataURL(file);
-  }else{
-    finish('');
-  }
-};
-
-window.deletePost=function(id){
-  if(!isAdmin){alert('Только админ может удалять. Введи пароль админа в форму.');return;}
-  if(!confirm('Удалить этот пост?'))return;
-  userPosts=userPosts.filter(p=>p.id!==id);
-  try{localStorage.setItem(POSTS_KEY,JSON.stringify(userPosts));}catch(e){}
-  renderAllPosts();
-};
-
-function attachFileHandler(){
-  const fileInput=document.getElementById('newPostFile');
-  const fileLabel=document.getElementById('fileLabel');
-  const filePreview=document.getElementById('filePreview');
-  if(!fileInput)return;
-  fileInput.addEventListener('change',function(){
-    const file=this.files[0];
-    if(file){
-      fileLabel.classList.add('has-file');
-      fileLabel.innerHTML='<i class="fas fa-check"></i> '+escapeHtml(file.name)+' <span style="color:#666;font-size:9px">(нажми чтобы изменить)</span><input id="newPostFile" type="file" accept="image/*">';
-      attachFileHandler();
-      const reader=new FileReader();
-      reader.onload=function(e){filePreview.src=e.target.result;filePreview.classList.add('show');};
-      reader.readAsDataURL(file);
-    }
-  });
-}
-
-document.addEventListener('click',function(e){
-  const likeBtn=e.target.closest('.like-btn');
-  if(likeBtn){const cnt=likeBtn.querySelector('.like-count');const liked=likeBtn.classList.toggle('liked');const icon=likeBtn.querySelector('i');icon.className=liked?'fas fa-heart':'far fa-heart';let n=parseInt(cnt.textContent)||0;cnt.textContent=liked?n+1:Math.max(0,n-1);return;}
-  const toggleBtn=e.target.closest('.comment-toggle');
-  if(toggleBtn){toggleBtn.closest('.post').querySelector('.comments').classList.toggle('show');return;}
-  const shareBtn=e.target.closest('.share-btn');
-  if(shareBtn){if(navigator.share){navigator.share({title:'METAIMPERIYA',url:location.href}).catch(()=>{});}else{navigator.clipboard.writeText(location.href).then(()=>alert('Ссылка скопирована!')).catch(()=>{});}}
-});
-
-window.addComment=function(e,form){
-  e.preventDefault();
-  const input=form.querySelector('.comment-input');
-  const text=input.value.trim();
-  if(!text)return;
-  const post=form.closest('.post');
-  const list=post.querySelector('.comments');
-  const name='@guest_'+Math.floor(Math.random()*900+100);
-  const div=document.createElement('div');
-  div.className='comment';
-  div.innerHTML='<div class="comment-avatar">'+name.charAt(1).toUpperCase()+'</div><div class="comment-body"><div class="comment-author">'+name+'</div><div class="comment-text"></div></div>';
-  div.querySelector('.comment-text').textContent=text;
-  list.insertBefore(div,form);
-  const cnt=post.querySelector('.comment-count');
-  cnt.textContent=(parseInt(cnt.textContent)||0)+1;
-  input.value='';
-  list.classList.add('show');
-};
-
-loadPosts();
-attachFileHandler();
 </script>
 </body>
 </html>
